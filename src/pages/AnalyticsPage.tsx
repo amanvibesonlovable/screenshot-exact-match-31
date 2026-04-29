@@ -153,8 +153,8 @@ function AnalyticsInner() {
             if (v !== null && v !== undefined) { sum += Number(v); n++; }
           }
         }
-        // Normalize to 0-10 scale (raw is 0..25 generally) — but PRD says 0-10
-        const avg = n ? (sum / n) / 2.5 : null;
+        // Use raw per-dimension averages (already on 0-10ish scale)
+        const avg = n ? Math.round((sum / n) * 10) / 10 : null;
         return { week: b.key, value: avg };
       });
       // Current avg (latest non-null)
@@ -197,7 +197,7 @@ function AnalyticsInner() {
       const row: Record<string, any> = { dimension: DIM_LABELS[d] };
       for (const b of branchList) {
         const s = sums[b][d];
-        row[b] = s ? Math.round(((s.sum / s.n) / 2.5) * 10) / 10 : 0;
+        row[b] = s ? Math.round((s.sum / s.n) * 10) / 10 : 0;
       }
       return row;
     });
@@ -430,7 +430,8 @@ function AnalyticsInner() {
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                                 <XAxis dataKey="week" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
                                 <YAxis domain={[0, 10]} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
+                                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
+                                  formatter={(v: any) => [Number(v).toFixed(1), "Score"]} />
                                 <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={{ r: 3, fill: color }} connectNulls />
                               </LineChart>
                             </ResponsiveContainer>
@@ -459,7 +460,7 @@ function AnalyticsInner() {
                           formatter={(v: any, name: string) => {
                             const num = Number(v);
                             const risk = dimRiskFromScore(num, 10);
-                            return [`${num} (${risk})`, name];
+                            return [`${num.toFixed(1)} (${risk})`, name];
                           }}
                         />
                         <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
@@ -500,7 +501,7 @@ function AnalyticsInner() {
                       <XAxis dataKey="stage" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
                       <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                         tickFormatter={(v) => stageMode === "pct" ? `${v}%` : v} />
-                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
                       <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
                       <Bar dataKey="LOW" stackId="a" fill={RISK_COLORS.LOW} />
                       <Bar dataKey="MEDIUM" stackId="a" fill={RISK_COLORS.MEDIUM} />
@@ -553,7 +554,7 @@ function AnalyticsInner() {
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis dataKey="key" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
                         <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
                         <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                           {timeDist.map((d, i) => <Cell key={i} fill={d.color} />)}
                         </Bar>
