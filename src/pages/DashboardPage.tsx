@@ -705,7 +705,7 @@ function DashboardInner() {
 
                 {/* Card 3: High risk */}
                 <button
-                  onClick={() => goToTrainees({ risk: "HIGH" })}
+                  onClick={() => setDrillKind("HIGH")}
                   className={kpiCardCls(kpis.high > 0 ? "bad" : "ok", true, false)}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">High risk</p>
@@ -726,7 +726,7 @@ function DashboardInner() {
 
                 {/* Card 4: Medium risk */}
                 <button
-                  onClick={() => goToTrainees({ risk: "MEDIUM" })}
+                  onClick={() => setDrillKind("MEDIUM")}
                   className={kpiCardCls(kpis.med > 0 ? "warn" : "neutral", true, false)}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Medium risk</p>
@@ -738,7 +738,7 @@ function DashboardInner() {
 
                 {/* Card 5: Critical flags */}
                 <button
-                  onClick={() => goToTrainees({ flag: "HAS" })}
+                  onClick={() => setDrillKind("CRITICAL")}
                   className={kpiCardCls(kpis.critical > 0 ? "bad" : "ok", true, kpis.critical > 0)}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Critical flags</p>
