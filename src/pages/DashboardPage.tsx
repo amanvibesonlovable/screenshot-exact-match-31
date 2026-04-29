@@ -1075,6 +1075,12 @@ function DashboardInner() {
       </div>
 
       <CsvUploadModal open={showUpload} onClose={() => setShowUpload(false)} onUploaded={refresh} />
+      <RiskDrillSheet
+        open={drillKind !== null}
+        onOpenChange={(v) => !v && setDrillKind(null)}
+        kind={drillKind}
+        trainees={drillTrainees}
+      />
       {toast && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-5 py-2.5 text-sm font-bold text-background shadow-lg">
           {toast}
