@@ -789,14 +789,19 @@ function DashboardInner() {
 
           {tab === "trainees" && (
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex rounded-full border border-border bg-card p-1">
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Trainees</h1>
+                <p className="text-xs text-muted-foreground">{filteredTrainees.length} of {traineeCards.length} trainees</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
+                <div className="flex rounded-md border border-border p-0.5">
                   {(["ALL", "HIGH", "MEDIUM", "LOW"] as const).map((f) => (
                     <button key={f} onClick={() => setRiskFilter(f)}
-                      className={`rounded-full px-4 py-1.5 text-xs font-bold transition ${
-                        riskFilter === f ? "bg-gradient-brand text-primary-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"
+                      className={`rounded px-3 py-1 text-xs font-semibold transition ${
+                        riskFilter === f ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                       }`}>
-                      {f === "ALL" ? "All risks" : f}
+                      {f === "ALL" ? "All" : f}
                     </button>
                   ))}
                 </div>
@@ -807,143 +812,129 @@ function DashboardInner() {
                   renderOption={(s) => s === "NONE" ? "No survey yet" : `Day ${s}`} />
                 <FilterChip label="Flags" value={flagFilter} onChange={setFlagFilter} options={["HAS", "NONE"]}
                   renderOption={(s) => s === "HAS" ? "Has flags" : "No flags"} />
-                <FilterChip label="Gaming" value={gamingFilter} onChange={setGamingFilter} options={["FLAGGED"]} />
                 <input value={search} onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search name, code, branch, manager…"
-                  className="flex-1 min-w-[220px] rounded-full border border-border bg-card px-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40" />
-                <div className="flex rounded-full border border-border bg-card p-1 text-xs">
-                  {(["flat", "branch", "manager"] as const).map((g) => (
-                    <button key={g} onClick={() => setGrouping(g)}
-                      className={`rounded-full px-3 py-1 font-bold ${grouping === g ? "bg-gradient-brand text-primary-foreground" : "text-muted-foreground"}`}>
-                      {g === "flat" ? "Flat" : `By ${g}`}
-                    </button>
-                  ))}
-                </div>
+                  className="flex-1 min-w-[220px] rounded-md border border-border bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
 
               {pendingOverdue > 0 && (
-                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
-                  ⚠ {pendingOverdue} trainees have overdue check-ins (eligible 5+ days, not completed).
+                <div className="rounded-lg border border-amber-500/30 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-400">
+                  ⚠ {pendingOverdue} trainees have overdue check-ins.
                 </div>
               )}
 
-              {/* Selection bar */}
-              <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/60 bg-card/60 px-4 py-2 text-xs">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-border accent-primary"
-                    checked={filteredTrainees.length > 0 && filteredTrainees.every((t) => selected.has(t.employee.id))}
-                    onChange={(e) => {
-                      const next = new Set(selected);
-                      if (e.target.checked) filteredTrainees.forEach((t) => next.add(t.employee.id));
-                      else filteredTrainees.forEach((t) => next.delete(t.employee.id));
-                      setSelected(next);
+              {selected.size > 0 && (
+                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 text-xs">
+                  <span className="font-semibold text-foreground">{selected.size} selected</span>
+                  <select value={bulkAction} onChange={(e) => setBulkAction(e.target.value)}
+                    className="rounded-md border border-border bg-background px-2 py-1 font-semibold">
+                    <option>Called trainee</option>
+                    <option>Spoke to manager</option>
+                    <option>Scheduled check-in</option>
+                    <option>Escalated to senior HR</option>
+                  </select>
+                  <button
+                    onClick={async () => {
+                      const { data: { user } } = await supabase.auth.getUser();
+                      const rows = Array.from(selected).map((employee_id) => ({
+                        employee_id, action_type: bulkAction, notes: null,
+                        created_by: user?.id ?? null, created_by_email: user?.email ?? null,
+                      }));
+                      await supabase.from("hr_actions").insert(rows);
+                      setToast(`Logged "${bulkAction}" for ${rows.length} trainees`);
+                      setTimeout(() => setToast(null), 3000);
+                      setSelected(new Set());
                     }}
-                  />
-                  <span className="font-bold text-muted-foreground">
-                    {selected.size > 0 ? `${selected.size} selected` : "Select all visible"}
-                  </span>
-                </label>
-                {selected.size > 0 && (
-                  <>
-                    <button
-                      onClick={() => {
-                        const rows = ["Code,Name,Phone,Email,Branch,Manager,DOJ,Risk,Score,Link"];
-                        for (const t of filteredTrainees) {
-                          if (!selected.has(t.employee.id)) continue;
-                          const e = t.employee;
-                          rows.push([
-                            e.employee_code, e.name, e.phone, e.email, e.branch, e.area_manager, e.doj,
-                            t.latest?.risk_level ?? "—",
-                            t.latest?.final_score?.toFixed(1) ?? "—",
-                            `${window.location.origin}/s/${e.token}`,
-                          ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","));
-                        }
-                        const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url; a.download = "pulse-selected-trainees.csv"; a.click();
-                      }}
-                      className="rounded-full border border-border bg-background px-3 py-1 font-bold hover:bg-secondary"
-                    >
-                      Export selected (CSV)
-                    </button>
-                    <select
-                      value={bulkAction}
-                      onChange={(e) => setBulkAction(e.target.value)}
-                      className="rounded-full border border-border bg-background px-3 py-1 font-bold"
-                    >
-                      <option>Called trainee</option>
-                      <option>Spoke to manager</option>
-                      <option>Scheduled check-in</option>
-                      <option>Escalated to senior HR</option>
-                      <option>Custom note</option>
-                    </select>
-                    <button
-                      onClick={async () => {
-                        const { data: { user } } = await supabase.auth.getUser();
-                        const rows = Array.from(selected).map((employee_id) => ({
-                          employee_id,
-                          action_type: bulkAction,
-                          notes: null,
-                          created_by: user?.id ?? null,
-                          created_by_email: user?.email ?? null,
-                        }));
-                        await supabase.from("hr_actions").insert(rows);
-                        setToast(`Logged "${bulkAction}" for ${rows.length} trainees`);
-                        setTimeout(() => setToast(null), 3000);
-                        setSelected(new Set());
-                      }}
-                      className="rounded-full bg-foreground px-3 py-1 font-bold text-background"
-                    >
-                      Bulk mark action
-                    </button>
-                    <button
-                      onClick={() => setSelected(new Set())}
-                      className="rounded-full px-2 py-1 text-muted-foreground hover:text-foreground"
-                    >
-                      Clear
-                    </button>
-                  </>
-                )}
-              </div>
+                    className="rounded-md bg-primary px-3 py-1 font-semibold text-primary-foreground hover:opacity-90">
+                    Log action
+                  </button>
+                  <button onClick={() => setSelected(new Set())} className="text-muted-foreground hover:text-foreground">Clear</button>
+                </div>
+              )}
 
               {loading ? (
-                <p className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">Loading trainees…</p>
+                <p className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">Loading trainees…</p>
               ) : filteredTrainees.length === 0 ? (
-                <p className="rounded-2xl border border-border bg-card p-12 text-center text-sm text-muted-foreground">
-                  No trainees match these filters.
-                </p>
+                <p className="rounded-xl border border-border bg-card p-12 text-center text-sm text-muted-foreground">No trainees match these filters.</p>
               ) : (
-                groupedTrainees.map((g) => (
-                  <div key={g.label || "all"}>
-                    {g.label && (
-                      <h3 className="mb-2 mt-4 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-                        {g.label} <span className="text-xs">({g.items.length})</span>
-                      </h3>
-                    )}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {g.items.map((t) => (
-                        <TraineeCard
-                          key={t.employee.id}
-                          data={t}
-                          selected={selected.has(t.employee.id)}
-                          onToggleSelect={() => {
-                            const next = new Set(selected);
-                            if (next.has(t.employee.id)) next.delete(t.employee.id);
-                            else next.add(t.employee.id);
-                            setSelected(next);
-                          }}
-                          onActionLogged={() => {
-                            setToast("Action logged");
-                            setTimeout(() => setToast(null), 2000);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))
+                <div className="overflow-hidden rounded-xl border border-border bg-card">
+                  <table className="w-full text-sm">
+                    <thead className="bg-secondary/50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr>
+                        <th className="w-8 px-3 py-2.5">
+                          <input type="checkbox" className="h-4 w-4 rounded border-border accent-primary"
+                            checked={filteredTrainees.length > 0 && filteredTrainees.every((t) => selected.has(t.employee.id))}
+                            onChange={(e) => {
+                              const next = new Set(selected);
+                              if (e.target.checked) filteredTrainees.forEach((t) => next.add(t.employee.id));
+                              else filteredTrainees.forEach((t) => next.delete(t.employee.id));
+                              setSelected(next);
+                            }} />
+                        </th>
+                        <th className="px-3 py-2.5">Name</th>
+                        <th className="px-3 py-2.5">Branch</th>
+                        <th className="px-3 py-2.5">Manager</th>
+                        <th className="px-3 py-2.5">Days</th>
+                        <th className="px-3 py-2.5">Latest stage</th>
+                        <th className="px-3 py-2.5">Risk</th>
+                        <th className="px-3 py-2.5">Score</th>
+                        <th className="px-3 py-2.5">Flags</th>
+                        <th className="px-3 py-2.5"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTrainees.map((t) => {
+                        const e = t.employee;
+                        const risk = t.latest?.risk_level;
+                        const riskCls =
+                          risk === "HIGH" ? "bg-destructive/10 text-destructive border-destructive/30"
+                          : risk === "MEDIUM" ? "bg-amber-500/10 text-amber-700 border-amber-500/30 dark:text-amber-400"
+                          : risk === "LOW" ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30 dark:text-emerald-400"
+                          : "bg-secondary text-muted-foreground border-border";
+                        return (
+                          <tr key={e.id} className="border-t border-border hover:bg-secondary/30">
+                            <td className="px-3 py-2.5">
+                              <input type="checkbox" className="h-4 w-4 rounded border-border accent-primary"
+                                checked={selected.has(e.id)}
+                                onChange={() => {
+                                  const next = new Set(selected);
+                                  if (next.has(e.id)) next.delete(e.id); else next.add(e.id);
+                                  setSelected(next);
+                                }} />
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <div className="font-semibold text-foreground">{e.name}</div>
+                              <div className="text-[11px] text-muted-foreground">{e.employee_code}</div>
+                            </td>
+                            <td className="px-3 py-2.5 text-muted-foreground">{e.branch}</td>
+                            <td className="px-3 py-2.5 text-muted-foreground">{e.area_manager}</td>
+                            <td className="px-3 py-2.5 tabular-nums text-muted-foreground">{t.daysSince}d</td>
+                            <td className="px-3 py-2.5 text-muted-foreground">{t.latest ? `Day ${t.latest.stage}` : "—"}</td>
+                            <td className="px-3 py-2.5">
+                              <span className={`inline-block rounded border px-2 py-0.5 text-[11px] font-semibold ${riskCls}`}>
+                                {risk ?? "—"}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 tabular-nums">{t.latest?.final_score?.toFixed(1) ?? "—"}</td>
+                            <td className="px-3 py-2.5">
+                              {t.latest?.critical_flags?.length ? (
+                                <span className="inline-block rounded bg-destructive/10 px-2 py-0.5 text-[11px] font-semibold text-destructive">
+                                  {t.latest.critical_flags.length}
+                                </span>
+                              ) : <span className="text-muted-foreground">—</span>}
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <button onClick={() => navigate(`/dashboard/trainees/${e.id}`)}
+                                className="rounded-md border border-border px-2 py-1 text-[11px] font-semibold hover:bg-secondary">
+                                Open
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           )}
