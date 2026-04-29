@@ -207,32 +207,37 @@ export default function CsvUploadModal({
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((r) => (
-                      <tr key={r.row} className="border-t border-border/40">
-                        <td className="px-3 py-2 text-muted-foreground">{r.row}</td>
-                        <td className="px-3 py-2">
-                          {r.ok ? (
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                              OK
-                            </span>
-                          ) : (
-                            <span className="font-bold text-destructive">Error</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-foreground">
-                          {r.ok ? (
-                            <span>
-                              {r.data.name}{" "}
-                              <span className="text-muted-foreground">
-                                · {r.data.employee_code} · {r.data.branch}
+                    {rows.map((r) => {
+                      const isOk = r.ok;
+                      return (
+                        <tr key={r.row} className="border-t border-border/40">
+                          <td className="px-3 py-2 text-muted-foreground">{r.row}</td>
+                          <td className="px-3 py-2">
+                            {isOk ? (
+                              <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                OK
                               </span>
-                            </span>
-                          ) : (
-                            <span className="text-destructive">{r.errors.join("; ")}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                            ) : (
+                              <span className="font-bold text-destructive">Error</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-foreground">
+                            {isOk ? (
+                              <span>
+                                {(r as any).data.name}{" "}
+                                <span className="text-muted-foreground">
+                                  · {(r as any).data.employee_code} · {(r as any).data.branch}
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="text-destructive">
+                                {(r as any).errors.join("; ")}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
