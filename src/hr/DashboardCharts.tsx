@@ -65,7 +65,7 @@ export function RiskDonut({
               stroke="hsl(var(--card))" strokeWidth={3}>
               {data.map((d) => <Cell key={d.name} fill={RISK_COLORS[d.name]} />)}
             </Pie>
-            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
             <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
           </PieChart>
         </ResponsiveContainer>
@@ -117,7 +117,7 @@ export function RiskTrendChart({
               <XAxis dataKey="week" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                 tickFormatter={(v) => mode === "pct" ? `${v}%` : v} />
-              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
               <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
               <Area type="monotone" dataKey="LOW" stackId="1" stroke={RISK_COLORS.LOW} fill={RISK_COLORS.LOW} fillOpacity={0.7} />
               <Area type="monotone" dataKey="MEDIUM" stackId="1" stroke={RISK_COLORS.MEDIUM} fill={RISK_COLORS.MEDIUM} fillOpacity={0.7} />
@@ -146,7 +146,7 @@ export function StageBreakdown({
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis dataKey="stage" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
             <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
             <Bar dataKey="LOW" stackId="a" fill={RISK_COLORS.LOW} />
             <Bar dataKey="MEDIUM" stackId="a" fill={RISK_COLORS.MEDIUM} />
@@ -556,7 +556,7 @@ export function OrgPulseDonut({
                 <Cell key={i} fill={COLOR_BY_NAME[d.name] ?? FALLBACK[i % FALLBACK.length]} />
               ))}
             </Pie>
-            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
             <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
           </PieChart>
         </ResponsiveContainer>

@@ -501,7 +501,7 @@ function AnalyticsInner() {
                       <XAxis dataKey="stage" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
                       <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                         tickFormatter={(v) => stageMode === "pct" ? `${v}%` : v} />
-                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
                       <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
                       <Bar dataKey="LOW" stackId="a" fill={RISK_COLORS.LOW} />
                       <Bar dataKey="MEDIUM" stackId="a" fill={RISK_COLORS.MEDIUM} />
@@ -554,7 +554,7 @@ function AnalyticsInner() {
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis dataKey="key" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
                         <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} formatter={(v: any) => (typeof v === "number" ? Number(v).toFixed(1) : v)} />
                         <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                           {timeDist.map((d, i) => <Cell key={i} fill={d.color} />)}
                         </Bar>
