@@ -597,16 +597,9 @@ function DashboardInner() {
 
   return (
     <main className="min-h-dvh bg-gradient-warm">
-      <header className="border-b border-border/60 bg-card/70 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand text-xl font-extrabold text-primary-foreground shadow-soft">✦</div>
-            <div>
-              <p className="text-lg font-extrabold tracking-tight text-foreground">Pulse · HR</p>
-              <p className="text-xs text-muted-foreground">Early warning & training effectiveness</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
+      <DashboardHeader
+        rightSlot={
+          <>
             <button onClick={handleSeed} disabled={seeding} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary disabled:opacity-50">
               {seeding ? "Seeding…" : "Seed demo"}
             </button>
@@ -614,39 +607,12 @@ function DashboardInner() {
             <button onClick={() => supabase.auth.signOut()} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary">
               Sign out
             </button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <div className="mx-auto flex max-w-7xl gap-6 px-6 py-6">
-        {/* Sidebar */}
-        <aside className="w-48 shrink-0 hidden md:block">
-          <nav className="sticky top-6 space-y-1">
-            {([
-              ["overview", "Overview"],
-              ["trainees", "Trainees"],
-              ["upload", "Upload"],
-              ["settings", "Settings"],
-            ] as [Tab, string][]).map(([k, label]) => (
-              <button
-                key={k}
-                onClick={() => setTab(k)}
-                className={`block w-full rounded-xl px-3 py-2 text-left text-sm font-bold transition ${
-                  tab === k ? "bg-gradient-brand text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-            <div className="my-2 h-px bg-border/60" />
-            <Link
-              to="/dashboard/scoring"
-              className="block w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-            >
-              Scoring Framework
-            </Link>
-          </nav>
-        </aside>
+        <DashboardSidebar />
 
         <div className="flex-1 min-w-0">
           {/* Mobile tab switch */}
@@ -657,6 +623,7 @@ function DashboardInner() {
               </button>
             ))}
           </div>
+
 
           {tab === "overview" && (
             <div className="space-y-4">
