@@ -296,26 +296,48 @@ function DashboardInner() {
       label: DIM_LABELS[k],
       avg: sums[k].n ? sums[k].sum / sums[k].n : 0,
       max: 25,
+      hasData: sums[k].n > 0,
     }));
   }, [latestByEmp]);
 
-  // Branch leaderboard
+  // Branch leaderboard — includes active count + completion rate per branch
   const branchData = useMemo(() => {
-    const map: Record<string, { branch: string; total: number; high: number; med: number; low: number; sum: number }> = {};
+    type Row = {
+      branch: string; active: number; total: number;
+      high: number; med: number; low: number; sum: number;
+      eligible: number; completed: number;
+    };
+    const map: Record<string, Row> = {};
+    const completedByEmpStage = new Set<string>();
+    for (const r of responses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
     for (const e of employees) {
+      const key = e.branch || "—";
+      if (!map[key]) map[key] = { branch: key, active: 0, total: 0, high: 0, med: 0, low: 0, sum: 0, eligible: 0, completed: 0 };
+      const days = daysSinceDOJ(e.doj);
+      const isActive = e.status === "training" || (e.status === "positioned" && days < 180);
+      if (isActive) map[key].active++;
+      const elig = eligibleStages(days);
+      map[key].eligible += elig.length;
+      for (const s of elig) if (completedByEmpStage.has(`${e.id}:${s}`)) map[key].completed++;
       const r = latestByEmp.get(e.id);
       if (!r) continue;
-      const key = e.branch || "—";
-      if (!map[key]) map[key] = { branch: key, total: 0, high: 0, med: 0, low: 0, sum: 0 };
       map[key].total++; map[key].sum += r.final_score;
       if (r.risk_level === "HIGH") map[key].high++;
       else if (r.risk_level === "MEDIUM") map[key].med++;
       else map[key].low++;
     }
-    return Object.values(map)
-      .map((b) => ({ ...b, avg: b.total ? b.sum / b.total : 0 }))
-      .sort((a, b) => b.high / Math.max(1, b.total) - a.high / Math.max(1, a.total));
-  }, [employees, latestByEmp]);
+    return Object.values(map).map((b) => ({
+      branch: b.branch,
+      active: b.active,
+      total: b.total,
+      high: b.high,
+      med: b.med,
+      low: b.low,
+      avg: b.total ? b.sum / b.total : 0,
+      completionPct: b.eligible ? Math.round((b.completed / b.eligible) * 100) : 0,
+      trend: "flat" as const,
+    }));
+  }, [employees, latestByEmp, responses]);
 
   // Manager view
   const managerRows = useMemo(() => {
