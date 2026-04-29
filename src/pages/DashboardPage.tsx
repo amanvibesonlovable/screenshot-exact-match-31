@@ -11,10 +11,7 @@ import {
   DIM_LABELS,
   ManagerView,
   OrgPulseDonut,
-  RISK_COLORS,
-  RiskDonut,
   RiskTrendChart,
-  StageBreakdown,
 } from "@/hr/DashboardCharts";
 import { TraineeCard, TraineeCardData } from "@/hr/TraineeCard";
 import CsvUploadModal from "@/hr/CsvUploadModal";
@@ -53,27 +50,34 @@ function FilterChip({
   );
 }
 
-function Kpi({
-  label, value, tone, onClick, glow,
-}: {
-  label: string; value: number | string;
-  tone?: "high" | "med" | "low" | "default";
-  onClick?: () => void; glow?: boolean;
-}) {
-  const toneClass =
-    tone === "high" ? "text-destructive"
-    : tone === "med" ? "text-amber-600 dark:text-amber-400"
-    : tone === "low" ? "text-emerald-600 dark:text-emerald-400"
-    : "text-foreground";
+type KpiTone = "neutral" | "ok" | "warn" | "bad";
+
+function kpiCardCls(tone: KpiTone, clickable: boolean, glow: boolean) {
+  const base =
+    "text-left rounded-2xl border p-4 shadow-bubble backdrop-blur transition";
+  const toneCls =
+    tone === "ok" ? "border-emerald-500/30 bg-emerald-500/10"
+    : tone === "warn" ? "border-amber-500/30 bg-amber-500/10"
+    : tone === "bad" ? "border-destructive/40 bg-destructive/10 border-l-4 border-l-destructive"
+    : "border-border/60 bg-card/80";
+  const interactive = clickable ? "hover:-translate-y-0.5 hover:shadow-lg cursor-pointer" : "";
+  const glowCls = glow ? "ring-2 ring-destructive/50 animate-pulse" : "";
+  return `${base} ${toneCls} ${interactive} ${glowCls}`;
+}
+
+/** Simple circular completion ring */
+function Ring({ pct, color, size = 44 }: { pct: number; color: string; size?: number }) {
+  const stroke = 5;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c - (Math.min(100, Math.max(0, pct)) / 100) * c;
   return (
-    <button
-      onClick={onClick}
-      disabled={!onClick}
-      className={`text-left rounded-3xl border border-border/60 bg-card/80 p-4 shadow-bubble backdrop-blur transition ${onClick ? "hover:-translate-y-0.5 hover:shadow-lg cursor-pointer" : ""} ${glow ? "ring-2 ring-destructive/40 animate-pulse" : ""}`}
-    >
-      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className={`mt-1 text-3xl font-extrabold tabular-nums ${toneClass}`}>{value}</p>
-    </button>
+    <svg width={size} height={size} className="shrink-0">
+      <circle cx={size / 2} cy={size / 2} r={r} stroke="hsl(var(--secondary))" strokeWidth={stroke} fill="none" />
+      <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={stroke} fill="none"
+        strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+    </svg>
   );
 }
 
@@ -192,9 +196,28 @@ function DashboardInner() {
       scoreSum += r.final_score; scoreN++;
     }
     const completionPct = totalEligible ? Math.round((totalCompleted / totalEligible) * 100) : 0;
+    // Branch breakdown of active trainees
+    const activeByBranch: Record<string, number> = {};
+    let activeTrainees = 0;
+    for (const e of employees) {
+      const isActive = e.status === "training" || (e.status === "positioned" && daysSinceDOJ(e.doj) < 180);
+      if (!isActive) continue;
+      activeTrainees++;
+      const k = (e.branch || "—").slice(0, 3);
+      activeByBranch[k] = (activeByBranch[k] ?? 0) + 1;
+    }
+    const branchBreakdown = Object.entries(activeByBranch)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(" · ");
+    const branchCount = Object.keys(activeByBranch).length;
     return {
       total: employees.length,
-      activeTrainees: employees.filter((e) => e.status === "training" || (e.status === "positioned" && daysSinceDOJ(e.doj) < 180)).length,
+      activeTrainees,
+      branchBreakdown,
+      branchCount,
+      totalEligible,
+      totalCompleted,
       completionPct,
       high, med, low, gaming, critical,
       avgScore: scoreN ? scoreSum / scoreN : 0,
@@ -296,26 +319,48 @@ function DashboardInner() {
       label: DIM_LABELS[k],
       avg: sums[k].n ? sums[k].sum / sums[k].n : 0,
       max: 25,
+      hasData: sums[k].n > 0,
     }));
   }, [latestByEmp]);
 
-  // Branch leaderboard
+  // Branch leaderboard — includes active count + completion rate per branch
   const branchData = useMemo(() => {
-    const map: Record<string, { branch: string; total: number; high: number; med: number; low: number; sum: number }> = {};
+    type Row = {
+      branch: string; active: number; total: number;
+      high: number; med: number; low: number; sum: number;
+      eligible: number; completed: number;
+    };
+    const map: Record<string, Row> = {};
+    const completedByEmpStage = new Set<string>();
+    for (const r of responses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
     for (const e of employees) {
+      const key = e.branch || "—";
+      if (!map[key]) map[key] = { branch: key, active: 0, total: 0, high: 0, med: 0, low: 0, sum: 0, eligible: 0, completed: 0 };
+      const days = daysSinceDOJ(e.doj);
+      const isActive = e.status === "training" || (e.status === "positioned" && days < 180);
+      if (isActive) map[key].active++;
+      const elig = eligibleStages(days);
+      map[key].eligible += elig.length;
+      for (const s of elig) if (completedByEmpStage.has(`${e.id}:${s}`)) map[key].completed++;
       const r = latestByEmp.get(e.id);
       if (!r) continue;
-      const key = e.branch || "—";
-      if (!map[key]) map[key] = { branch: key, total: 0, high: 0, med: 0, low: 0, sum: 0 };
       map[key].total++; map[key].sum += r.final_score;
       if (r.risk_level === "HIGH") map[key].high++;
       else if (r.risk_level === "MEDIUM") map[key].med++;
       else map[key].low++;
     }
-    return Object.values(map)
-      .map((b) => ({ ...b, avg: b.total ? b.sum / b.total : 0 }))
-      .sort((a, b) => b.high / Math.max(1, b.total) - a.high / Math.max(1, a.total));
-  }, [employees, latestByEmp]);
+    return Object.values(map).map((b) => ({
+      branch: b.branch,
+      active: b.active,
+      total: b.total,
+      high: b.high,
+      med: b.med,
+      low: b.low,
+      avg: b.total ? b.sum / b.total : 0,
+      completionPct: b.eligible ? Math.round((b.completed / b.eligible) * 100) : 0,
+      trend: "flat" as const,
+    }));
+  }, [employees, latestByEmp, responses]);
 
   // Manager view
   const managerRows = useMemo(() => {
@@ -546,20 +591,100 @@ function DashboardInner() {
           </div>
 
           {tab === "overview" && (
-            <div className="space-y-6">
-              {/* KPI Row */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-                <Kpi label="Active trainees" value={kpis.activeTrainees} />
-                <Kpi label="Completion rate" value={`${kpis.completionPct}%`}
-                  tone={kpis.completionPct >= 80 ? "low" : kpis.completionPct >= 50 ? "med" : "high"} />
-                <Kpi label="High risk" value={kpis.high} tone="high"
-                  onClick={() => goToTrainees({ risk: "HIGH" })} />
-                <Kpi label="Medium risk" value={kpis.med} tone="med"
-                  onClick={() => goToTrainees({ risk: "MEDIUM" })} />
-                <Kpi label="Critical flags" value={kpis.critical} tone="high" glow={kpis.critical > 0}
-                  onClick={() => goToTrainees({ flag: "HAS" })} />
-                <Kpi label="Avg risk score" value={kpis.avgScore.toFixed(1)} />
+            <div className="space-y-4">
+              {/* KPI Row — 5 rich cards */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {/* Card 1: Active trainees */}
+                <div className={kpiCardCls("neutral", false, false)}>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Active trainees</p>
+                  <p className="mt-1 text-3xl font-extrabold tabular-nums text-foreground">{kpis.activeTrainees}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    across {kpis.branchCount} branch{kpis.branchCount === 1 ? "" : "es"}
+                  </p>
+                  {kpis.branchBreakdown && (
+                    <p className="mt-1 truncate text-[10px] text-muted-foreground" title={kpis.branchBreakdown}>
+                      {kpis.branchBreakdown}
+                    </p>
+                  )}
+                </div>
+
+                {/* Card 2: Survey completion */}
+                {(() => {
+                  const tone: KpiTone = kpis.completionPct >= 80 ? "ok" : kpis.completionPct >= 50 ? "warn" : "bad";
+                  const ringColor = kpis.completionPct >= 80 ? "#2D8B4E" : kpis.completionPct >= 50 ? "#D4820C" : "#C23B22";
+                  return (
+                    <div className={kpiCardCls(tone, false, false)}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Survey completion</p>
+                      <div className="mt-1 flex items-center gap-3">
+                        <p className="text-3xl font-extrabold tabular-nums text-foreground">{kpis.completionPct}%</p>
+                        <Ring pct={kpis.completionPct} color={ringColor} />
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {kpis.totalCompleted} of {kpis.totalEligible} eligible
+                      </p>
+                    </div>
+                  );
+                })()}
+
+                {/* Card 3: High risk */}
+                <button
+                  onClick={() => goToTrainees({ risk: "HIGH" })}
+                  className={kpiCardCls(kpis.high > 0 ? "bad" : "ok", true, false)}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">High risk</p>
+                  {kpis.high > 0 ? (
+                    <>
+                      <p className="mt-1 text-3xl font-extrabold tabular-nums text-destructive">{kpis.high}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {kpis.activeTrainees ? Math.round((kpis.high / kpis.activeTrainees) * 100) : 0}% of active trainees
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">All clear ✓</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">No high-risk trainees</p>
+                    </>
+                  )}
+                </button>
+
+                {/* Card 4: Medium risk */}
+                <button
+                  onClick={() => goToTrainees({ risk: "MEDIUM" })}
+                  className={kpiCardCls(kpis.med > 0 ? "warn" : "neutral", true, false)}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Medium risk</p>
+                  <p className="mt-1 text-3xl font-extrabold tabular-nums text-amber-600 dark:text-amber-400">{kpis.med}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    {kpis.activeTrainees ? Math.round((kpis.med / kpis.activeTrainees) * 100) : 0}% of active trainees
+                  </p>
+                </button>
+
+                {/* Card 5: Critical flags */}
+                <button
+                  onClick={() => goToTrainees({ flag: "HAS" })}
+                  className={kpiCardCls(kpis.critical > 0 ? "bad" : "ok", true, kpis.critical > 0)}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Critical flags</p>
+                  {kpis.critical > 0 ? (
+                    <>
+                      <p className="mt-1 text-3xl font-extrabold tabular-nums text-destructive">{kpis.critical}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">require immediate attention</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">No critical flags 🎉</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">All clear</p>
+                    </>
+                  )}
+                </button>
               </div>
+
+              {/* Low-risk footnote */}
+              {kpis.low > 0 && (
+                <p className="text-[11px] text-muted-foreground">
+                  {kpis.low} trainee{kpis.low === 1 ? "" : "s"} in the healthy range (Low Risk).
+                </p>
+              )}
 
               {pendingOverdue > 0 && (
                 <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
@@ -568,28 +693,38 @@ function DashboardInner() {
                 </div>
               )}
 
-              {/* Charts */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <RiskTrendChart data={trendData} />
-                <RiskDonut data={donutData} />
+              {/* Row: Funnel (60%) + Critical Alerts (40%) */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <div className="lg:col-span-3">
+                  <CompletionFunnel rows={funnel} onStageClick={(s) => goToTrainees({ stage: String(s) })} />
+                </div>
+                <div className="lg:col-span-2">
+                  <CriticalAlertsFeed alerts={alertsFeed} onClick={(empId) => navigate(`/dashboard/trainees/${empId}`)} />
+                </div>
               </div>
 
+              {/* Row: Branch (50%) + Dimension Heatmap (50%) */}
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <CompletionFunnel rows={funnel} onStageClick={(s) => goToTrainees({ stage: String(s) })} />
+                <BranchLeaderboard rows={branchData} onBranchClick={(b) => goToTrainees({ branch: b })} />
                 <DimensionHeatmap rows={dimRows} />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <BranchLeaderboard rows={branchData} onBranchClick={(b) => goToTrainees({ branch: b })} />
-                <StageBreakdown data={stageData} />
+              {/* Full-width: Risk trend over time */}
+              <div className="grid grid-cols-1 gap-4">
+                <RiskTrendChart data={trendData} />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <ManagerView rows={managerRows} onManagerClick={(m) => goToTrainees({ manager: m })} />
-                <CriticalAlertsFeed alerts={alertsFeed} onClick={(empId) => navigate(`/dashboard/trainees/${empId}`)} />
+              {/* Row: Manager view (60%) + Pulse (40%, hides if empty) */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <div className={orgPulse.length > 0 ? "lg:col-span-3" : "lg:col-span-5"}>
+                  <ManagerView rows={managerRows} onManagerClick={(m) => goToTrainees({ manager: m })} />
+                </div>
+                {orgPulse.length > 0 && (
+                  <div className="lg:col-span-2">
+                    <OrgPulseDonut data={orgPulse} />
+                  </div>
+                )}
               </div>
-
-              <OrgPulseDonut data={orgPulse} />
             </div>
           )}
 

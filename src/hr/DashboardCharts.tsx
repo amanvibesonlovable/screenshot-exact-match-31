@@ -197,41 +197,87 @@ export function CompletionFunnel({
   );
 }
 
-/** Risk heatmap by 5 dimensions — horizontal gauges with avg score. */
+/** Risk heatmap by 5 dimensions — prominent horizontal bars with risk badges. */
 export function DimensionHeatmap({
   rows,
 }: {
-  rows: { key: string; label: string; avg: number; max: number }[];
+  rows: { key: string; label: string; avg: number; max: number; hasData: boolean }[];
 }) {
-  const top = rows.slice().sort((a, b) => b.avg - a.avg)[0];
+  // Sort by avg desc, but keep "no data" rows at the end
+  const sorted = rows.slice().sort((a, b) => {
+    if (a.hasData !== b.hasData) return a.hasData ? -1 : 1;
+    return b.avg - a.avg;
+  });
+  const top = sorted.find((r) => r.hasData);
+  function levelFor(avg: number): "LOW" | "MEDIUM" | "HIGH" {
+    // Per-dimension max is 25 in scoring — bands roughly mirror final-score bands scaled down
+    if (avg >= 6) return "HIGH";
+    if (avg >= 3) return "MEDIUM";
+    return "LOW";
+  }
   return (
     <div className={cardCls}>
       <div className="flex items-center justify-between">
-        <h3 className={titleCls}>Risk by dimension</h3>
-        {top && (
-          <span className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
-            Primary driver: {top.label}
-          </span>
-        )}
+        <div>
+          <h3 className={titleCls}>Where the pressure is</h3>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            Average scores across all latest check-ins. Higher = more concern.
+          </p>
+        </div>
       </div>
-      <ul className="mt-4 space-y-3">
-        {rows.map((r) => {
+      <ul className="mt-4 space-y-3.5">
+        {sorted.map((r, i) => {
           const pct = r.max ? Math.min(100, Math.round((r.avg / r.max) * 100)) : 0;
+          const level = levelFor(r.avg);
+          const isPrimary = r.hasData && i === 0;
           return (
             <li key={r.key}>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-foreground">{r.label}</span>
-                <span className="tabular-nums text-muted-foreground">
-                  {r.avg.toFixed(1)} avg
+                <span className={`font-bold ${isPrimary ? "text-foreground" : "text-foreground"}`}>
+                  {r.label}
+                  {isPrimary && (
+                    <span className="ml-2 rounded-full border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive">
+                      ← Primary concern
+                    </span>
+                  )}
+                </span>
+                <span className="flex items-center gap-2 tabular-nums">
+                  {r.hasData ? (
+                    <>
+                      <span className="text-muted-foreground">{r.avg.toFixed(1)}</span>
+                      <span
+                        className="rounded-full px-1.5 py-0.5 text-[10px] font-extrabold"
+                        style={{
+                          background: `${RISK_COLORS[level]}22`,
+                          color: RISK_COLORS[level],
+                        }}
+                      >
+                        {level}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground">Not enough data yet</span>
+                  )}
                 </span>
               </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-secondary">
-                <div style={{ width: `${pct}%`, background: DIM_COLORS[r.key] }} className="h-full" />
+              <div className={`mt-1.5 h-3 overflow-hidden rounded-full ${r.hasData ? "bg-secondary" : "bg-secondary/40"}`}>
+                <div
+                  style={{
+                    width: `${pct}%`,
+                    background: r.hasData ? DIM_COLORS[r.key] : "hsl(var(--muted-foreground) / 0.3)",
+                  }}
+                  className="h-full"
+                />
               </div>
             </li>
           );
         })}
       </ul>
+      {top && (
+        <p className="mt-4 text-[11px] text-muted-foreground">
+          Biggest systemic concern: <span className="font-bold text-foreground">{top.label}</span>.
+        </p>
+      )}
     </div>
   );
 }
@@ -240,62 +286,104 @@ export function BranchLeaderboard({
   rows,
   onBranchClick,
 }: {
-  rows: { branch: string; total: number; high: number; med: number; low: number; avg: number }[];
+  rows: {
+    branch: string;
+    active: number;
+    total: number;       // number with surveys
+    high: number;
+    med: number;
+    low: number;
+    avg: number;
+    completionPct: number;
+    trend?: "up" | "down" | "flat";
+  }[];
   onBranchClick?: (branch: string) => void;
 }) {
-  const max = Math.max(1, ...rows.map((r) => r.total));
-  // PRD insight: e.g., "Nagpur has 2.5x the high-risk rate of average"
+  // Auto-insight comparing best vs worst by avg
   let insight: string | null = null;
-  if (rows.length >= 2) {
-    const totalAll = rows.reduce((s, r) => s + r.total, 0);
-    const highAll = rows.reduce((s, r) => s + r.high, 0);
-    const avgHighRate = totalAll ? highAll / totalAll : 0;
-    const worst = rows.slice().sort((a, b) =>
-      (b.high / Math.max(1, b.total)) - (a.high / Math.max(1, a.total))
-    )[0];
-    const worstRate = worst.total ? worst.high / worst.total : 0;
-    if (avgHighRate > 0 && worstRate > avgHighRate * 1.5) {
-      insight = `${worst.branch} branch has ${(worstRate / avgHighRate).toFixed(1)}x the high-risk rate of the average.`;
+  const measured = rows.filter((r) => r.total > 0);
+  if (measured.length >= 2) {
+    const sorted = measured.slice().sort((a, b) => b.avg - a.avg);
+    const worst = sorted[0];
+    const best = sorted[sorted.length - 1];
+    if (best.avg > 0 && worst.avg > best.avg * 1.5) {
+      insight = `${worst.branch} has ${(worst.avg / best.avg).toFixed(1)}x the average risk score compared to ${best.branch}.`;
+    } else {
+      const sortedComp = rows.slice().sort((a, b) => b.completionPct - a.completionPct);
+      insight = `${sortedComp[0].branch} has the highest completion rate at ${sortedComp[0].completionPct}%.`;
     }
   }
+
+  function compTone(p: number) {
+    if (p >= 80) return RISK_COLORS.LOW;
+    if (p >= 50) return RISK_COLORS.MEDIUM;
+    return RISK_COLORS.HIGH;
+  }
+
+  const sorted = rows.slice().sort((a, b) => b.avg - a.avg);
+
   return (
     <div className={cardCls}>
-      <div className="flex items-center justify-between">
-        <h3 className={titleCls}>Branches by risk</h3>
-        <span className="text-xs text-muted-foreground">avg score · % high</span>
-      </div>
+      <h3 className={titleCls}>Risk by branch</h3>
       {rows.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">No data yet.</p>
+        <p className="mt-4 text-sm text-muted-foreground">Data will populate as trainees complete check-ins.</p>
       ) : (
         <>
-          <ul className="mt-4 space-y-3">
-            {rows.slice(0, 8).map((r) => {
-              const highPct = r.total ? Math.round((r.high / r.total) * 100) : 0;
-              return (
-                <li key={r.branch}>
-                  <button
-                    onClick={() => onBranchClick?.(r.branch)}
-                    className="block w-full text-left"
-                  >
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-bold text-foreground">{r.branch}</span>
-                      <span className="text-xs text-muted-foreground tabular-nums">
-                        {r.avg.toFixed(1)} · {highPct}% high
-                      </span>
-                    </div>
-                    <div className="mt-1.5 flex h-2 overflow-hidden rounded-full bg-secondary">
-                      <div style={{ width: `${(r.low / max) * 100}%`, background: RISK_COLORS.LOW }} />
-                      <div style={{ width: `${(r.med / max) * 100}%`, background: RISK_COLORS.MEDIUM }} />
-                      <div style={{ width: `${(r.high / max) * 100}%`, background: RISK_COLORS.HIGH }} />
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-[10px] uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="py-2 pr-2">Branch</th>
+                  <th className="py-2 pr-2 text-right">Active</th>
+                  <th className="py-2 pr-2 text-right">Compl.</th>
+                  <th className="py-2 pr-2">Risk distribution</th>
+                  <th className="py-2 pr-2 text-right">Avg</th>
+                  <th className="py-2 text-right">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((r) => {
+                  const totalSeg = Math.max(1, r.high + r.med + r.low);
+                  return (
+                    <tr
+                      key={r.branch}
+                      onClick={() => onBranchClick?.(r.branch)}
+                      className="border-t border-border/40 cursor-pointer hover:bg-secondary/40"
+                    >
+                      <td className="py-2 pr-2 font-bold text-foreground">{r.branch}</td>
+                      <td className="py-2 pr-2 text-right tabular-nums">{r.active}</td>
+                      <td className="py-2 pr-2 text-right tabular-nums">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full" style={{ background: compTone(r.completionPct) }} />
+                          {r.completionPct}%
+                        </span>
+                      </td>
+                      <td className="py-2 pr-2 min-w-[120px]">
+                        <div className="flex h-2 overflow-hidden rounded-full bg-secondary/60">
+                          <div style={{ width: `${(r.low / totalSeg) * 100}%`, background: RISK_COLORS.LOW }} />
+                          <div style={{ width: `${(r.med / totalSeg) * 100}%`, background: RISK_COLORS.MEDIUM }} />
+                          <div style={{ width: `${(r.high / totalSeg) * 100}%`, background: RISK_COLORS.HIGH }} />
+                        </div>
+                      </td>
+                      <td className="py-2 pr-2 text-right tabular-nums font-bold">{r.avg.toFixed(1)}</td>
+                      <td className="py-2 text-right">
+                        {r.trend === "up" ? (
+                          <span style={{ color: RISK_COLORS.HIGH }}>↑</span>
+                        ) : r.trend === "down" ? (
+                          <span style={{ color: RISK_COLORS.LOW }}>↓</span>
+                        ) : (
+                          <span className="text-muted-foreground">→</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
           {insight && (
-            <p className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-xs font-bold text-destructive">
-              ⚠ {insight}
+            <p className="mt-3 rounded-xl border border-border/60 bg-secondary/40 p-2.5 text-xs text-foreground">
+              💡 {insight}
             </p>
           )}
         </>
@@ -372,7 +460,7 @@ export function ManagerView({
   );
 }
 
-/** Recent critical alerts feed */
+/** Recent critical alerts feed — fixed-height scrollable */
 export function CriticalAlertsFeed({
   alerts,
   onClick,
@@ -380,29 +468,46 @@ export function CriticalAlertsFeed({
   alerts: { id: string; name: string; branch: string; stage: number; flag: string; daysAgo: number; employeeId: string }[];
   onClick?: (employeeId: string) => void;
 }) {
+  function relTime(d: number) {
+    if (d <= 0) return "today";
+    if (d === 1) return "1 day ago";
+    if (d < 7) return `${d} days ago`;
+    const w = Math.round(d / 7);
+    return w === 1 ? "1 week ago" : `${w} weeks ago`;
+  }
   return (
     <div className={cardCls}>
-      <h3 className={titleCls}>Recent critical alerts</h3>
+      <div className="flex items-center justify-between">
+        <h3 className={titleCls}>🚨 Critical alerts</h3>
+        {alerts.length > 0 && (
+          <span className="text-[10px] font-bold text-destructive">{alerts.length}</span>
+        )}
+      </div>
       {alerts.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">No active critical flags. 🎉</p>
+        <p className="mt-4 text-sm text-muted-foreground">No critical flags raised — all clear 🎉</p>
       ) : (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-3 max-h-[420px] space-y-2 overflow-y-auto pr-1">
           {alerts.slice(0, 15).map((a) => (
             <li key={a.id}>
               <button
                 onClick={() => onClick?.(a.employeeId)}
                 className="block w-full rounded-2xl border border-destructive/20 bg-destructive/5 p-3 text-left hover:bg-destructive/10"
               >
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="font-bold text-foreground">{a.name}</span>
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    {a.daysAgo === 0 ? "today" : `${a.daysAgo}d ago`}
-                  </span>
+                <div className="flex items-start gap-2">
+                  <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-destructive" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="truncate font-bold text-foreground">{a.name}</span>
+                      <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {relTime(a.daysAgo)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {a.branch} · Day {a.stage}
+                    </p>
+                    <p className="mt-0.5 text-xs font-bold text-destructive">"{a.flag}"</p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {a.branch} · Day {a.stage}
-                </p>
-                <p className="mt-1 text-xs font-bold text-destructive">"{a.flag}"</p>
               </button>
             </li>
           ))}
@@ -418,30 +523,48 @@ export function OrgPulseDonut({
 }: {
   data: { name: string; value: number }[];
 }) {
-  const COLORS = ["#2563EB", "#7C3AED", "#0D9488", "#D4820C", "#2D8B4E", "#DC2626"];
+  // Per spec colors:
+  // Better trainers = purple, More structured = blue, Prepare for field = teal,
+  // Fix aggressive = red, Training is solid = green
+  const COLOR_BY_NAME: Record<string, string> = {
+    "Better trainers / more investment": "#7C3AED",
+    "More structured assessments": "#2563EB",
+    "Prepare for field reality": "#0D9488",
+    "Fix aggressive culture": "#DC2626",
+    "Training is solid": "#2D8B4E",
+  };
+  const FALLBACK = ["#7C3AED", "#2563EB", "#0D9488", "#DC2626", "#2D8B4E", "#D4820C"];
   const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) return null; // hide entirely per spec
   return (
     <div className={cardCls}>
-      <h3 className={titleCls}>What trainees want leadership to know</h3>
-      {total === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">
-          Pulse insights appear once Day 90 / Day 180 surveys come in.
+      <div>
+        <h3 className={titleCls}>What trainees want leadership to know</h3>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          Aggregated from Day 90 & Day 180 feedback
         </p>
-      ) : (
-        <div className="h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                innerRadius={45} outerRadius={80} paddingAngle={2}
-                stroke="hsl(var(--card))" strokeWidth={3}>
-                {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Pie>
-              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
-              <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-            </PieChart>
-          </ResponsiveContainer>
+      </div>
+      <div className="relative h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%"
+              innerRadius={55} outerRadius={85} paddingAngle={2}
+              stroke="hsl(var(--card))" strokeWidth={3}
+              label={(p: any) => `${Math.round((p.value / total) * 100)}%`}
+              labelLine={false}>
+              {data.map((d, i) => (
+                <Cell key={i} fill={COLOR_BY_NAME[d.name] ?? FALLBACK[i % FALLBACK.length]} />
+              ))}
+            </Pie>
+            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+            <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-2xl font-extrabold text-foreground">{total}</span>
+          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">responses</span>
         </div>
-      )}
+      </div>
     </div>
   );
 }
