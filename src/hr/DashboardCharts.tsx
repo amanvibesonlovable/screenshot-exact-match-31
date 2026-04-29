@@ -460,7 +460,7 @@ export function ManagerView({
   );
 }
 
-/** Recent critical alerts feed */
+/** Recent critical alerts feed — fixed-height scrollable */
 export function CriticalAlertsFeed({
   alerts,
   onClick,
@@ -468,29 +468,46 @@ export function CriticalAlertsFeed({
   alerts: { id: string; name: string; branch: string; stage: number; flag: string; daysAgo: number; employeeId: string }[];
   onClick?: (employeeId: string) => void;
 }) {
+  function relTime(d: number) {
+    if (d <= 0) return "today";
+    if (d === 1) return "1 day ago";
+    if (d < 7) return `${d} days ago`;
+    const w = Math.round(d / 7);
+    return w === 1 ? "1 week ago" : `${w} weeks ago`;
+  }
   return (
     <div className={cardCls}>
-      <h3 className={titleCls}>Recent critical alerts</h3>
+      <div className="flex items-center justify-between">
+        <h3 className={titleCls}>🚨 Critical alerts</h3>
+        {alerts.length > 0 && (
+          <span className="text-[10px] font-bold text-destructive">{alerts.length}</span>
+        )}
+      </div>
       {alerts.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">No active critical flags. 🎉</p>
+        <p className="mt-4 text-sm text-muted-foreground">No critical flags raised — all clear 🎉</p>
       ) : (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-3 max-h-[420px] space-y-2 overflow-y-auto pr-1">
           {alerts.slice(0, 15).map((a) => (
             <li key={a.id}>
               <button
                 onClick={() => onClick?.(a.employeeId)}
                 className="block w-full rounded-2xl border border-destructive/20 bg-destructive/5 p-3 text-left hover:bg-destructive/10"
               >
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="font-bold text-foreground">{a.name}</span>
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    {a.daysAgo === 0 ? "today" : `${a.daysAgo}d ago`}
-                  </span>
+                <div className="flex items-start gap-2">
+                  <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-destructive" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="truncate font-bold text-foreground">{a.name}</span>
+                      <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {relTime(a.daysAgo)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {a.branch} · Day {a.stage}
+                    </p>
+                    <p className="mt-0.5 text-xs font-bold text-destructive">"{a.flag}"</p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {a.branch} · Day {a.stage}
-                </p>
-                <p className="mt-1 text-xs font-bold text-destructive">"{a.flag}"</p>
               </button>
             </li>
           ))}
@@ -506,30 +523,48 @@ export function OrgPulseDonut({
 }: {
   data: { name: string; value: number }[];
 }) {
-  const COLORS = ["#2563EB", "#7C3AED", "#0D9488", "#D4820C", "#2D8B4E", "#DC2626"];
+  // Per spec colors:
+  // Better trainers = purple, More structured = blue, Prepare for field = teal,
+  // Fix aggressive = red, Training is solid = green
+  const COLOR_BY_NAME: Record<string, string> = {
+    "Better trainers / more investment": "#7C3AED",
+    "More structured assessments": "#2563EB",
+    "Prepare for field reality": "#0D9488",
+    "Fix aggressive culture": "#DC2626",
+    "Training is solid": "#2D8B4E",
+  };
+  const FALLBACK = ["#7C3AED", "#2563EB", "#0D9488", "#DC2626", "#2D8B4E", "#D4820C"];
   const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) return null; // hide entirely per spec
   return (
     <div className={cardCls}>
-      <h3 className={titleCls}>What trainees want leadership to know</h3>
-      {total === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">
-          Pulse insights appear once Day 90 / Day 180 surveys come in.
+      <div>
+        <h3 className={titleCls}>What trainees want leadership to know</h3>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          Aggregated from Day 90 & Day 180 feedback
         </p>
-      ) : (
-        <div className="h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                innerRadius={45} outerRadius={80} paddingAngle={2}
-                stroke="hsl(var(--card))" strokeWidth={3}>
-                {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Pie>
-              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
-              <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-            </PieChart>
-          </ResponsiveContainer>
+      </div>
+      <div className="relative h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%"
+              innerRadius={55} outerRadius={85} paddingAngle={2}
+              stroke="hsl(var(--card))" strokeWidth={3}
+              label={(p: any) => `${Math.round((p.value / total) * 100)}%`}
+              labelLine={false}>
+              {data.map((d, i) => (
+                <Cell key={i} fill={COLOR_BY_NAME[d.name] ?? FALLBACK[i % FALLBACK.length]} />
+              ))}
+            </Pie>
+            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+            <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-2xl font-extrabold text-foreground">{total}</span>
+          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">responses</span>
         </div>
-      )}
+      </div>
     </div>
   );
 }
