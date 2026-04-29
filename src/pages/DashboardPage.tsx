@@ -114,6 +114,8 @@ function DashboardInner() {
   const [gamingFilter, setGamingFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [grouping, setGrouping] = useState<"flat" | "branch" | "manager">("flat");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState("Called trainee");
 
   const [showUpload, setShowUpload] = useState(false);
   const [seeding, setSeeding] = useState(false);
