@@ -637,6 +637,13 @@ function DashboardInner() {
                 {label}
               </button>
             ))}
+            <div className="my-2 h-px bg-border/60" />
+            <Link
+              to="/dashboard/scoring"
+              className="block w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+            >
+              Scoring Framework
+            </Link>
           </nav>
         </aside>
 
