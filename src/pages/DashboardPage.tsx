@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useHrAuth } from "@/hr/useHrAuth";
 import RequireHr from "@/hr/RequireHr";
+import {
+  BranchLeaderboard,
+  RiskDonut,
+  RiskTrendChart,
+  StageBreakdown,
+} from "@/hr/DashboardCharts";
 
 type Employee = {
   id: string;
