@@ -197,41 +197,87 @@ export function CompletionFunnel({
   );
 }
 
-/** Risk heatmap by 5 dimensions — horizontal gauges with avg score. */
+/** Risk heatmap by 5 dimensions — prominent horizontal bars with risk badges. */
 export function DimensionHeatmap({
   rows,
 }: {
-  rows: { key: string; label: string; avg: number; max: number }[];
+  rows: { key: string; label: string; avg: number; max: number; hasData: boolean }[];
 }) {
-  const top = rows.slice().sort((a, b) => b.avg - a.avg)[0];
+  // Sort by avg desc, but keep "no data" rows at the end
+  const sorted = rows.slice().sort((a, b) => {
+    if (a.hasData !== b.hasData) return a.hasData ? -1 : 1;
+    return b.avg - a.avg;
+  });
+  const top = sorted.find((r) => r.hasData);
+  function levelFor(avg: number): "LOW" | "MEDIUM" | "HIGH" {
+    // Per-dimension max is 25 in scoring — bands roughly mirror final-score bands scaled down
+    if (avg >= 6) return "HIGH";
+    if (avg >= 3) return "MEDIUM";
+    return "LOW";
+  }
   return (
     <div className={cardCls}>
       <div className="flex items-center justify-between">
-        <h3 className={titleCls}>Risk by dimension</h3>
-        {top && (
-          <span className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
-            Primary driver: {top.label}
-          </span>
-        )}
+        <div>
+          <h3 className={titleCls}>Where the pressure is</h3>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            Average scores across all latest check-ins. Higher = more concern.
+          </p>
+        </div>
       </div>
-      <ul className="mt-4 space-y-3">
-        {rows.map((r) => {
+      <ul className="mt-4 space-y-3.5">
+        {sorted.map((r, i) => {
           const pct = r.max ? Math.min(100, Math.round((r.avg / r.max) * 100)) : 0;
+          const level = levelFor(r.avg);
+          const isPrimary = r.hasData && i === 0;
           return (
             <li key={r.key}>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-foreground">{r.label}</span>
-                <span className="tabular-nums text-muted-foreground">
-                  {r.avg.toFixed(1)} avg
+                <span className={`font-bold ${isPrimary ? "text-foreground" : "text-foreground"}`}>
+                  {r.label}
+                  {isPrimary && (
+                    <span className="ml-2 rounded-full border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive">
+                      ← Primary concern
+                    </span>
+                  )}
+                </span>
+                <span className="flex items-center gap-2 tabular-nums">
+                  {r.hasData ? (
+                    <>
+                      <span className="text-muted-foreground">{r.avg.toFixed(1)}</span>
+                      <span
+                        className="rounded-full px-1.5 py-0.5 text-[10px] font-extrabold"
+                        style={{
+                          background: `${RISK_COLORS[level]}22`,
+                          color: RISK_COLORS[level],
+                        }}
+                      >
+                        {level}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground">Not enough data yet</span>
+                  )}
                 </span>
               </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-secondary">
-                <div style={{ width: `${pct}%`, background: DIM_COLORS[r.key] }} className="h-full" />
+              <div className={`mt-1.5 h-3 overflow-hidden rounded-full ${r.hasData ? "bg-secondary" : "bg-secondary/40"}`}>
+                <div
+                  style={{
+                    width: `${pct}%`,
+                    background: r.hasData ? DIM_COLORS[r.key] : "hsl(var(--muted-foreground) / 0.3)",
+                  }}
+                  className="h-full"
+                />
               </div>
             </li>
           );
         })}
       </ul>
+      {top && (
+        <p className="mt-4 text-[11px] text-muted-foreground">
+          Biggest systemic concern: <span className="font-bold text-foreground">{top.label}</span>.
+        </p>
+      )}
     </div>
   );
 }
