@@ -8,6 +8,9 @@ import {
   ListChecks,
   Upload,
   Settings,
+  MapPin,
+  UserCog,
+  FileText,
 } from "lucide-react";
 
 type Item = {
