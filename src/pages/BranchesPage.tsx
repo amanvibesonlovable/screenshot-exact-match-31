@@ -345,6 +345,7 @@ function BranchesInner() {
                         </tr>
                       </thead>
                       <tbody>
+                        {managerRows.map((m) => (
                           <tr key={m.mgr}
                             className={`border-t border-border/40 ${m.flag ? "bg-destructive/5" : ""}`}>
                             <td className="px-2 py-2 font-bold text-foreground">{m.mgr}</td>
