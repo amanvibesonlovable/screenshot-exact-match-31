@@ -53,27 +53,34 @@ function FilterChip({
   );
 }
 
-function Kpi({
-  label, value, tone, onClick, glow,
-}: {
-  label: string; value: number | string;
-  tone?: "high" | "med" | "low" | "default";
-  onClick?: () => void; glow?: boolean;
-}) {
-  const toneClass =
-    tone === "high" ? "text-destructive"
-    : tone === "med" ? "text-amber-600 dark:text-amber-400"
-    : tone === "low" ? "text-emerald-600 dark:text-emerald-400"
-    : "text-foreground";
+type KpiTone = "neutral" | "ok" | "warn" | "bad";
+
+function kpiCardCls(tone: KpiTone, clickable: boolean, glow: boolean) {
+  const base =
+    "text-left rounded-2xl border p-4 shadow-bubble backdrop-blur transition";
+  const toneCls =
+    tone === "ok" ? "border-emerald-500/30 bg-emerald-500/10"
+    : tone === "warn" ? "border-amber-500/30 bg-amber-500/10"
+    : tone === "bad" ? "border-destructive/40 bg-destructive/10 border-l-4 border-l-destructive"
+    : "border-border/60 bg-card/80";
+  const interactive = clickable ? "hover:-translate-y-0.5 hover:shadow-lg cursor-pointer" : "";
+  const glowCls = glow ? "ring-2 ring-destructive/50 animate-pulse" : "";
+  return `${base} ${toneCls} ${interactive} ${glowCls}`;
+}
+
+/** Simple circular completion ring */
+function Ring({ pct, color, size = 44 }: { pct: number; color: string; size?: number }) {
+  const stroke = 5;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c - (Math.min(100, Math.max(0, pct)) / 100) * c;
   return (
-    <button
-      onClick={onClick}
-      disabled={!onClick}
-      className={`text-left rounded-3xl border border-border/60 bg-card/80 p-4 shadow-bubble backdrop-blur transition ${onClick ? "hover:-translate-y-0.5 hover:shadow-lg cursor-pointer" : ""} ${glow ? "ring-2 ring-destructive/40 animate-pulse" : ""}`}
-    >
-      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className={`mt-1 text-3xl font-extrabold tabular-nums ${toneClass}`}>{value}</p>
-    </button>
+    <svg width={size} height={size} className="shrink-0">
+      <circle cx={size / 2} cy={size / 2} r={r} stroke="hsl(var(--secondary))" strokeWidth={stroke} fill="none" />
+      <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={stroke} fill="none"
+        strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+    </svg>
   );
 }
 
