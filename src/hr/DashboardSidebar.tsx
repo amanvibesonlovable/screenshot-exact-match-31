@@ -7,9 +7,7 @@ import {
   CheckCircle2,
   ListChecks,
   Upload,
-  Settings,
   MapPin,
-  UserCog,
   FileText,
 } from "lucide-react";
 
@@ -80,9 +78,9 @@ export function DashboardSidebar() {
                   <li key={item.to}>
                     <Link
                       to={item.to}
-                      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition ${
+                      className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-gradient-brand text-primary-foreground shadow-soft"
+                          ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                       }`}
                     >
@@ -106,15 +104,15 @@ export function DashboardHeader({
   rightSlot?: React.ReactNode;
 }) {
   return (
-    <header className="border-b border-border/60 bg-card/70 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand text-xl font-extrabold text-primary-foreground shadow-soft">
-            ✦
+    <header className="border-b border-border bg-card">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
+        <Link to="/dashboard" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+            P
           </div>
           <div>
-            <p className="text-lg font-extrabold tracking-tight text-foreground">Pulse · HR</p>
-            <p className="text-xs text-muted-foreground">Early warning &amp; training effectiveness</p>
+            <p className="text-base font-semibold tracking-tight text-foreground">Pulse · HR</p>
+            <p className="text-[11px] text-muted-foreground">Early warning &amp; training effectiveness</p>
           </div>
         </Link>
         <div className="flex items-center gap-2">{rightSlot}</div>
