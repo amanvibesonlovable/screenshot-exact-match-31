@@ -1,11 +1,12 @@
+import { useState } from "react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
   Legend,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -76,26 +77,54 @@ export function RiskDonut({
 export function RiskTrendChart({
   data,
 }: {
-  data: { date: string; HIGH: number; MEDIUM: number; LOW: number }[];
+  data: { week: string; HIGH: number; MEDIUM: number; LOW: number }[];
 }) {
+  const [mode, setMode] = useState<"count" | "pct">("count");
+  const display = mode === "count"
+    ? data
+    : data.map((d) => {
+        const total = d.HIGH + d.MEDIUM + d.LOW || 1;
+        return {
+          week: d.week,
+          HIGH: Math.round((d.HIGH / total) * 100),
+          MEDIUM: Math.round((d.MEDIUM / total) * 100),
+          LOW: Math.round((d.LOW / total) * 100),
+        };
+      });
+  const empty = data.every((d) => d.HIGH + d.MEDIUM + d.LOW === 0);
   return (
     <div className={`${cardCls} lg:col-span-2`}>
       <div className="flex items-center justify-between">
-        <h3 className={titleCls}>Risk trend (last 30 days)</h3>
+        <h3 className={titleCls}>Risk distribution over time (weekly)</h3>
+        <div className="flex rounded-full border border-border p-0.5 text-[10px] font-bold">
+          {(["count", "pct"] as const).map((m) => (
+            <button key={m} onClick={() => setMode(m)}
+              className={`rounded-full px-2.5 py-0.5 ${mode === m ? "bg-foreground text-background" : "text-muted-foreground"}`}>
+              {m === "count" ? "Count" : "%"}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
-            <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
-            <Line type="monotone" dataKey="HIGH" stroke={RISK_COLORS.HIGH} strokeWidth={2.5} dot={false} />
-            <Line type="monotone" dataKey="MEDIUM" stroke={RISK_COLORS.MEDIUM} strokeWidth={2.5} dot={false} />
-            <Line type="monotone" dataKey="LOW" stroke={RISK_COLORS.LOW} strokeWidth={2.5} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
+        {empty ? (
+          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+            No survey responses yet — chart will populate as trainees check in.
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={display} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                tickFormatter={(v) => mode === "pct" ? `${v}%` : v} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
+              <Area type="monotone" dataKey="LOW" stackId="1" stroke={RISK_COLORS.LOW} fill={RISK_COLORS.LOW} fillOpacity={0.7} />
+              <Area type="monotone" dataKey="MEDIUM" stackId="1" stroke={RISK_COLORS.MEDIUM} fill={RISK_COLORS.MEDIUM} fillOpacity={0.7} />
+              <Area type="monotone" dataKey="HIGH" stackId="1" stroke={RISK_COLORS.HIGH} fill={RISK_COLORS.HIGH} fillOpacity={0.8} />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
