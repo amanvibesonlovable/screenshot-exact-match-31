@@ -48,6 +48,38 @@ function riskClasses(level: string) {
   }
 }
 
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+  renderOption,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  renderOption?: (v: string) => string;
+}) {
+  return (
+    <label className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs">
+      <span className="font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-transparent text-foreground focus:outline-none"
+      >
+        <option value="ALL">All</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {renderOption ? renderOption(o) : o}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function DashboardInner() {
   const { user } = useHrAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -554,37 +586,6 @@ function DashboardInner() {
   );
 }
 
-function FilterSelect({
-  label,
-  value,
-  onChange,
-  options,
-  renderOption,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-  renderOption?: (v: string) => string;
-}) {
-  return (
-    <label className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs">
-      <span className="font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="bg-transparent text-foreground focus:outline-none"
-      >
-        <option value="ALL">All</option>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {renderOption ? renderOption(o) : o}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
 
 function Kpi({
   label,
