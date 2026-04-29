@@ -36,14 +36,13 @@ const GROUPS: Group[] = [
     items: [
       { label: "Overview", to: "/dashboard?tab=overview", icon: <LayoutDashboard size={15} />, match: dashTab("overview") },
       { label: "Trainees", to: "/dashboard?tab=trainees", icon: <Users size={15} />, match: dashTab("trainees") },
-      { label: "Branches", to: "/dashboard/branches", icon: <MapPin size={15} />, match: has("/dashboard/branches") },
-      { label: "Managers", to: "/dashboard/managers", icon: <UserCog size={15} />, match: has("/dashboard/managers") },
     ],
   },
   {
     label: "Analyze",
     items: [
       { label: "Analytics", to: "/dashboard/analytics", icon: <TrendingUp size={15} />, match: has("/dashboard/analytics") },
+      { label: "Branches", to: "/dashboard/branches", icon: <MapPin size={15} />, match: has("/dashboard/branches") },
     ],
   },
   {
@@ -59,7 +58,6 @@ const GROUPS: Group[] = [
     items: [
       { label: "Scoring Framework", to: "/dashboard/scoring", icon: <ListChecks size={15} />, match: has("/dashboard/scoring") },
       { label: "Upload", to: "/dashboard?tab=upload", icon: <Upload size={15} />, match: dashTab("upload") },
-      { label: "Settings", to: "/dashboard?tab=settings", icon: <Settings size={15} />, match: dashTab("settings") },
     ],
   },
 ];
