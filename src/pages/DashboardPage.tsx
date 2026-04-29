@@ -93,27 +93,43 @@ function DashboardInner() {
   const [managerFilter, setManagerFilter] = useState<string>("ALL");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
   const [selected, setSelected] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const refresh = async () => {
+    setLoading(true);
+    const [{ data: emp }, { data: resp }] = await Promise.all([
+      supabase.from("employees").select("*").order("created_at", { ascending: false }),
+      supabase
+        .from("survey_responses")
+        .select("*")
+        .order("submitted_at", { ascending: false }),
+    ]);
+    setEmployees((emp ?? []) as Employee[]);
+    setResponses((resp ?? []) as unknown as SurveyResponse[]);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const [{ data: emp }, { data: resp }] = await Promise.all([
-        supabase.from("employees").select("*").order("created_at", { ascending: false }),
-        supabase
-          .from("survey_responses")
-          .select("*")
-          .order("submitted_at", { ascending: false }),
-      ]);
-      if (cancelled) return;
-      setEmployees((emp ?? []) as Employee[]);
-      setResponses((resp ?? []) as unknown as SurveyResponse[]);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    const res = await seedDemoTrainees(12);
+    setSeeding(false);
+    if (res.error) {
+      setToast(`Seed failed: ${res.error}`);
+    } else {
+      setToast(
+        `Seeded ${res.insertedEmployees} trainees and ${res.insertedResponses} responses`
+      );
+      await refresh();
+    }
+    setTimeout(() => setToast(null), 4000);
+  };
 
   // Latest response per employee
   const latestByEmp = useMemo(() => {
