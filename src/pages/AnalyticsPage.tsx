@@ -153,8 +153,8 @@ function AnalyticsInner() {
             if (v !== null && v !== undefined) { sum += Number(v); n++; }
           }
         }
-        // Normalize to 0-10 scale (raw is 0..25 generally) — but PRD says 0-10
-        const avg = n ? (sum / n) / 2.5 : null;
+        // Use raw per-dimension averages (already on 0-10ish scale)
+        const avg = n ? Math.round((sum / n) * 10) / 10 : null;
         return { week: b.key, value: avg };
       });
       // Current avg (latest non-null)
