@@ -13,6 +13,9 @@ import ScoringFrameworkPage from "./pages/ScoringFrameworkPage.tsx";
 import AnalyticsPage from "./pages/AnalyticsPage.tsx";
 import ResponsesPage from "./pages/ResponsesPage.tsx";
 import ActionsPage from "./pages/ActionsPage.tsx";
+import BranchesPage from "./pages/BranchesPage.tsx";
+import ManagersPage from "./pages/ManagersPage.tsx";
+import ReportsPage from "./pages/ReportsPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,9 @@ const App = () => (
           <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
           <Route path="/dashboard/responses" element={<ResponsesPage />} />
           <Route path="/dashboard/actions" element={<ActionsPage />} />
+          <Route path="/dashboard/branches" element={<BranchesPage />} />
+          <Route path="/dashboard/managers" element={<ManagersPage />} />
+          <Route path="/dashboard/reports" element={<ReportsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

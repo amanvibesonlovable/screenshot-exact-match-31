@@ -8,6 +8,9 @@ import {
   ListChecks,
   Upload,
   Settings,
+  MapPin,
+  UserCog,
+  FileText,
 } from "lucide-react";
 
 type Item = {
@@ -33,6 +36,8 @@ const GROUPS: Group[] = [
     items: [
       { label: "Overview", to: "/dashboard?tab=overview", icon: <LayoutDashboard size={15} />, match: dashTab("overview") },
       { label: "Trainees", to: "/dashboard?tab=trainees", icon: <Users size={15} />, match: dashTab("trainees") },
+      { label: "Branches", to: "/dashboard/branches", icon: <MapPin size={15} />, match: has("/dashboard/branches") },
+      { label: "Managers", to: "/dashboard/managers", icon: <UserCog size={15} />, match: has("/dashboard/managers") },
     ],
   },
   {
@@ -46,6 +51,7 @@ const GROUPS: Group[] = [
     items: [
       { label: "Responses", to: "/dashboard/responses", icon: <MessageSquare size={15} />, match: has("/dashboard/responses") },
       { label: "Actions", to: "/dashboard/actions", icon: <CheckCircle2 size={15} />, match: has("/dashboard/actions") },
+      { label: "Reports", to: "/dashboard/reports", icon: <FileText size={15} />, match: has("/dashboard/reports") },
     ],
   },
   {
