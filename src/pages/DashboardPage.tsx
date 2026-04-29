@@ -11,10 +11,7 @@ import {
   DIM_LABELS,
   ManagerView,
   OrgPulseDonut,
-  RISK_COLORS,
-  RiskDonut,
   RiskTrendChart,
-  StageBreakdown,
 } from "@/hr/DashboardCharts";
 import { TraineeCard, TraineeCardData } from "@/hr/TraineeCard";
 import CsvUploadModal from "@/hr/CsvUploadModal";
