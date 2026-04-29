@@ -255,13 +255,13 @@ function ResponsesInner() {
                               </td>
                             </tr>
                             {isOpen && (
-                              <tr key={`${r.id}-d`} className="border-t border-border/40 bg-background/30">
+                              <tr className="border-t border-border/40 bg-background/30">
                                 <td colSpan={11} className="p-4">
                                   <ResponseDetail response={r} employee={e} />
                                 </td>
                               </tr>
                             )}
-                          </>
+                          </FragmentWithKey>
                         );
                       })}
                     </tbody>
