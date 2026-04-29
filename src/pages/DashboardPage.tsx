@@ -9,6 +9,8 @@ import {
   RiskTrendChart,
   StageBreakdown,
 } from "@/hr/DashboardCharts";
+import CsvUploadModal from "@/hr/CsvUploadModal";
+import { seedDemoTrainees } from "@/hr/seed";
 
 type Employee = {
   id: string;
@@ -91,27 +93,43 @@ function DashboardInner() {
   const [managerFilter, setManagerFilter] = useState<string>("ALL");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
   const [selected, setSelected] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const refresh = async () => {
+    setLoading(true);
+    const [{ data: emp }, { data: resp }] = await Promise.all([
+      supabase.from("employees").select("*").order("created_at", { ascending: false }),
+      supabase
+        .from("survey_responses")
+        .select("*")
+        .order("submitted_at", { ascending: false }),
+    ]);
+    setEmployees((emp ?? []) as Employee[]);
+    setResponses((resp ?? []) as unknown as SurveyResponse[]);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const [{ data: emp }, { data: resp }] = await Promise.all([
-        supabase.from("employees").select("*").order("created_at", { ascending: false }),
-        supabase
-          .from("survey_responses")
-          .select("*")
-          .order("submitted_at", { ascending: false }),
-      ]);
-      if (cancelled) return;
-      setEmployees((emp ?? []) as Employee[]);
-      setResponses((resp ?? []) as unknown as SurveyResponse[]);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    const res = await seedDemoTrainees(12);
+    setSeeding(false);
+    if (res.error) {
+      setToast(`Seed failed: ${res.error}`);
+    } else {
+      setToast(
+        `Seeded ${res.insertedEmployees} trainees and ${res.insertedResponses} responses`
+      );
+      await refresh();
+    }
+    setTimeout(() => setToast(null), 4000);
+  };
 
   // Latest response per employee
   const latestByEmp = useMemo(() => {
@@ -291,8 +309,21 @@ function DashboardInner() {
               <p className="text-xs text-muted-foreground">Early warning dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSeed}
+              disabled={seeding}
+              className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary disabled:opacity-50"
+            >
+              {seeding ? "Seeding…" : "Seed demo trainees"}
+            </button>
+            <button
+              onClick={() => setShowUpload(true)}
+              className="rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-soft hover:-translate-y-0.5 transition"
+            >
+              Upload CSV
+            </button>
+            <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
             <button
               onClick={() => supabase.auth.signOut()}
               className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary"
@@ -580,6 +611,16 @@ function DashboardInner() {
               </code>
             </div>
           </aside>
+        </div>
+      )}
+      <CsvUploadModal
+        open={showUpload}
+        onClose={() => setShowUpload(false)}
+        onUploaded={refresh}
+      />
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-5 py-2.5 text-sm font-bold text-background shadow-lg">
+          {toast}
         </div>
       )}
     </main>
