@@ -198,6 +198,22 @@ function DashboardInner() {
     return m;
   }, [responses]);
 
+  // === Overview-tab filtered datasets (driven by OverviewFilterBar) ===
+  const oEmployees = useMemo(
+    () => employees.filter((e) => employeeMatchesBranch(e.branch, overviewFilters)),
+    [employees, overviewFilters],
+  );
+  const oEmpIdSet = useMemo(() => new Set(oEmployees.map((e) => e.id)), [oEmployees]);
+  const oResponses = useMemo(
+    () => responses.filter((r) => oEmpIdSet.has(r.employee_id) && responseMatchesFilters(r, overviewFilters)),
+    [responses, oEmpIdSet, overviewFilters],
+  );
+  const oLatest = useMemo(() => {
+    const m = new Map<string, SurveyResponse>();
+    for (const r of oResponses) if (!m.has(r.employee_id)) m.set(r.employee_id, r);
+    return m;
+  }, [oResponses]);
+
   // KPIs
   const kpis = useMemo(() => {
     let high = 0, med = 0, low = 0, gaming = 0, critical = 0, scoreSum = 0, scoreN = 0;
