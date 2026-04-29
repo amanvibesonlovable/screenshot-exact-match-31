@@ -87,7 +87,7 @@ export function TraineeCard({
   return (
     <div className={`rounded-3xl border ${selected ? "border-primary ring-2 ring-primary/30" : "border-border/60"} bg-card/80 p-5 shadow-bubble backdrop-blur`}>
       <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-2">
+        <div className="flex items-start gap-2 min-w-0">
           {onToggleSelect && (
             <input
               type="checkbox"
@@ -97,32 +97,33 @@ export function TraineeCard({
               aria-label={`Select ${employee.name}`}
             />
           )}
-          <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-extrabold text-foreground">{employee.name}</h3>
-            {trend && (
-              <span
-                className="text-xs font-bold"
-                style={{
-                  color:
-                    trend === "WORSENING" ? RISK_COLORS.HIGH :
-                    trend === "IMPROVING" ? RISK_COLORS.LOW :
-                    "hsl(var(--muted-foreground))",
-                }}
-              >
-                {trend === "WORSENING" ? "↗ worsening" : trend === "IMPROVING" ? "↘ improving" : "→ stable"}
-              </span>
-            )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-extrabold text-foreground">{employee.name}</h3>
+              {trend && (
+                <span
+                  className="text-xs font-bold"
+                  style={{
+                    color:
+                      trend === "WORSENING" ? RISK_COLORS.HIGH :
+                      trend === "IMPROVING" ? RISK_COLORS.LOW :
+                      "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  {trend === "WORSENING" ? "↗ worsening" : trend === "IMPROVING" ? "↘ improving" : "→ stable"}
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {employee.employee_code} · {employee.branch} · {employee.area_manager}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              DOJ {employee.doj} · day {daysSince}
+            </p>
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {employee.employee_code} · {employee.branch} · {employee.area_manager}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            DOJ {employee.doj} · day {daysSince}
-          </p>
         </div>
         <span
-          className="rounded-full px-3 py-1 text-xs font-extrabold uppercase"
+          className="rounded-full px-3 py-1 text-xs font-extrabold uppercase whitespace-nowrap"
           style={riskBadgeStyle(latest?.risk_level)}
         >
           {latest ? latest.risk_level : "no data"}
@@ -186,17 +187,51 @@ export function TraineeCard({
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <Link
-          to={`/dashboard/trainees/${employee.id}`}
-          className="rounded-full bg-gradient-brand px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-soft hover:-translate-y-0.5 transition"
-        >
-          View full responses →
-        </Link>
-        <code className="truncate rounded bg-secondary px-2 py-1 text-[10px] text-muted-foreground">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/dashboard/trainees/${employee.id}`}
+            className="rounded-full bg-gradient-brand px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-soft hover:-translate-y-0.5 transition"
+          >
+            View →
+          </Link>
+          <button
+            onClick={() => setActionOpen((v) => !v)}
+            className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-bold text-foreground hover:bg-secondary"
+          >
+            {actionOpen ? "Cancel" : "Mark action"}
+          </button>
+        </div>
+        <code className="truncate rounded bg-secondary px-2 py-1 text-[10px] text-muted-foreground max-w-[160px]">
           /s/{employee.token}
         </code>
       </div>
+
+      {actionOpen && (
+        <div className="mt-3 rounded-2xl border border-border/60 bg-background/60 p-3">
+          <select
+            value={actionType}
+            onChange={(e) => setActionType(e.target.value)}
+            className="w-full rounded-lg border border-border bg-background p-1.5 text-xs"
+          >
+            {ACTION_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+          </select>
+          <textarea
+            value={actionNote}
+            onChange={(e) => setActionNote(e.target.value)}
+            placeholder="Optional note…"
+            rows={2}
+            className="mt-2 w-full rounded-lg border border-border bg-background p-1.5 text-xs"
+          />
+          <button
+            onClick={logAction}
+            disabled={logging}
+            className="mt-2 w-full rounded-full bg-foreground px-3 py-1.5 text-xs font-bold text-background disabled:opacity-50"
+          >
+            {logging ? "Logging…" : "Log action"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
