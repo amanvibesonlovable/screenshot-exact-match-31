@@ -1,5 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { DIM_COLORS, DIM_LABELS, RISK_COLORS } from "./DashboardCharts";
+
+const ACTION_OPTIONS = [
+  "Called trainee",
+  "Spoke to manager",
+  "Scheduled check-in",
+  "Escalated to senior HR",
+  "Custom note",
+];
 
 type Stage = 15 | 30 | 45 | 60 | 90 | 180;
 const STAGES: Stage[] = [15, 30, 45, 60, 90, 180];
