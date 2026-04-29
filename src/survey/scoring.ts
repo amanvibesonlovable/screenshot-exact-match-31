@@ -105,9 +105,9 @@ export function scoreSurvey(
 
   dims.final_score = Math.round(dims.composite * dims.stage_multiplier * 10) / 10;
 
-  // Risk level thresholds — calibrated for Day 15 ranges; tune later per survey if needed.
-  if (dims.final_score >= 18 || criticalFlags.length > 0) dims.risk_level = "HIGH";
-  else if (dims.final_score >= 9) dims.risk_level = "MEDIUM";
+  // PRD risk levels: LOW 0-10, MEDIUM 11-22, HIGH 23+ (or any critical flag)
+  if (criticalFlags.length > 0 || dims.final_score >= 23) dims.risk_level = "HIGH";
+  else if (dims.final_score >= 11) dims.risk_level = "MEDIUM";
   else dims.risk_level = "LOW";
 
   // Gaming detection: ALL static-single answers are index 0 AND completion < 45s
