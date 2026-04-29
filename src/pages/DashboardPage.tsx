@@ -607,15 +607,18 @@ function DashboardInner() {
   };
 
   return (
-    <main className="min-h-dvh bg-gradient-warm">
+    <main className="min-h-dvh bg-background">
       <DashboardHeader
         rightSlot={
           <>
-            <button onClick={handleSeed} disabled={seeding} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary disabled:opacity-50">
+            <button onClick={handleSeed} disabled={seeding} className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary disabled:opacity-50">
               {seeding ? "Seeding…" : "Seed demo"}
             </button>
+            <button onClick={handleClear} disabled={seeding} className="rounded-md border border-destructive/30 bg-background px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
+              Clear data
+            </button>
             <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
-            <button onClick={() => supabase.auth.signOut()} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary">
+            <button onClick={() => supabase.auth.signOut()} className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary">
               Sign out
             </button>
           </>
