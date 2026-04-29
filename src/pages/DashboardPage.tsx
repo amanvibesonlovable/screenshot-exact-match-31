@@ -64,14 +64,14 @@ type KpiTone = "neutral" | "ok" | "warn" | "bad";
 
 function kpiCardCls(tone: KpiTone, clickable: boolean, glow: boolean) {
   const base =
-    "text-left rounded-2xl border p-4 shadow-bubble backdrop-blur transition";
+    "text-left rounded-xl border bg-card p-4 shadow-sm transition";
   const toneCls =
-    tone === "ok" ? "border-emerald-500/30 bg-emerald-500/10"
-    : tone === "warn" ? "border-amber-500/30 bg-amber-500/10"
-    : tone === "bad" ? "border-destructive/40 bg-destructive/10 border-l-4 border-l-destructive"
-    : "border-border/60 bg-card/80";
-  const interactive = clickable ? "hover:-translate-y-0.5 hover:shadow-lg cursor-pointer" : "";
-  const glowCls = glow ? "ring-2 ring-destructive/50 animate-pulse" : "";
+    tone === "ok" ? "border-border border-l-4 border-l-emerald-500"
+    : tone === "warn" ? "border-border border-l-4 border-l-amber-500"
+    : tone === "bad" ? "border-border border-l-4 border-l-destructive"
+    : "border-border border-l-4 border-l-primary";
+  const interactive = clickable ? "hover:-translate-y-0.5 hover:shadow-md cursor-pointer" : "";
+  const glowCls = glow ? "ring-2 ring-destructive/40" : "";
   return `${base} ${toneCls} ${interactive} ${glowCls}`;
 }
 
