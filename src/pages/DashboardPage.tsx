@@ -20,7 +20,7 @@ type Employee = {
 type SurveyResponse = {
   id: string;
   employee_id: string;
-  stage: number;
+  stage: string | number;
   risk_level: "LOW" | "MEDIUM" | "HIGH";
   final_score: number;
   gaming_flag: boolean;
@@ -64,7 +64,7 @@ function DashboardInner() {
       ]);
       if (cancelled) return;
       setEmployees((emp ?? []) as Employee[]);
-      setResponses((resp ?? []) as SurveyResponse[]);
+      setResponses((resp ?? []) as unknown as SurveyResponse[]);
       setLoading(false);
     })();
     return () => {
