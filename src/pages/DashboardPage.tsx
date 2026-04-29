@@ -9,6 +9,8 @@ import {
   RiskTrendChart,
   StageBreakdown,
 } from "@/hr/DashboardCharts";
+import CsvUploadModal from "@/hr/CsvUploadModal";
+import { seedDemoTrainees } from "@/hr/seed";
 
 type Employee = {
   id: string;
