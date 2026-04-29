@@ -9,6 +9,7 @@ import SurveyPage from "./pages/SurveyPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import TraineeDetailPage from "./pages/TraineeDetailPage.tsx";
+import ScoringFrameworkPage from "./pages/ScoringFrameworkPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/trainees/:id" element={<TraineeDetailPage />} />
+          <Route path="/dashboard/scoring" element={<ScoringFrameworkPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
