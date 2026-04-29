@@ -99,18 +99,19 @@ const SurveyPage = () => {
       completion_time_seconds: number;
     },
   ) {
-    const { error } = await supabase.from("survey_responses").insert({
+    const payload = {
       employee_id: employeeId,
       stage: String(stage) as "15" | "30" | "45" | "60" | "90" | "180",
-      responses: result.responses as unknown as Record<string, unknown>[],
-      free_text_response: result.free_text_response ?? undefined,
-      scores: result.scores as unknown as Record<string, unknown>,
-      critical_flags: result.critical_flags as unknown as string[],
+      responses: result.responses as unknown as never,
+      free_text_response: result.free_text_response,
+      scores: result.scores as unknown as never,
+      critical_flags: result.critical_flags as unknown as never,
       gaming_flag: result.gaming_flag,
       completion_time_seconds: result.completion_time_seconds,
       final_score: result.scores.final_score,
       risk_level: result.scores.risk_level,
-    });
+    };
+    const { error } = await supabase.from("survey_responses").insert(payload);
 
     if (error) {
       // Show error but keep the friendly closing screen — the chat already
