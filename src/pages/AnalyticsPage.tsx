@@ -197,7 +197,7 @@ function AnalyticsInner() {
       const row: Record<string, any> = { dimension: DIM_LABELS[d] };
       for (const b of branchList) {
         const s = sums[b][d];
-        row[b] = s ? Math.round(((s.sum / s.n) / 2.5) * 10) / 10 : 0;
+        row[b] = s ? Math.round((s.sum / s.n) * 10) / 10 : 0;
       }
       return row;
     });
