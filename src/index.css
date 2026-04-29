@@ -2,95 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Pulse — Warm, human, conversational design system.
+   All colors HSL. Soft coral + amber, generous radii, friendly motion. */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Surfaces */
+    --background: 30 40% 98%;
+    --foreground: 24 25% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 24 25% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 24 25% 16%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand — soft coral */
+    --primary: 12 82% 62%;
+    --primary-foreground: 30 40% 98%;
+    --primary-soft: 12 90% 95%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Accent — warm amber */
+    --accent: 36 95% 60%;
+    --accent-foreground: 24 35% 18%;
+    --accent-soft: 36 100% 94%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --secondary: 30 30% 95%;
+    --secondary-foreground: 24 25% 22%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted: 30 25% 94%;
+    --muted-foreground: 24 10% 46%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 30 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --success: 150 55% 42%;
+    --success-foreground: 30 40% 98%;
 
-    --radius: 0.5rem;
+    --border: 28 25% 90%;
+    --input: 28 25% 90%;
+    --ring: 12 82% 62%;
+
+    --radius: 1.25rem;
+
+    /* Chat-specific tokens */
+    --bot-bubble: 30 35% 96%;
+    --bot-bubble-foreground: 24 25% 18%;
+    --user-bubble: 12 82% 62%;
+    --user-bubble-foreground: 30 40% 98%;
+
+    /* Gradients & shadows */
+    --gradient-warm: linear-gradient(135deg, hsl(12 90% 96%), hsl(36 100% 95%));
+    --gradient-brand: linear-gradient(135deg, hsl(12 82% 62%), hsl(24 88% 60%));
+    --shadow-soft: 0 4px 20px -8px hsl(12 50% 40% / 0.15);
+    --shadow-bubble: 0 2px 12px -4px hsl(24 30% 30% / 0.08);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 24 20% 10%;
+    --foreground: 30 30% 95%;
+    --card: 24 20% 12%;
+    --card-foreground: 30 30% 95%;
+    --popover: 24 20% 12%;
+    --popover-foreground: 30 30% 95%;
+    --primary: 12 82% 62%;
+    --primary-foreground: 30 40% 98%;
+    --primary-soft: 12 40% 22%;
+    --accent: 36 95% 60%;
+    --accent-foreground: 24 35% 12%;
+    --accent-soft: 36 40% 22%;
+    --secondary: 24 15% 18%;
+    --secondary-foreground: 30 30% 95%;
+    --muted: 24 15% 18%;
+    --muted-foreground: 30 10% 65%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 30 40% 98%;
+    --success: 150 55% 45%;
+    --success-foreground: 30 40% 98%;
+    --border: 24 15% 22%;
+    --input: 24 15% 22%;
+    --ring: 12 82% 62%;
+    --bot-bubble: 24 15% 18%;
+    --bot-bubble-foreground: 30 30% 95%;
+    --user-bubble: 12 82% 62%;
+    --user-bubble-foreground: 30 40% 98%;
   }
 }
 
@@ -98,8 +102,64 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 }
+
+@layer utilities {
+  .bg-gradient-warm {
+    background: var(--gradient-warm);
+  }
+  .bg-gradient-brand {
+    background: var(--gradient-brand);
+  }
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  .shadow-bubble {
+    box-shadow: var(--shadow-bubble);
+  }
+}
+
+/* Typing indicator */
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot {
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* Bubble entrance */
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.bubble-in {
+  animation: bubble-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Checkmark draw */
+@keyframes check-draw {
+  to { stroke-dashoffset: 0; }
+}
+.check-path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: check-draw 0.6s ease-out 0.2s forwards;
+}
+
+@keyframes check-pop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.check-pop { animation: check-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
