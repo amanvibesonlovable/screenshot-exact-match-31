@@ -35,12 +35,12 @@ export interface ScoredSurvey {
 }
 
 const STAGE_MULTIPLIERS: Record<SurveyStage, number> = {
-  15: 1.0,
+  15: 0.7,
   30: 0.9,
   45: 1.0,
-  60: 1.1,
-  90: 1.2,
-  180: 1.0,
+  60: 1.2,
+  90: 1.4,
+  180: 1.5,
 };
 
 export function scoreSurvey(
