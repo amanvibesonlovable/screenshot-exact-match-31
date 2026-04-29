@@ -286,62 +286,104 @@ export function BranchLeaderboard({
   rows,
   onBranchClick,
 }: {
-  rows: { branch: string; total: number; high: number; med: number; low: number; avg: number }[];
+  rows: {
+    branch: string;
+    active: number;
+    total: number;       // number with surveys
+    high: number;
+    med: number;
+    low: number;
+    avg: number;
+    completionPct: number;
+    trend?: "up" | "down" | "flat";
+  }[];
   onBranchClick?: (branch: string) => void;
 }) {
-  const max = Math.max(1, ...rows.map((r) => r.total));
-  // PRD insight: e.g., "Nagpur has 2.5x the high-risk rate of average"
+  // Auto-insight comparing best vs worst by avg
   let insight: string | null = null;
-  if (rows.length >= 2) {
-    const totalAll = rows.reduce((s, r) => s + r.total, 0);
-    const highAll = rows.reduce((s, r) => s + r.high, 0);
-    const avgHighRate = totalAll ? highAll / totalAll : 0;
-    const worst = rows.slice().sort((a, b) =>
-      (b.high / Math.max(1, b.total)) - (a.high / Math.max(1, a.total))
-    )[0];
-    const worstRate = worst.total ? worst.high / worst.total : 0;
-    if (avgHighRate > 0 && worstRate > avgHighRate * 1.5) {
-      insight = `${worst.branch} branch has ${(worstRate / avgHighRate).toFixed(1)}x the high-risk rate of the average.`;
+  const measured = rows.filter((r) => r.total > 0);
+  if (measured.length >= 2) {
+    const sorted = measured.slice().sort((a, b) => b.avg - a.avg);
+    const worst = sorted[0];
+    const best = sorted[sorted.length - 1];
+    if (best.avg > 0 && worst.avg > best.avg * 1.5) {
+      insight = `${worst.branch} has ${(worst.avg / best.avg).toFixed(1)}x the average risk score compared to ${best.branch}.`;
+    } else {
+      const sortedComp = rows.slice().sort((a, b) => b.completionPct - a.completionPct);
+      insight = `${sortedComp[0].branch} has the highest completion rate at ${sortedComp[0].completionPct}%.`;
     }
   }
+
+  function compTone(p: number) {
+    if (p >= 80) return RISK_COLORS.LOW;
+    if (p >= 50) return RISK_COLORS.MEDIUM;
+    return RISK_COLORS.HIGH;
+  }
+
+  const sorted = rows.slice().sort((a, b) => b.avg - a.avg);
+
   return (
     <div className={cardCls}>
-      <div className="flex items-center justify-between">
-        <h3 className={titleCls}>Branches by risk</h3>
-        <span className="text-xs text-muted-foreground">avg score · % high</span>
-      </div>
+      <h3 className={titleCls}>Risk by branch</h3>
       {rows.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">No data yet.</p>
+        <p className="mt-4 text-sm text-muted-foreground">Data will populate as trainees complete check-ins.</p>
       ) : (
         <>
-          <ul className="mt-4 space-y-3">
-            {rows.slice(0, 8).map((r) => {
-              const highPct = r.total ? Math.round((r.high / r.total) * 100) : 0;
-              return (
-                <li key={r.branch}>
-                  <button
-                    onClick={() => onBranchClick?.(r.branch)}
-                    className="block w-full text-left"
-                  >
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-bold text-foreground">{r.branch}</span>
-                      <span className="text-xs text-muted-foreground tabular-nums">
-                        {r.avg.toFixed(1)} · {highPct}% high
-                      </span>
-                    </div>
-                    <div className="mt-1.5 flex h-2 overflow-hidden rounded-full bg-secondary">
-                      <div style={{ width: `${(r.low / max) * 100}%`, background: RISK_COLORS.LOW }} />
-                      <div style={{ width: `${(r.med / max) * 100}%`, background: RISK_COLORS.MEDIUM }} />
-                      <div style={{ width: `${(r.high / max) * 100}%`, background: RISK_COLORS.HIGH }} />
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-[10px] uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="py-2 pr-2">Branch</th>
+                  <th className="py-2 pr-2 text-right">Active</th>
+                  <th className="py-2 pr-2 text-right">Compl.</th>
+                  <th className="py-2 pr-2">Risk distribution</th>
+                  <th className="py-2 pr-2 text-right">Avg</th>
+                  <th className="py-2 text-right">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((r) => {
+                  const totalSeg = Math.max(1, r.high + r.med + r.low);
+                  return (
+                    <tr
+                      key={r.branch}
+                      onClick={() => onBranchClick?.(r.branch)}
+                      className="border-t border-border/40 cursor-pointer hover:bg-secondary/40"
+                    >
+                      <td className="py-2 pr-2 font-bold text-foreground">{r.branch}</td>
+                      <td className="py-2 pr-2 text-right tabular-nums">{r.active}</td>
+                      <td className="py-2 pr-2 text-right tabular-nums">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full" style={{ background: compTone(r.completionPct) }} />
+                          {r.completionPct}%
+                        </span>
+                      </td>
+                      <td className="py-2 pr-2 min-w-[120px]">
+                        <div className="flex h-2 overflow-hidden rounded-full bg-secondary/60">
+                          <div style={{ width: `${(r.low / totalSeg) * 100}%`, background: RISK_COLORS.LOW }} />
+                          <div style={{ width: `${(r.med / totalSeg) * 100}%`, background: RISK_COLORS.MEDIUM }} />
+                          <div style={{ width: `${(r.high / totalSeg) * 100}%`, background: RISK_COLORS.HIGH }} />
+                        </div>
+                      </td>
+                      <td className="py-2 pr-2 text-right tabular-nums font-bold">{r.avg.toFixed(1)}</td>
+                      <td className="py-2 text-right">
+                        {r.trend === "up" ? (
+                          <span style={{ color: RISK_COLORS.HIGH }}>↑</span>
+                        ) : r.trend === "down" ? (
+                          <span style={{ color: RISK_COLORS.LOW }}>↓</span>
+                        ) : (
+                          <span className="text-muted-foreground">→</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
           {insight && (
-            <p className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-xs font-bold text-destructive">
-              ⚠ {insight}
+            <p className="mt-3 rounded-xl border border-border/60 bg-secondary/40 p-2.5 text-xs text-foreground">
+              💡 {insight}
             </p>
           )}
         </>
