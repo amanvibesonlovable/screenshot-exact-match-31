@@ -15,7 +15,7 @@ import {
 } from "@/hr/DashboardCharts";
 import { TraineeCard, TraineeCardData } from "@/hr/TraineeCard";
 import CsvUploadModal from "@/hr/CsvUploadModal";
-import { seedDemoTrainees } from "@/hr/seed";
+import { seedDemoTrainees, clearAllData } from "@/hr/seed";
 import { DashboardSidebar, DashboardHeader } from "@/hr/DashboardSidebar";
 import {
   OverviewFilterBar,
@@ -173,11 +173,22 @@ function DashboardInner() {
   }, [tab]);
 
   const handleSeed = async () => {
+    if (!window.confirm("This will populate the database with 45 demo trainees and ~100 survey responses. Any existing data will be replaced. Continue?")) return;
     setSeeding(true);
-    const res = await seedDemoTrainees(20);
+    const res = await seedDemoTrainees(45);
     setSeeding(false);
     if (res.error) setToast(`Seed failed: ${res.error}`);
-    else { setToast(`Seeded ${res.insertedEmployees} trainees and ${res.insertedResponses} responses`); await refresh(); }
+    else { setToast(`Demo data seeded successfully — ${res.insertedEmployees} trainees, ${res.insertedResponses} responses`); await refresh(); }
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleClear = async () => {
+    if (!window.confirm("This will permanently delete ALL data (trainees, responses, actions). This cannot be undone. Continue?")) return;
+    setSeeding(true);
+    const res = await clearAllData();
+    setSeeding(false);
+    if (res.error) setToast(`Clear failed: ${res.error}`);
+    else { setToast("All data cleared"); await refresh(); }
     setTimeout(() => setToast(null), 4000);
   };
 

@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: [
-          "Nunito",
+          "Inter",
           "ui-sans-serif",
           "system-ui",
           "-apple-system",

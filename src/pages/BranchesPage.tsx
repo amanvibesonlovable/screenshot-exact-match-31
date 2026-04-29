@@ -347,8 +347,7 @@ function BranchesInner() {
                       <tbody>
                         {managerRows.map((m) => (
                           <tr key={m.mgr}
-                            onClick={() => window.location.assign(`/dashboard/managers?focus=${encodeURIComponent(m.mgr)}`)}
-                            className={`cursor-pointer border-t border-border/40 hover:bg-background/40 ${m.flag ? "bg-destructive/5" : ""}`}>
+                            className={`border-t border-border/40 ${m.flag ? "bg-destructive/5" : ""}`}>
                             <td className="px-2 py-2 font-bold text-foreground">{m.mgr}</td>
                             <td className="px-2 py-2 text-xs">{m.count}</td>
                             <td className="px-2 py-2 text-xs">{m.surveys}</td>

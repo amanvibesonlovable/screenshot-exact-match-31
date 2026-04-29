@@ -2,99 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pulse — Warm, human, conversational design system.
-   All colors HSL. Soft coral + amber, generous radii, friendly motion. */
+/* Pulse — Clean enterprise design system.
+   Indigo primary (#4F46E5), white surfaces, light gray page background. */
 
 @layer base {
   :root {
-    /* Surfaces */
-    --background: 30 40% 98%;
-    --foreground: 24 25% 16%;
+    /* Surfaces — clean enterprise: white card on light gray page */
+    --background: 220 20% 98%;          /* #F9FAFB */
+    --foreground: 222 47% 11%;          /* near #111827 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 24 25% 16%;
+    --card: 0 0% 100%;                  /* #FFFFFF */
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 24 25% 16%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Brand — soft coral */
-    --primary: 12 82% 62%;
-    --primary-foreground: 30 40% 98%;
-    --primary-soft: 12 90% 95%;
+    /* Brand — indigo */
+    --primary: 244 75% 59%;             /* #4F46E5 */
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 244 100% 96%;       /* very light indigo tint */
 
-    /* Accent — warm amber */
-    --accent: 36 95% 60%;
-    --accent-foreground: 24 35% 18%;
-    --accent-soft: 36 100% 94%;
+    /* Accent — kept indigo to avoid orange anywhere */
+    --accent: 244 75% 59%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 244 100% 96%;
 
-    --secondary: 30 30% 95%;
-    --secondary-foreground: 24 25% 22%;
+    --secondary: 220 14% 96%;           /* #F3F4F6 */
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 30 25% 94%;
-    --muted-foreground: 24 10% 46%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;     /* #6B7280 */
 
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 30 40% 98%;
+    --destructive: 0 74% 50%;           /* #DC2626 */
+    --destructive-foreground: 0 0% 100%;
 
-    --success: 150 55% 42%;
-    --success-foreground: 30 40% 98%;
+    --success: 142 55% 36%;             /* #2D8B4E */
+    --success-foreground: 0 0% 100%;
 
-    --border: 28 25% 90%;
-    --input: 28 25% 90%;
-    --ring: 12 82% 62%;
+    --border: 220 13% 91%;              /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 244 75% 59%;
 
-    --radius: 1.25rem;
+    --radius: 0.5rem;                   /* 8px — clean enterprise, not pill */
 
-    /* Chat-specific tokens */
-    --bot-bubble: 30 35% 96%;
-    --bot-bubble-foreground: 24 25% 18%;
-    --user-bubble: 12 82% 62%;
-    --user-bubble-foreground: 30 40% 98%;
+    /* Chat bubbles (still warm-friendly inside the trainee survey) */
+    --bot-bubble: 220 14% 96%;
+    --bot-bubble-foreground: 222 47% 11%;
+    --user-bubble: 244 75% 59%;
+    --user-bubble-foreground: 0 0% 100%;
 
-    /* Gradients & shadows */
-    --gradient-warm: linear-gradient(135deg, hsl(12 90% 96%), hsl(36 100% 95%));
-    --gradient-brand: linear-gradient(135deg, hsl(12 82% 62%), hsl(24 88% 60%));
-    --shadow-soft: 0 4px 20px -8px hsl(12 50% 40% / 0.15);
-    --shadow-bubble: 0 2px 12px -4px hsl(24 30% 30% / 0.08);
+    /* Gradients & shadows — repurposed to indigo/white tones so existing
+       utilities (bg-gradient-warm, bg-gradient-brand) stop being orange. */
+    --gradient-warm: linear-gradient(180deg, hsl(220 20% 98%), hsl(220 20% 98%));
+    --gradient-brand: linear-gradient(135deg, hsl(244 75% 59%), hsl(244 70% 52%));
+    --shadow-soft: 0 1px 2px 0 hsl(220 13% 60% / 0.08), 0 1px 3px 0 hsl(220 13% 60% / 0.06);
+    --shadow-bubble: 0 1px 2px 0 hsl(220 13% 60% / 0.05);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 244 75% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 244 75% 59%;
   }
 
   .dark {
-    --background: 24 20% 10%;
-    --foreground: 30 30% 95%;
-    --card: 24 20% 12%;
-    --card-foreground: 30 30% 95%;
-    --popover: 24 20% 12%;
-    --popover-foreground: 30 30% 95%;
-    --primary: 12 82% 62%;
-    --primary-foreground: 30 40% 98%;
-    --primary-soft: 12 40% 22%;
-    --accent: 36 95% 60%;
-    --accent-foreground: 24 35% 12%;
-    --accent-soft: 36 40% 22%;
-    --secondary: 24 15% 18%;
-    --secondary-foreground: 30 30% 95%;
-    --muted: 24 15% 18%;
-    --muted-foreground: 30 10% 65%;
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 30 40% 98%;
-    --success: 150 55% 45%;
-    --success-foreground: 30 40% 98%;
-    --border: 24 15% 22%;
-    --input: 24 15% 22%;
-    --ring: 12 82% 62%;
-    --bot-bubble: 24 15% 18%;
-    --bot-bubble-foreground: 30 30% 95%;
-    --user-bubble: 12 82% 62%;
-    --user-bubble-foreground: 30 40% 98%;
+    --background: 222 47% 7%;
+    --foreground: 220 14% 96%;
+    --card: 222 47% 11%;
+    --card-foreground: 220 14% 96%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 220 14% 96%;
+    --primary: 244 75% 65%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 244 50% 22%;
+    --accent: 244 75% 65%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 244 50% 22%;
+    --secondary: 222 30% 18%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 222 30% 18%;
+    --muted-foreground: 220 9% 65%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 55% 45%;
+    --success-foreground: 0 0% 100%;
+    --border: 222 30% 22%;
+    --input: 222 30% 22%;
+    --ring: 244 75% 65%;
+    --bot-bubble: 222 30% 18%;
+    --bot-bubble-foreground: 220 14% 96%;
+    --user-bubble: 244 75% 65%;
+    --user-bubble-foreground: 0 0% 100%;
   }
 }
 
