@@ -19,6 +19,8 @@ export type TraineeCardData = {
     id: string;
     employee_code: string;
     name: string;
+    phone: string;
+    email: string;
     branch: string;
     area_manager: string;
     doj: string;
