@@ -10,6 +10,9 @@ import AuthPage from "./pages/AuthPage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import TraineeDetailPage from "./pages/TraineeDetailPage.tsx";
 import ScoringFrameworkPage from "./pages/ScoringFrameworkPage.tsx";
+import AnalyticsPage from "./pages/AnalyticsPage.tsx";
+import ResponsesPage from "./pages/ResponsesPage.tsx";
+import ActionsPage from "./pages/ActionsPage.tsx";
 
 const queryClient = new QueryClient();
 
