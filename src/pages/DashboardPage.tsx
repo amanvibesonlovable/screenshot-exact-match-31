@@ -192,9 +192,28 @@ function DashboardInner() {
       scoreSum += r.final_score; scoreN++;
     }
     const completionPct = totalEligible ? Math.round((totalCompleted / totalEligible) * 100) : 0;
+    // Branch breakdown of active trainees
+    const activeByBranch: Record<string, number> = {};
+    let activeTrainees = 0;
+    for (const e of employees) {
+      const isActive = e.status === "training" || (e.status === "positioned" && daysSinceDOJ(e.doj) < 180);
+      if (!isActive) continue;
+      activeTrainees++;
+      const k = (e.branch || "—").slice(0, 3);
+      activeByBranch[k] = (activeByBranch[k] ?? 0) + 1;
+    }
+    const branchBreakdown = Object.entries(activeByBranch)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(" · ");
+    const branchCount = Object.keys(activeByBranch).length;
     return {
       total: employees.length,
-      activeTrainees: employees.filter((e) => e.status === "training" || (e.status === "positioned" && daysSinceDOJ(e.doj) < 180)).length,
+      activeTrainees,
+      branchBreakdown,
+      branchCount,
+      totalEligible,
+      totalCompleted,
       completionPct,
       high, med, low, gaming, critical,
       avgScore: scoreN ? scoreSum / scoreN : 0,
