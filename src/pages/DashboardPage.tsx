@@ -134,6 +134,20 @@ function DashboardInner() {
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Overview-tab filter bar (date / branch / stage / risk)
+  const [overviewFilters, setOverviewFiltersState] = useState<OverviewFilters>(() => filtersFromParams(params));
+  const setOverviewFilters = (next: OverviewFilters) => {
+    setOverviewFiltersState(next);
+    const np = new URLSearchParams(params);
+    // clear our keys then re-apply
+    ["dr", "dfrom", "dto", "b", "s", "r"].forEach((k) => np.delete(k));
+    for (const [k, v] of Object.entries(filtersToParams(next))) np.set(k, v);
+    setParams(np, { replace: true });
+  };
+
+  // Drill-down sheet
+  const [drillKind, setDrillKind] = useState<DrillKind | null>(null);
+
   const refresh = async () => {
     setLoading(true);
     const [{ data: emp }, { data: resp }, { data: wl }] = await Promise.all([
