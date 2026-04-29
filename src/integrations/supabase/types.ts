@@ -14,16 +14,178 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      employees: {
+        Row: {
+          age: number | null
+          area_manager: string
+          branch: string
+          college: string | null
+          created_at: string
+          doj: string
+          email: string
+          employee_code: string
+          id: string
+          name: string
+          phone: string
+          status: Database["public"]["Enums"]["employee_status"]
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          area_manager: string
+          branch: string
+          college?: string | null
+          created_at?: string
+          doj: string
+          email: string
+          employee_code: string
+          id?: string
+          name: string
+          phone: string
+          status?: Database["public"]["Enums"]["employee_status"]
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          area_manager?: string
+          branch?: string
+          college?: string | null
+          created_at?: string
+          doj?: string
+          email?: string
+          employee_code?: string
+          id?: string
+          name?: string
+          phone?: string
+          status?: Database["public"]["Enums"]["employee_status"]
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hr_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          created_by: string | null
+          created_by_email: string | null
+          employee_id: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          created_by?: string | null
+          created_by_email?: string | null
+          employee_id: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          created_by?: string | null
+          created_by_email?: string | null
+          employee_id?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_actions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_whitelist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      survey_responses: {
+        Row: {
+          completion_time_seconds: number
+          critical_flags: Json
+          employee_id: string
+          final_score: number
+          free_text_response: string | null
+          gaming_flag: boolean
+          id: string
+          responses: Json
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          scores: Json
+          stage: Database["public"]["Enums"]["survey_stage"]
+          submitted_at: string
+        }
+        Insert: {
+          completion_time_seconds: number
+          critical_flags?: Json
+          employee_id: string
+          final_score: number
+          free_text_response?: string | null
+          gaming_flag?: boolean
+          id?: string
+          responses: Json
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          scores: Json
+          stage: Database["public"]["Enums"]["survey_stage"]
+          submitted_at?: string
+        }
+        Update: {
+          completion_time_seconds?: number
+          critical_flags?: Json
+          employee_id?: string
+          final_score?: number
+          free_text_response?: string | null
+          gaming_flag?: boolean
+          id?: string
+          responses?: Json
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          scores?: Json
+          stage?: Database["public"]["Enums"]["survey_stage"]
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      gen_survey_token: { Args: never; Returns: string }
+      is_hr_user: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      employee_status: "training" | "positioned" | "exited"
+      risk_level: "LOW" | "MEDIUM" | "HIGH"
+      survey_stage: "15" | "30" | "45" | "60" | "90" | "180"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +312,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      employee_status: ["training", "positioned", "exited"],
+      risk_level: ["LOW", "MEDIUM", "HIGH"],
+      survey_stage: ["15", "30", "45", "60", "90", "180"],
+    },
   },
 } as const
