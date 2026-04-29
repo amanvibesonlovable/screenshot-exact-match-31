@@ -28,9 +28,12 @@ const Index = () => {
           >
             Preview the Day 15 check-in →
           </Link>
-          <span className="text-xs text-muted-foreground">
-            HR dashboard coming next
-          </span>
+          <Link
+            to="/auth"
+            className="rounded-full border border-border bg-card px-7 py-3.5 text-sm font-bold text-foreground shadow-sm transition-all hover:-translate-y-0.5"
+          >
+            HR sign in
+          </Link>
         </div>
 
         <div className="mt-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
