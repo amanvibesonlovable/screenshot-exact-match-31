@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useHrAuth } from "@/hr/useHrAuth";
 import RequireHr from "@/hr/RequireHr";
+import {
+  BranchLeaderboard,
+  RiskDonut,
+  RiskTrendChart,
+  StageBreakdown,
+} from "@/hr/DashboardCharts";
 
 type Employee = {
   id: string;
@@ -49,6 +55,9 @@ function DashboardInner() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<RiskFilter>("ALL");
   const [search, setSearch] = useState("");
+  const [branchFilter, setBranchFilter] = useState<string>("ALL");
+  const [managerFilter, setManagerFilter] = useState<string>("ALL");
+  const [stageFilter, setStageFilter] = useState<string>("ALL");
   const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
@@ -105,12 +114,31 @@ function DashboardInner() {
     };
   }, [latestByEmp, employees]);
 
+  const branches = useMemo(
+    () => Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort(),
+    [employees]
+  );
+  const managers = useMemo(
+    () => Array.from(new Set(employees.map((e) => e.area_manager).filter(Boolean))).sort(),
+    [employees]
+  );
+  const stages = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of responses) set.add(String(r.stage));
+    return Array.from(set).sort((a, b) => Number(a) - Number(b));
+  }, [responses]);
+
   const filteredEmployees = useMemo(() => {
     const q = search.trim().toLowerCase();
     return employees.filter((e) => {
+      if (branchFilter !== "ALL" && e.branch !== branchFilter) return false;
+      if (managerFilter !== "ALL" && e.area_manager !== managerFilter) return false;
       const r = latestByEmp.get(e.id);
       if (filter !== "ALL") {
         if (!r || r.risk_level !== filter) return false;
+      }
+      if (stageFilter !== "ALL") {
+        if (!r || String(r.stage) !== stageFilter) return false;
       }
       if (!q) return true;
       return (
@@ -120,7 +148,98 @@ function DashboardInner() {
         e.area_manager.toLowerCase().includes(q)
       );
     });
-  }, [employees, latestByEmp, filter, search]);
+  }, [employees, latestByEmp, filter, search, branchFilter, managerFilter, stageFilter]);
+
+  // Risk donut from current latest-per-employee + filters (excluding risk filter)
+  const donutData = useMemo(() => {
+    const counts = { LOW: 0, MEDIUM: 0, HIGH: 0 };
+    for (const e of employees) {
+      if (branchFilter !== "ALL" && e.branch !== branchFilter) continue;
+      if (managerFilter !== "ALL" && e.area_manager !== managerFilter) continue;
+      const r = latestByEmp.get(e.id);
+      if (!r) continue;
+      if (stageFilter !== "ALL" && String(r.stage) !== stageFilter) continue;
+      counts[r.risk_level]++;
+    }
+    return [
+      { name: "HIGH" as const, value: counts.HIGH },
+      { name: "MEDIUM" as const, value: counts.MEDIUM },
+      { name: "LOW" as const, value: counts.LOW },
+    ];
+  }, [employees, latestByEmp, branchFilter, managerFilter, stageFilter]);
+
+  // Trend over last 30 days, by submitted_at date
+  const trendData = useMemo(() => {
+    const days = 30;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const buckets: Record<string, { HIGH: number; MEDIUM: number; LOW: number }> = {};
+    const order: string[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = `${d.getMonth() + 1}/${d.getDate()}`;
+      buckets[key] = { HIGH: 0, MEDIUM: 0, LOW: 0 };
+      order.push(key);
+    }
+    const empById = new Map(employees.map((e) => [e.id, e]));
+    for (const r of responses) {
+      const e = empById.get(r.employee_id);
+      if (!e) continue;
+      if (branchFilter !== "ALL" && e.branch !== branchFilter) continue;
+      if (managerFilter !== "ALL" && e.area_manager !== managerFilter) continue;
+      if (stageFilter !== "ALL" && String(r.stage) !== stageFilter) continue;
+      const d = new Date(r.submitted_at);
+      d.setHours(0, 0, 0, 0);
+      const diff = Math.round((today.getTime() - d.getTime()) / 86400000);
+      if (diff < 0 || diff >= days) continue;
+      const key = `${d.getMonth() + 1}/${d.getDate()}`;
+      if (buckets[key]) buckets[key][r.risk_level]++;
+    }
+    return order.map((k) => ({ date: k, ...buckets[k] }));
+  }, [responses, employees, branchFilter, managerFilter, stageFilter]);
+
+  // Stage breakdown — latest response per employee, grouped by stage
+  const stageData = useMemo(() => {
+    const map: Record<string, { HIGH: number; MEDIUM: number; LOW: number }> = {};
+    for (const e of employees) {
+      if (branchFilter !== "ALL" && e.branch !== branchFilter) continue;
+      if (managerFilter !== "ALL" && e.area_manager !== managerFilter) continue;
+      const r = latestByEmp.get(e.id);
+      if (!r) continue;
+      const key = `Day ${r.stage}`;
+      if (!map[key]) map[key] = { HIGH: 0, MEDIUM: 0, LOW: 0 };
+      map[key][r.risk_level]++;
+    }
+    return Object.entries(map)
+      .map(([stage, v]) => ({ stage, ...v }))
+      .sort((a, b) => Number(a.stage.replace("Day ", "")) - Number(b.stage.replace("Day ", "")));
+  }, [employees, latestByEmp, branchFilter, managerFilter]);
+
+  // Branch leaderboard
+  const branchData = useMemo(() => {
+    const map: Record<
+      string,
+      { branch: string; total: number; high: number; med: number; low: number; sum: number }
+    > = {};
+    for (const e of employees) {
+      if (managerFilter !== "ALL" && e.area_manager !== managerFilter) continue;
+      const r = latestByEmp.get(e.id);
+      if (!r) continue;
+      if (stageFilter !== "ALL" && String(r.stage) !== stageFilter) continue;
+      const key = e.branch || "—";
+      if (!map[key]) map[key] = { branch: key, total: 0, high: 0, med: 0, low: 0, sum: 0 };
+      map[key].total++;
+      map[key].sum += r.final_score;
+      if (r.risk_level === "HIGH") map[key].high++;
+      else if (r.risk_level === "MEDIUM") map[key].med++;
+      else map[key].low++;
+    }
+    return Object.values(map)
+      .map((b) => ({ ...b, avg: b.total ? b.sum / b.total : 0 }))
+      .sort((a, b) => b.high / Math.max(1, b.total) - a.high / Math.max(1, a.total));
+  }, [employees, latestByEmp, managerFilter, stageFilter]);
+
 
   const selectedEmp = selected ? employees.find((e) => e.id === selected) ?? null : null;
   const selectedResponses = selected
@@ -163,6 +282,16 @@ function DashboardInner() {
           <Kpi label="Critical flags" value={stats.critical} tone="high" />
         </div>
 
+        {/* Charts */}
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <RiskTrendChart data={trendData} />
+          <RiskDonut data={donutData} />
+          <StageBreakdown data={stageData} />
+          <div className="lg:col-span-2">
+            <BranchLeaderboard rows={branchData} />
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <div className="flex rounded-full border border-border bg-card p-1">
@@ -176,23 +305,56 @@ function DashboardInner() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {f === "ALL" ? "All" : f}
+                {f === "ALL" ? "All risks" : f}
               </button>
             ))}
           </div>
+
+          <FilterSelect
+            label="Branch"
+            value={branchFilter}
+            onChange={setBranchFilter}
+            options={branches}
+          />
+          <FilterSelect
+            label="Area Mgr"
+            value={managerFilter}
+            onChange={setManagerFilter}
+            options={managers}
+          />
+          <FilterSelect
+            label="Stage"
+            value={stageFilter}
+            onChange={setStageFilter}
+            options={stages}
+            renderOption={(s) => `Day ${s}`}
+          />
+
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, code, branch, manager…"
             className="flex-1 min-w-[220px] rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
-          <button
-            disabled
-            title="CSV upload coming next"
-            className="rounded-full border border-dashed border-border px-4 py-2 text-xs font-bold text-muted-foreground"
-          >
-            Upload CSV (soon)
-          </button>
+
+          {(filter !== "ALL" ||
+            branchFilter !== "ALL" ||
+            managerFilter !== "ALL" ||
+            stageFilter !== "ALL" ||
+            search) && (
+            <button
+              onClick={() => {
+                setFilter("ALL");
+                setBranchFilter("ALL");
+                setManagerFilter("ALL");
+                setStageFilter("ALL");
+                setSearch("");
+              }}
+              className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground"
+            >
+              Clear filters
+            </button>
+          )}
         </div>
 
         {/* Table */}
@@ -389,6 +551,38 @@ function DashboardInner() {
         </div>
       )}
     </main>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+  renderOption,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  renderOption?: (v: string) => string;
+}) {
+  return (
+    <label className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs">
+      <span className="font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-transparent text-foreground focus:outline-none"
+      >
+        <option value="ALL">All</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {renderOption ? renderOption(o) : o}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
