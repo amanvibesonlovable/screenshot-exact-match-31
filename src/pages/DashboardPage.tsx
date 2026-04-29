@@ -16,6 +16,15 @@ import {
 import { TraineeCard, TraineeCardData } from "@/hr/TraineeCard";
 import CsvUploadModal from "@/hr/CsvUploadModal";
 import { seedDemoTrainees } from "@/hr/seed";
+import {
+  OverviewFilterBar,
+  OverviewFilters,
+  responseMatchesFilters,
+  employeeMatchesBranch,
+  filtersFromParams,
+  filtersToParams,
+} from "@/hr/OverviewFilterBar";
+import { RiskDrillSheet, DrillKind, DrillTrainee } from "@/hr/RiskDrillSheet";
 
 type Employee = {
   id: string; employee_code: string; name: string; email: string; phone: string;
@@ -125,6 +134,20 @@ function DashboardInner() {
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Overview-tab filter bar (date / branch / stage / risk)
+  const [overviewFilters, setOverviewFiltersState] = useState<OverviewFilters>(() => filtersFromParams(params));
+  const setOverviewFilters = (next: OverviewFilters) => {
+    setOverviewFiltersState(next);
+    const np = new URLSearchParams(params);
+    // clear our keys then re-apply
+    ["dr", "dfrom", "dto", "b", "s", "r"].forEach((k) => np.delete(k));
+    for (const [k, v] of Object.entries(filtersToParams(next))) np.set(k, v);
+    setParams(np, { replace: true });
+  };
+
+  // Drill-down sheet
+  const [drillKind, setDrillKind] = useState<DrillKind | null>(null);
+
   const refresh = async () => {
     setLoading(true);
     const [{ data: emp }, { data: resp }, { data: wl }] = await Promise.all([
@@ -175,18 +198,35 @@ function DashboardInner() {
     return m;
   }, [responses]);
 
-  // KPIs
+  // === Overview-tab filtered datasets (driven by OverviewFilterBar) ===
+  const oEmployees = useMemo(
+    () => employees.filter((e) => employeeMatchesBranch(e.branch, overviewFilters)),
+    [employees, overviewFilters],
+  );
+  const oEmpIdSet = useMemo(() => new Set(oEmployees.map((e) => e.id)), [oEmployees]);
+  const oResponses = useMemo(
+    () => responses.filter((r) => oEmpIdSet.has(r.employee_id) && responseMatchesFilters(r, overviewFilters)),
+    [responses, oEmpIdSet, overviewFilters],
+  );
+  const oLatest = useMemo(() => {
+    const m = new Map<string, SurveyResponse>();
+    for (const r of oResponses) if (!m.has(r.employee_id)) m.set(r.employee_id, r);
+    return m;
+  }, [oResponses]);
+
+  // KPIs (overview-tab; respects filters)
   const kpis = useMemo(() => {
     let high = 0, med = 0, low = 0, gaming = 0, critical = 0, scoreSum = 0, scoreN = 0;
     let totalEligible = 0, totalCompleted = 0;
     const completedByEmpStage = new Set<string>();
-    for (const r of responses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
-    for (const e of employees) {
+    for (const r of oResponses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
+    const stageFilterSet = overviewFilters.stages;
+    for (const e of oEmployees) {
       const days = daysSinceDOJ(e.doj);
-      const elig = eligibleStages(days);
+      const elig = eligibleStages(days).filter((s) => stageFilterSet.size === 0 || stageFilterSet.has(s));
       totalEligible += elig.length;
       for (const s of elig) if (completedByEmpStage.has(`${e.id}:${s}`)) totalCompleted++;
-      const r = latestByEmp.get(e.id);
+      const r = oLatest.get(e.id);
       if (!r) continue;
       if (r.risk_level === "HIGH") high++;
       else if (r.risk_level === "MEDIUM") med++;
@@ -196,10 +236,9 @@ function DashboardInner() {
       scoreSum += r.final_score; scoreN++;
     }
     const completionPct = totalEligible ? Math.round((totalCompleted / totalEligible) * 100) : 0;
-    // Branch breakdown of active trainees
     const activeByBranch: Record<string, number> = {};
     let activeTrainees = 0;
-    for (const e of employees) {
+    for (const e of oEmployees) {
       const isActive = e.status === "training" || (e.status === "positioned" && daysSinceDOJ(e.doj) < 180);
       if (!isActive) continue;
       activeTrainees++;
@@ -212,7 +251,7 @@ function DashboardInner() {
       .join(" · ");
     const branchCount = Object.keys(activeByBranch).length;
     return {
-      total: employees.length,
+      total: oEmployees.length,
       activeTrainees,
       branchBreakdown,
       branchCount,
@@ -222,15 +261,14 @@ function DashboardInner() {
       high, med, low, gaming, critical,
       avgScore: scoreN ? scoreSum / scoreN : 0,
     };
-  }, [employees, responses, latestByEmp]);
+  }, [oEmployees, oResponses, oLatest, overviewFilters.stages]);
 
-  // Funnel
   const funnel = useMemo(() => {
     const completedByEmpStage = new Set<string>();
-    for (const r of responses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
+    for (const r of oResponses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
     return STAGES.map((s) => {
       let elig = 0, done = 0;
-      for (const e of employees) {
+      for (const e of oEmployees) {
         if (daysSinceDOJ(e.doj) >= s) {
           elig++;
           if (completedByEmpStage.has(`${e.id}:${s}`)) done++;
@@ -238,14 +276,13 @@ function DashboardInner() {
       }
       return { stage: s, eligible: elig, completed: done };
     });
-  }, [employees, responses]);
+  }, [oEmployees, oResponses]);
 
-  // Pending overdue count: eligible 5+ days but not completed
   const pendingOverdue = useMemo(() => {
     const completedByEmpStage = new Set<string>();
-    for (const r of responses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
+    for (const r of oResponses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
     let n = 0;
-    for (const e of employees) {
+    for (const e of oEmployees) {
       const days = daysSinceDOJ(e.doj);
       const elig = eligibleStages(days);
       for (const s of elig) {
@@ -253,24 +290,22 @@ function DashboardInner() {
       }
     }
     return n;
-  }, [employees, responses]);
+  }, [oEmployees, oResponses]);
 
-  // Donut & charts
   const donutData = useMemo(() => {
     const c = { LOW: 0, MEDIUM: 0, HIGH: 0 };
-    for (const r of latestByEmp.values()) c[r.risk_level]++;
+    for (const r of oLatest.values()) c[r.risk_level]++;
     return [
       { name: "HIGH" as const, value: c.HIGH },
       { name: "MEDIUM" as const, value: c.MEDIUM },
       { name: "LOW" as const, value: c.LOW },
     ];
-  }, [latestByEmp]);
+  }, [oLatest]);
 
   const trendData = useMemo(() => {
     const weeks = 10;
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    // Anchor each bucket at the Monday of the week
-    const dayOfWeek = (today.getDay() + 6) % 7; // 0 = Mon
+    const dayOfWeek = (today.getDay() + 6) % 7;
     const thisMonday = new Date(today); thisMonday.setDate(today.getDate() - dayOfWeek);
     const buckets: { start: Date; end: Date; key: string; HIGH: number; MEDIUM: number; LOW: number }[] = [];
     for (let i = weeks - 1; i >= 0; i--) {
@@ -282,17 +317,17 @@ function DashboardInner() {
         HIGH: 0, MEDIUM: 0, LOW: 0,
       });
     }
-    for (const r of responses) {
+    for (const r of oResponses) {
       const d = new Date(r.submitted_at);
       const b = buckets.find((x) => d >= x.start && d < x.end);
       if (b) b[r.risk_level]++;
     }
     return buckets.map((b) => ({ week: b.key, HIGH: b.HIGH, MEDIUM: b.MEDIUM, LOW: b.LOW }));
-  }, [responses]);
+  }, [oResponses]);
 
   const stageData = useMemo(() => {
     const map: Record<string, { HIGH: number; MEDIUM: number; LOW: number }> = {};
-    for (const r of latestByEmp.values()) {
+    for (const r of oLatest.values()) {
       const key = `Day ${r.stage}`;
       if (!map[key]) map[key] = { HIGH: 0, MEDIUM: 0, LOW: 0 };
       map[key][r.risk_level]++;
@@ -300,14 +335,13 @@ function DashboardInner() {
     return Object.entries(map)
       .map(([stage, v]) => ({ stage, ...v }))
       .sort((a, b) => Number(a.stage.replace("Day ", "")) - Number(b.stage.replace("Day ", "")));
-  }, [latestByEmp]);
+  }, [oLatest]);
 
-  // Dimension heatmap — average per dimension over latest responses
   const dimRows = useMemo(() => {
     const sums: Record<string, { sum: number; n: number }> = {};
     const keys = ["training_effectiveness", "attrition_risk", "support_guidance", "adjustment_wellbeing", "transition_readiness"];
     for (const k of keys) sums[k] = { sum: 0, n: 0 };
-    for (const r of latestByEmp.values()) {
+    for (const r of oLatest.values()) {
       for (const k of keys) {
         const v = r.scores?.[k];
         if (v === null || v === undefined) continue;
@@ -321,9 +355,8 @@ function DashboardInner() {
       max: 25,
       hasData: sums[k].n > 0,
     }));
-  }, [latestByEmp]);
+  }, [oLatest]);
 
-  // Branch leaderboard — includes active count + completion rate per branch
   const branchData = useMemo(() => {
     type Row = {
       branch: string; active: number; total: number;
@@ -332,8 +365,8 @@ function DashboardInner() {
     };
     const map: Record<string, Row> = {};
     const completedByEmpStage = new Set<string>();
-    for (const r of responses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
-    for (const e of employees) {
+    for (const r of oResponses) completedByEmpStage.add(`${r.employee_id}:${r.stage}`);
+    for (const e of oEmployees) {
       const key = e.branch || "—";
       if (!map[key]) map[key] = { branch: key, active: 0, total: 0, high: 0, med: 0, low: 0, sum: 0, eligible: 0, completed: 0 };
       const days = daysSinceDOJ(e.doj);
@@ -342,7 +375,7 @@ function DashboardInner() {
       const elig = eligibleStages(days);
       map[key].eligible += elig.length;
       for (const s of elig) if (completedByEmpStage.has(`${e.id}:${s}`)) map[key].completed++;
-      const r = latestByEmp.get(e.id);
+      const r = oLatest.get(e.id);
       if (!r) continue;
       map[key].total++; map[key].sum += r.final_score;
       if (r.risk_level === "HIGH") map[key].high++;
@@ -360,17 +393,16 @@ function DashboardInner() {
       completionPct: b.eligible ? Math.round((b.completed / b.eligible) * 100) : 0,
       trend: "flat" as const,
     }));
-  }, [employees, latestByEmp, responses]);
+  }, [oEmployees, oLatest, oResponses]);
 
-  // Manager view
   const managerRows = useMemo(() => {
     type Row = { manager: string; branch: string; trainees: number; surveysDone: number; sumScore: number; n: number; highCount: number };
     const map: Record<string, Row> = {};
-    for (const e of employees) {
+    for (const e of oEmployees) {
       if (!e.area_manager) continue;
       if (!map[e.area_manager]) map[e.area_manager] = { manager: e.area_manager, branch: e.branch, trainees: 0, surveysDone: 0, sumScore: 0, n: 0, highCount: 0 };
       map[e.area_manager].trainees++;
-      const r = latestByEmp.get(e.id);
+      const r = oLatest.get(e.id);
       if (r) {
         map[e.area_manager].surveysDone++;
         map[e.area_manager].sumScore += r.final_score; map[e.area_manager].n++;
@@ -380,12 +412,11 @@ function DashboardInner() {
     return Object.values(map)
       .map((r) => ({ manager: r.manager, branch: r.branch, trainees: r.trainees, surveysDone: r.surveysDone, avgRisk: r.n ? r.sumScore / r.n : 0, highCount: r.highCount }))
       .sort((a, b) => b.avgRisk - a.avgRisk);
-  }, [employees, latestByEmp]);
+  }, [oEmployees, oLatest]);
 
-  // Critical alerts feed
   const alertsFeed = useMemo(() => {
-    const empById = new Map(employees.map((e) => [e.id, e]));
-    const items = responses
+    const empById = new Map(oEmployees.map((e) => [e.id, e]));
+    const items = oResponses
       .filter((r) => Array.isArray(r.critical_flags) && r.critical_flags.length > 0)
       .flatMap((r) =>
         (r.critical_flags as string[]).map((f, idx) => {
@@ -405,13 +436,11 @@ function DashboardInner() {
       )
       .filter(Boolean) as any[];
     return items.sort((a, b) => a.daysAgo - b.daysAgo);
-  }, [employees, responses]);
+  }, [oEmployees, oResponses]);
 
-  // Org pulse — aggregate program-feedback responses (Day 90 Q5, Day 180 Q6).
-  // Demo data has no question-level records for these; build a placeholder.
   const orgPulse = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const r of responses) {
+    for (const r of oResponses) {
       if (Number(r.stage) !== 90 && Number(r.stage) !== 180) continue;
       const list = Array.isArray(r.responses) ? r.responses : [];
       for (const qa of list) {
@@ -421,7 +450,38 @@ function DashboardInner() {
       }
     }
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [responses]);
+  }, [oResponses]);
+
+  // === Drill-down trainees for sheet ===
+  const drillTrainees = useMemo<DrillTrainee[]>(() => {
+    if (!drillKind) return [];
+    const empById = new Map(oEmployees.map((e) => [e.id, e]));
+    const matches: DrillTrainee[] = [];
+    for (const [empId, r] of oLatest.entries()) {
+      const e = empById.get(empId);
+      if (!e) continue;
+      if (drillKind === "HIGH" && r.risk_level !== "HIGH") continue;
+      if (drillKind === "MEDIUM" && r.risk_level !== "MEDIUM") continue;
+      if (drillKind === "CRITICAL" && (!Array.isArray(r.critical_flags) || r.critical_flags.length === 0)) continue;
+      const responsesList = Array.isArray(r.responses) ? r.responses : [];
+      matches.push({
+        id: e.id,
+        name: e.name,
+        employee_code: e.employee_code,
+        branch: e.branch,
+        area_manager: e.area_manager,
+        stage: Number(r.stage),
+        risk_level: r.risk_level,
+        final_score: r.final_score,
+        critical_flags: r.critical_flags ?? [],
+        scores: r.scores ?? {},
+        responses: responsesList,
+        free_text_response: r.free_text_response,
+        gaming_flag: r.gaming_flag,
+      });
+    }
+    return matches.sort((a, b) => b.final_score - a.final_score);
+  }, [drillKind, oEmployees, oLatest]);
 
   // === Trainees tab data ===
   const branches = useMemo(() => Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort(), [employees]);
@@ -577,6 +637,13 @@ function DashboardInner() {
                 {label}
               </button>
             ))}
+            <div className="my-2 h-px bg-border/60" />
+            <Link
+              to="/dashboard/scoring"
+              className="block w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+            >
+              Scoring Framework
+            </Link>
           </nav>
         </aside>
 
@@ -592,6 +659,16 @@ function DashboardInner() {
 
           {tab === "overview" && (
             <div className="space-y-4">
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Trainee health overview</h1>
+                <p className="text-xs text-muted-foreground">All KPIs and charts below respect the filters you set.</p>
+              </div>
+              <OverviewFilterBar
+                filters={overviewFilters}
+                setFilters={setOverviewFilters}
+                branches={Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort()}
+              />
+
               {/* KPI Row — 5 rich cards */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 {/* Card 1: Active trainees */}
@@ -628,7 +705,7 @@ function DashboardInner() {
 
                 {/* Card 3: High risk */}
                 <button
-                  onClick={() => goToTrainees({ risk: "HIGH" })}
+                  onClick={() => setDrillKind("HIGH")}
                   className={kpiCardCls(kpis.high > 0 ? "bad" : "ok", true, false)}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">High risk</p>
@@ -649,7 +726,7 @@ function DashboardInner() {
 
                 {/* Card 4: Medium risk */}
                 <button
-                  onClick={() => goToTrainees({ risk: "MEDIUM" })}
+                  onClick={() => setDrillKind("MEDIUM")}
                   className={kpiCardCls(kpis.med > 0 ? "warn" : "neutral", true, false)}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Medium risk</p>
@@ -661,7 +738,7 @@ function DashboardInner() {
 
                 {/* Card 5: Critical flags */}
                 <button
-                  onClick={() => goToTrainees({ flag: "HAS" })}
+                  onClick={() => setDrillKind("CRITICAL")}
                   className={kpiCardCls(kpis.critical > 0 ? "bad" : "ok", true, kpis.critical > 0)}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Critical flags</p>
@@ -998,6 +1075,12 @@ function DashboardInner() {
       </div>
 
       <CsvUploadModal open={showUpload} onClose={() => setShowUpload(false)} onUploaded={refresh} />
+      <RiskDrillSheet
+        open={drillKind !== null}
+        onOpenChange={(v) => !v && setDrillKind(null)}
+        kind={drillKind}
+        trainees={drillTrainees}
+      />
       {toast && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-5 py-2.5 text-sm font-bold text-background shadow-lg">
           {toast}
