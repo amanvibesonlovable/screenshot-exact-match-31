@@ -6,13 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function AuthPage() {
   const nav = useNavigate();
-  const { user, isWhitelisted, loading } = useHrAuth();
+  const { user } = useHrAuth();
   const [signingIn, setSigningIn] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && isWhitelisted) nav("/dashboard", { replace: true });
-  }, [user, isWhitelisted, nav]);
+    if (user) nav("/dashboard", { replace: true });
+  }, [user, nav]);
 
   const onGoogle = async () => {
     setErr(null);
