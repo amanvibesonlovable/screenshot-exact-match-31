@@ -242,24 +242,27 @@ function DashboardInner() {
   }, [latestByEmp]);
 
   const trendData = useMemo(() => {
-    const days = 30;
+    const weeks = 10;
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    const buckets: Record<string, { HIGH: number; MEDIUM: number; LOW: number }> = {};
-    const order: string[] = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(today); d.setDate(d.getDate() - i);
-      const key = `${d.getMonth() + 1}/${d.getDate()}`;
-      buckets[key] = { HIGH: 0, MEDIUM: 0, LOW: 0 };
-      order.push(key);
+    // Anchor each bucket at the Monday of the week
+    const dayOfWeek = (today.getDay() + 6) % 7; // 0 = Mon
+    const thisMonday = new Date(today); thisMonday.setDate(today.getDate() - dayOfWeek);
+    const buckets: { start: Date; end: Date; key: string; HIGH: number; MEDIUM: number; LOW: number }[] = [];
+    for (let i = weeks - 1; i >= 0; i--) {
+      const start = new Date(thisMonday); start.setDate(thisMonday.getDate() - i * 7);
+      const end = new Date(start); end.setDate(start.getDate() + 7);
+      buckets.push({
+        start, end,
+        key: `${start.getMonth() + 1}/${start.getDate()}`,
+        HIGH: 0, MEDIUM: 0, LOW: 0,
+      });
     }
     for (const r of responses) {
-      const d = new Date(r.submitted_at); d.setHours(0, 0, 0, 0);
-      const diff = Math.round((today.getTime() - d.getTime()) / 86400000);
-      if (diff < 0 || diff >= days) continue;
-      const key = `${d.getMonth() + 1}/${d.getDate()}`;
-      if (buckets[key]) buckets[key][r.risk_level]++;
+      const d = new Date(r.submitted_at);
+      const b = buckets.find((x) => d >= x.start && d < x.end);
+      if (b) b[r.risk_level]++;
     }
-    return order.map((k) => ({ date: k, ...buckets[k] }));
+    return buckets.map((b) => ({ week: b.key, HIGH: b.HIGH, MEDIUM: b.MEDIUM, LOW: b.LOW }));
   }, [responses]);
 
   const stageData = useMemo(() => {
