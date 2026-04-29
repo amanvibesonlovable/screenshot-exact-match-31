@@ -460,7 +460,7 @@ function AnalyticsInner() {
                           formatter={(v: any, name: string) => {
                             const num = Number(v);
                             const risk = dimRiskFromScore(num, 10);
-                            return [`${num} (${risk})`, name];
+                            return [`${num.toFixed(1)} (${risk})`, name];
                           }}
                         />
                         <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
