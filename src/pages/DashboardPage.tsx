@@ -16,6 +16,7 @@ import {
 import { TraineeCard, TraineeCardData } from "@/hr/TraineeCard";
 import CsvUploadModal from "@/hr/CsvUploadModal";
 import { seedDemoTrainees } from "@/hr/seed";
+import { DashboardSidebar, DashboardHeader } from "@/hr/DashboardSidebar";
 import {
   OverviewFilterBar,
   OverviewFilters,
