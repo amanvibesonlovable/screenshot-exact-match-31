@@ -13,6 +13,9 @@ import ScoringFrameworkPage from "./pages/ScoringFrameworkPage.tsx";
 import AnalyticsPage from "./pages/AnalyticsPage.tsx";
 import ResponsesPage from "./pages/ResponsesPage.tsx";
 import ActionsPage from "./pages/ActionsPage.tsx";
+import BranchesPage from "./pages/BranchesPage.tsx";
+import ManagersPage from "./pages/ManagersPage.tsx";
+import ReportsPage from "./pages/ReportsPage.tsx";
 
 const queryClient = new QueryClient();
 
