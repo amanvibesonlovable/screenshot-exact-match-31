@@ -309,8 +309,21 @@ function DashboardInner() {
               <p className="text-xs text-muted-foreground">Early warning dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSeed}
+              disabled={seeding}
+              className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary disabled:opacity-50"
+            >
+              {seeding ? "Seeding…" : "Seed demo trainees"}
+            </button>
+            <button
+              onClick={() => setShowUpload(true)}
+              className="rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-soft hover:-translate-y-0.5 transition"
+            >
+              Upload CSV
+            </button>
+            <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
             <button
               onClick={() => supabase.auth.signOut()}
               className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary"
