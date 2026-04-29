@@ -594,20 +594,100 @@ function DashboardInner() {
           </div>
 
           {tab === "overview" && (
-            <div className="space-y-6">
-              {/* KPI Row */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-                <Kpi label="Active trainees" value={kpis.activeTrainees} />
-                <Kpi label="Completion rate" value={`${kpis.completionPct}%`}
-                  tone={kpis.completionPct >= 80 ? "low" : kpis.completionPct >= 50 ? "med" : "high"} />
-                <Kpi label="High risk" value={kpis.high} tone="high"
-                  onClick={() => goToTrainees({ risk: "HIGH" })} />
-                <Kpi label="Medium risk" value={kpis.med} tone="med"
-                  onClick={() => goToTrainees({ risk: "MEDIUM" })} />
-                <Kpi label="Critical flags" value={kpis.critical} tone="high" glow={kpis.critical > 0}
-                  onClick={() => goToTrainees({ flag: "HAS" })} />
-                <Kpi label="Avg risk score" value={kpis.avgScore.toFixed(1)} />
+            <div className="space-y-4">
+              {/* KPI Row — 5 rich cards */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {/* Card 1: Active trainees */}
+                <div className={kpiCardCls("neutral", false, false)}>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Active trainees</p>
+                  <p className="mt-1 text-3xl font-extrabold tabular-nums text-foreground">{kpis.activeTrainees}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    across {kpis.branchCount} branch{kpis.branchCount === 1 ? "" : "es"}
+                  </p>
+                  {kpis.branchBreakdown && (
+                    <p className="mt-1 truncate text-[10px] text-muted-foreground" title={kpis.branchBreakdown}>
+                      {kpis.branchBreakdown}
+                    </p>
+                  )}
+                </div>
+
+                {/* Card 2: Survey completion */}
+                {(() => {
+                  const tone: KpiTone = kpis.completionPct >= 80 ? "ok" : kpis.completionPct >= 50 ? "warn" : "bad";
+                  const ringColor = kpis.completionPct >= 80 ? "#2D8B4E" : kpis.completionPct >= 50 ? "#D4820C" : "#C23B22";
+                  return (
+                    <div className={kpiCardCls(tone, false, false)}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Survey completion</p>
+                      <div className="mt-1 flex items-center gap-3">
+                        <p className="text-3xl font-extrabold tabular-nums text-foreground">{kpis.completionPct}%</p>
+                        <Ring pct={kpis.completionPct} color={ringColor} />
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {kpis.totalCompleted} of {kpis.totalEligible} eligible
+                      </p>
+                    </div>
+                  );
+                })()}
+
+                {/* Card 3: High risk */}
+                <button
+                  onClick={() => goToTrainees({ risk: "HIGH" })}
+                  className={kpiCardCls(kpis.high > 0 ? "bad" : "ok", true, false)}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">High risk</p>
+                  {kpis.high > 0 ? (
+                    <>
+                      <p className="mt-1 text-3xl font-extrabold tabular-nums text-destructive">{kpis.high}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {kpis.activeTrainees ? Math.round((kpis.high / kpis.activeTrainees) * 100) : 0}% of active trainees
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">All clear ✓</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">No high-risk trainees</p>
+                    </>
+                  )}
+                </button>
+
+                {/* Card 4: Medium risk */}
+                <button
+                  onClick={() => goToTrainees({ risk: "MEDIUM" })}
+                  className={kpiCardCls(kpis.med > 0 ? "warn" : "neutral", true, false)}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Medium risk</p>
+                  <p className="mt-1 text-3xl font-extrabold tabular-nums text-amber-600 dark:text-amber-400">{kpis.med}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    {kpis.activeTrainees ? Math.round((kpis.med / kpis.activeTrainees) * 100) : 0}% of active trainees
+                  </p>
+                </button>
+
+                {/* Card 5: Critical flags */}
+                <button
+                  onClick={() => goToTrainees({ flag: "HAS" })}
+                  className={kpiCardCls(kpis.critical > 0 ? "bad" : "ok", true, kpis.critical > 0)}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Critical flags</p>
+                  {kpis.critical > 0 ? (
+                    <>
+                      <p className="mt-1 text-3xl font-extrabold tabular-nums text-destructive">{kpis.critical}</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">require immediate attention</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">No critical flags 🎉</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">All clear</p>
+                    </>
+                  )}
+                </button>
               </div>
+
+              {/* Low-risk footnote */}
+              {kpis.low > 0 && (
+                <p className="text-[11px] text-muted-foreground">
+                  {kpis.low} trainee{kpis.low === 1 ? "" : "s"} in the healthy range (Low Risk).
+                </p>
+              )}
 
               {pendingOverdue > 0 && (
                 <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
@@ -616,28 +696,38 @@ function DashboardInner() {
                 </div>
               )}
 
-              {/* Charts */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <RiskTrendChart data={trendData} />
-                <RiskDonut data={donutData} />
+              {/* Row: Funnel (60%) + Critical Alerts (40%) */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <div className="lg:col-span-3">
+                  <CompletionFunnel rows={funnel} onStageClick={(s) => goToTrainees({ stage: String(s) })} />
+                </div>
+                <div className="lg:col-span-2">
+                  <CriticalAlertsFeed alerts={alertsFeed} onClick={(empId) => navigate(`/dashboard/trainees/${empId}`)} />
+                </div>
               </div>
 
+              {/* Row: Branch (50%) + Dimension Heatmap (50%) */}
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <CompletionFunnel rows={funnel} onStageClick={(s) => goToTrainees({ stage: String(s) })} />
+                <BranchLeaderboard rows={branchData} onBranchClick={(b) => goToTrainees({ branch: b })} />
                 <DimensionHeatmap rows={dimRows} />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <BranchLeaderboard rows={branchData} onBranchClick={(b) => goToTrainees({ branch: b })} />
-                <StageBreakdown data={stageData} />
+              {/* Full-width: Risk trend over time */}
+              <div className="grid grid-cols-1 gap-4">
+                <RiskTrendChart data={trendData} />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <ManagerView rows={managerRows} onManagerClick={(m) => goToTrainees({ manager: m })} />
-                <CriticalAlertsFeed alerts={alertsFeed} onClick={(empId) => navigate(`/dashboard/trainees/${empId}`)} />
+              {/* Row: Manager view (60%) + Pulse (40%, hides if empty) */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <div className={orgPulse.length > 0 ? "lg:col-span-3" : "lg:col-span-5"}>
+                  <ManagerView rows={managerRows} onManagerClick={(m) => goToTrainees({ manager: m })} />
+                </div>
+                {orgPulse.length > 0 && (
+                  <div className="lg:col-span-2">
+                    <OrgPulseDonut data={orgPulse} />
+                  </div>
+                )}
               </div>
-
-              <OrgPulseDonut data={orgPulse} />
             </div>
           )}
 
