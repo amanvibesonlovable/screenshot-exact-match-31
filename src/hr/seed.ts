@@ -148,6 +148,34 @@ export async function seedDemoTrainees(count = 20): Promise<{
       const subDate = new Date();
       subDate.setDate(subDate.getDate() - submittedDaysAgo);
 
+      // Inject program-feedback Q records for Day 90 (S5_Q5) and Day 180 (S6_Q6)
+      // so the OrgPulseDonut populates from real data.
+      const PULSE_OPTIONS = [
+        "Better trainers / more investment",
+        "More structured assessments",
+        "Prepare for field reality",
+        "Fix aggressive culture",
+        "Training is solid",
+      ];
+      const qaList: any[] = [];
+      if (stage === 90) {
+        qaList.push({
+          question_id: "S5_Q5",
+          question_text: "If you could change one thing about training, what would it be?",
+          answer_text: pick(PULSE_OPTIONS),
+          points: 0,
+          dimension: "none",
+        });
+      } else if (stage === 180) {
+        qaList.push({
+          question_id: "S6_Q6",
+          question_text: "What's the one thing leadership should know?",
+          answer_text: pick(PULSE_OPTIONS),
+          points: 0,
+          dimension: "none",
+        });
+      }
+
       responses.push({
         employee_id: emp.id,
         stage: String(stage),
@@ -157,7 +185,7 @@ export async function seedDemoTrainees(count = 20): Promise<{
         critical_flags: flags,
         completion_time_seconds: rand(60, 240),
         submitted_at: subDate.toISOString(),
-        responses: { demo: true, stage },
+        responses: qaList,
         scores: { ...scores, risk_level: finalRisk },
         free_text_response:
           empBias === "HIGH" && Math.random() < 0.5
