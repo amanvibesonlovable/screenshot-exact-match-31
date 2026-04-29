@@ -659,6 +659,16 @@ function DashboardInner() {
 
           {tab === "overview" && (
             <div className="space-y-4">
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Trainee health overview</h1>
+                <p className="text-xs text-muted-foreground">All KPIs and charts below respect the filters you set.</p>
+              </div>
+              <OverviewFilterBar
+                filters={overviewFilters}
+                setFilters={setOverviewFilters}
+                branches={Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort()}
+              />
+
               {/* KPI Row — 5 rich cards */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 {/* Card 1: Active trainees */}
