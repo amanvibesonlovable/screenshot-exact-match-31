@@ -125,7 +125,7 @@ const Index = () => {
             <div className="mt-4 space-y-1.5">
               {[
                 { l: "Training", w: "75%", c: "bg-primary" },
-                { l: "Attrition", w: "40%", c: "bg-warning" },
+                { l: "Attrition", w: "40%", c: "bg-[#F59E0B]" },
                 { l: "Support", w: "60%", c: "bg-primary" },
                 { l: "Wellbeing", w: "85%", c: "bg-success" },
                 { l: "Readiness", w: "55%", c: "bg-primary" },
