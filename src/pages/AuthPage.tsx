@@ -6,13 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function AuthPage() {
   const nav = useNavigate();
-  const { user, isWhitelisted, loading } = useHrAuth();
+  const { user } = useHrAuth();
   const [signingIn, setSigningIn] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && isWhitelisted) nav("/dashboard", { replace: true });
-  }, [user, isWhitelisted, nav]);
+    if (user) nav("/dashboard", { replace: true });
+  }, [user, nav]);
 
   const onGoogle = async () => {
     setErr(null);
@@ -65,15 +65,11 @@ export default function AuthPage() {
             </button>
           )}
 
-          {user && isWhitelisted === false && (
+          {user && (
             <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-foreground">
-                <p className="font-bold">Access denied</p>
-                <p className="mt-1 text-muted-foreground">
-                  <span className="text-foreground">{user.email}</span> isn't on the HR whitelist.
-                  Ask an admin to add your email to <code>hr_whitelist</code>.
-                </p>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Signed in as <span className="font-bold text-foreground">{user.email}</span>. Redirecting…
+              </p>
               <button
                 onClick={onSignOut}
                 className="w-full rounded-full border border-border px-5 py-3 text-sm font-bold text-foreground hover:bg-secondary"
@@ -81,10 +77,6 @@ export default function AuthPage() {
                 Sign out
               </button>
             </div>
-          )}
-
-          {user && isWhitelisted === null && !loading && (
-            <p className="mt-6 text-sm text-muted-foreground">Checking access…</p>
           )}
 
           {err && <p className="mt-4 text-sm text-destructive">{err}</p>}
