@@ -216,9 +216,8 @@ function ResponsesInner() {
                         const isOpen = expanded === r.id;
                         const flagCount = Array.isArray(r.critical_flags) ? r.critical_flags.length : 0;
                         return (
-                          <>
+                          <FragmentWithKey key={r.id}>
                             <tr
-                              key={r.id}
                               onClick={() => setExpanded(isOpen ? null : r.id)}
                               className={`cursor-pointer border-t border-border/40 hover:bg-background/40 ${isOpen ? "bg-background/40" : ""}`}
                             >
