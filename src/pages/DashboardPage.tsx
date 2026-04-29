@@ -627,6 +627,94 @@ function DashboardInner() {
                 </div>
               </div>
 
+              {pendingOverdue > 0 && (
+                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
+                  ⚠ {pendingOverdue} trainees have overdue check-ins (eligible 5+ days, not completed).
+                </div>
+              )}
+
+              {/* Selection bar */}
+              <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/60 bg-card/60 px-4 py-2 text-xs">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-border accent-primary"
+                    checked={filteredTrainees.length > 0 && filteredTrainees.every((t) => selected.has(t.employee.id))}
+                    onChange={(e) => {
+                      const next = new Set(selected);
+                      if (e.target.checked) filteredTrainees.forEach((t) => next.add(t.employee.id));
+                      else filteredTrainees.forEach((t) => next.delete(t.employee.id));
+                      setSelected(next);
+                    }}
+                  />
+                  <span className="font-bold text-muted-foreground">
+                    {selected.size > 0 ? `${selected.size} selected` : "Select all visible"}
+                  </span>
+                </label>
+                {selected.size > 0 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        const rows = ["Code,Name,Phone,Email,Branch,Manager,DOJ,Risk,Score,Link"];
+                        for (const t of filteredTrainees) {
+                          if (!selected.has(t.employee.id)) continue;
+                          const e = t.employee;
+                          rows.push([
+                            e.employee_code, e.name, e.phone, e.email, e.branch, e.area_manager, e.doj,
+                            t.latest?.risk_level ?? "—",
+                            t.latest?.final_score?.toFixed(1) ?? "—",
+                            `${window.location.origin}/s/${e.token}`,
+                          ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","));
+                        }
+                        const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url; a.download = "pulse-selected-trainees.csv"; a.click();
+                      }}
+                      className="rounded-full border border-border bg-background px-3 py-1 font-bold hover:bg-secondary"
+                    >
+                      Export selected (CSV)
+                    </button>
+                    <select
+                      value={bulkAction}
+                      onChange={(e) => setBulkAction(e.target.value)}
+                      className="rounded-full border border-border bg-background px-3 py-1 font-bold"
+                    >
+                      <option>Called trainee</option>
+                      <option>Spoke to manager</option>
+                      <option>Scheduled check-in</option>
+                      <option>Escalated to senior HR</option>
+                      <option>Custom note</option>
+                    </select>
+                    <button
+                      onClick={async () => {
+                        const { data: { user } } = await supabase.auth.getUser();
+                        const rows = Array.from(selected).map((employee_id) => ({
+                          employee_id,
+                          action_type: bulkAction,
+                          notes: null,
+                          created_by: user?.id ?? null,
+                          created_by_email: user?.email ?? null,
+                        }));
+                        await supabase.from("hr_actions").insert(rows);
+                        setToast(`Logged "${bulkAction}" for ${rows.length} trainees`);
+                        setTimeout(() => setToast(null), 3000);
+                        setSelected(new Set());
+                      }}
+                      className="rounded-full bg-foreground px-3 py-1 font-bold text-background"
+                    >
+                      Bulk mark action
+                    </button>
+                    <button
+                      onClick={() => setSelected(new Set())}
+                      className="rounded-full px-2 py-1 text-muted-foreground hover:text-foreground"
+                    >
+                      Clear
+                    </button>
+                  </>
+                )}
+              </div>
+
               {loading ? (
                 <p className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">Loading trainees…</p>
               ) : filteredTrainees.length === 0 ? (
@@ -642,7 +730,23 @@ function DashboardInner() {
                       </h3>
                     )}
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {g.items.map((t) => <TraineeCard key={t.employee.id} data={t} />)}
+                      {g.items.map((t) => (
+                        <TraineeCard
+                          key={t.employee.id}
+                          data={t}
+                          selected={selected.has(t.employee.id)}
+                          onToggleSelect={() => {
+                            const next = new Set(selected);
+                            if (next.has(t.employee.id)) next.delete(t.employee.id);
+                            else next.add(t.employee.id);
+                            setSelected(next);
+                          }}
+                          onActionLogged={() => {
+                            setToast("Action logged");
+                            setTimeout(() => setToast(null), 2000);
+                          }}
+                        />
+                      ))}
                     </div>
                   </div>
                 ))
