@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import SurveyPage from "./pages/SurveyPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
+import TraineeDetailPage from "./pages/TraineeDetailPage.tsx";
 
 const queryClient = new QueryClient();
 
