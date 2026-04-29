@@ -6,7 +6,7 @@ export type HrAuthState = {
   loading: boolean;
   session: Session | null;
   user: User | null;
-  isWhitelisted: boolean | null; // null while unknown
+  isWhitelisted: boolean | null;
 };
 
 export function useHrAuth(): HrAuthState {
@@ -16,13 +16,11 @@ export function useHrAuth(): HrAuthState {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1) Listener first
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (!s?.user) setIsWhitelisted(null);
     });
-    // 2) Initial read
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
@@ -37,25 +35,12 @@ export function useHrAuth(): HrAuthState {
       return;
     }
     let cancelled = false;
+    const email = user.email?.toLowerCase();
+    if (!email) {
+      setIsWhitelisted(false);
+      return;
+    }
     (async () => {
-      // Try a privileged query — works only if whitelisted (RLS gates it)
-      const { data, error } = await supabase.from("hr_whitelist").select("id").limit(1);
-      if (cancelled) return;
-      if (error) {
-        setIsWhitelisted(false);
-      } else {
-        setIsWhitelisted((data?.length ?? 0) >= 0 ? true : false);
-        // The above always evaluates true if no error. We need a real check:
-      }
-    })();
-    // Real check: query employees table (HR-only readable beyond token usage? employees is public-readable)
-    // So instead, check hr_whitelist with the user's email directly via a function-safe path.
-    (async () => {
-      const email = user.email?.toLowerCase();
-      if (!email) {
-        setIsWhitelisted(false);
-        return;
-      }
       const { data, error } = await supabase
         .from("hr_whitelist")
         .select("id")
