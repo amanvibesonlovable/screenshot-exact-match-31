@@ -49,15 +49,55 @@ function riskBadgeStyle(level: "LOW" | "MEDIUM" | "HIGH" | undefined) {
   return { background: `${RISK_COLORS[level]}22`, color: RISK_COLORS[level], border: `1px solid ${RISK_COLORS[level]}55` };
 }
 
-export function TraineeCard({ data }: { data: TraineeCardData }) {
+export function TraineeCard({
+  data,
+  selected,
+  onToggleSelect,
+  onActionLogged,
+}: {
+  data: TraineeCardData;
+  selected?: boolean;
+  onToggleSelect?: () => void;
+  onActionLogged?: () => void;
+}) {
   const { employee, daysSince, surveysByStage, latest, trend } = data;
   const dims = ["training_effectiveness", "attrition_risk", "support_guidance", "adjustment_wellbeing", "transition_readiness"] as const;
   const maxDimScore = 25;
+  const [actionOpen, setActionOpen] = useState(false);
+  const [actionType, setActionType] = useState(ACTION_OPTIONS[0]);
+  const [actionNote, setActionNote] = useState("");
+  const [logging, setLogging] = useState(false);
+
+  async function logAction() {
+    setLogging(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("hr_actions").insert({
+      employee_id: employee.id,
+      action_type: actionType,
+      notes: actionNote || null,
+      created_by: user?.id ?? null,
+      created_by_email: user?.email ?? null,
+    });
+    setLogging(false);
+    setActionOpen(false);
+    setActionNote("");
+    onActionLogged?.();
+  }
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/80 p-5 shadow-bubble backdrop-blur">
+    <div className={`rounded-3xl border ${selected ? "border-primary ring-2 ring-primary/30" : "border-border/60"} bg-card/80 p-5 shadow-bubble backdrop-blur`}>
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="flex items-start gap-2">
+          {onToggleSelect && (
+            <input
+              type="checkbox"
+              checked={!!selected}
+              onChange={onToggleSelect}
+              className="mt-1 h-4 w-4 rounded border-border accent-primary"
+              aria-label={`Select ${employee.name}`}
+            />
+          )}
+          <div>
           <div className="flex items-center gap-2">
             <h3 className="text-base font-extrabold text-foreground">{employee.name}</h3>
             {trend && (
