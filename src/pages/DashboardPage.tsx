@@ -650,124 +650,113 @@ function DashboardInner() {
                 branches={Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort()}
               />
 
-              {/* KPI Row — 5 premium cards */}
+              {/* KPI Row — 5 clean, cohesive cards */}
               {(() => {
                 const completionColor =
                   kpis.completionPct >= 80 ? "#16A34A" : kpis.completionPct >= 50 ? "#D97706" : "#DC2626";
+                const labelCls = "text-[11px] font-semibold uppercase tracking-[0.05em] text-[#6B7280]";
+                const numberCls = "mt-3 text-[36px] font-bold leading-none tabular-nums";
+                const ctxCls = "mt-3 text-sm text-[#6B7280]";
                 const cardBase =
-                  "relative flex flex-col rounded-xl p-5 shadow-sm transition";
-                const labelBase = "text-[11px] font-semibold uppercase tracking-[0.05em]";
+                  "relative flex flex-col rounded-xl border border-[#E5E7EB] bg-white p-6 shadow-sm transition";
+                const clickableCls = "hover:bg-[#FAFAFA] hover:shadow-md cursor-pointer";
+
                 return (
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                    {/* Card 1: Active trainees */}
-                    <div
-                      className={cardBase}
-                      style={{
-                        background: "linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 100%)",
-                        borderBottom: "3px solid #0F766E",
-                      }}
-                    >
-                      <Users size={20} className="absolute right-4 top-4" style={{ color: "#94A3B8" }} />
-                      <p className={labelBase} style={{ color: "#64748B" }}>Active Trainees</p>
-                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: "#1E293B" }}>
+                    {/* Card 1: Active Trainees */}
+                    <div className={cardBase} style={{ borderLeft: "4px solid #0F766E" }}>
+                      <div className="flex items-start justify-between">
+                        <p className={labelCls}>Active Trainees</p>
+                        <Users size={18} style={{ color: "#0F766E", opacity: 0.5 }} />
+                      </div>
+                      <p className={numberCls} style={{ color: "#111827" }}>
                         {kpis.activeTrainees}
                       </p>
-                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
+                      <p className={ctxCls}>
                         across {kpis.branchCount} branch{kpis.branchCount === 1 ? "" : "es"}
                       </p>
                       {kpis.branchBreakdown && (
-                        <p className="mt-1 truncate text-xs" style={{ color: "#94A3B8" }} title={kpis.branchBreakdown}>
+                        <p className="mt-1 truncate text-xs text-[#9CA3AF]" title={kpis.branchBreakdown}>
                           {kpis.branchBreakdown}
                         </p>
                       )}
                     </div>
 
-                    {/* Card 2: Survey completion */}
-                    <div
-                      className={cardBase}
-                      style={{
-                        background: "linear-gradient(135deg, #F8FAFC 0%, #F0FDF4 100%)",
-                        borderBottom: `3px solid ${completionColor}`,
-                      }}
-                    >
-                      <div className="absolute right-3 top-3">
-                        <Ring pct={kpis.completionPct} color={completionColor} size={40} />
+                    {/* Card 2: Survey Completion */}
+                    <div className={cardBase} style={{ borderLeft: `4px solid ${completionColor}` }}>
+                      <div className="flex items-start justify-between">
+                        <p className={labelCls}>Survey Completion</p>
+                        <CheckCircle2 size={18} style={{ color: completionColor, opacity: 0.5 }} />
                       </div>
-                      <p className={labelBase} style={{ color: "#64748B" }}>Survey Completion</p>
-                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: completionColor }}>
+                      <p className={numberCls} style={{ color: completionColor }}>
                         {kpis.completionPct}%
                       </p>
-                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
+                      <p className={ctxCls}>
                         {kpis.totalCompleted} of {kpis.totalEligible} eligible
                       </p>
                     </div>
 
-                    {/* Card 3: High risk */}
+                    {/* Card 3: High Risk */}
                     <button
                       onClick={() => setDrillKind("HIGH")}
-                      className={`${cardBase} text-left hover:shadow-lg cursor-pointer`}
-                      style={{
-                        background: "linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%)",
-                        borderBottom: "3px solid #DC2626",
-                      }}
+                      className={`${cardBase} ${clickableCls} text-left`}
+                      style={{ borderLeft: "4px solid #DC2626" }}
                     >
-                      <AlertTriangle size={20} className="absolute right-4 top-4" style={{ color: "#FCA5A5" }} />
-                      <p className={labelBase} style={{ color: "#DC2626" }}>High Risk</p>
-                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: "#DC2626" }}>
+                      <div className="flex items-start justify-between">
+                        <p className={labelCls}>High Risk</p>
+                        <AlertTriangle size={18} style={{ color: "#DC2626", opacity: 0.5 }} />
+                      </div>
+                      <p className={numberCls} style={{ color: "#DC2626" }}>
                         {kpis.high}
                       </p>
-                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
+                      <p className={ctxCls}>
                         {kpis.activeTrainees ? Math.round((kpis.high / kpis.activeTrainees) * 100) : 0}% of active trainees
                       </p>
-                      <ChevronRight size={16} className="absolute bottom-4 right-3" style={{ color: "#DC2626" }} />
+                      <ChevronRight size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
                     </button>
 
-                    {/* Card 4: Medium risk */}
+                    {/* Card 4: Medium Risk */}
                     <button
                       onClick={() => setDrillKind("MEDIUM")}
-                      className={`${cardBase} text-left hover:shadow-lg cursor-pointer`}
-                      style={{
-                        background: "linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%)",
-                        borderBottom: "3px solid #D97706",
-                      }}
+                      className={`${cardBase} ${clickableCls} text-left`}
+                      style={{ borderLeft: "4px solid #D97706" }}
                     >
-                      <AlertCircle size={20} className="absolute right-4 top-4" style={{ color: "#FCD34D" }} />
-                      <p className={labelBase} style={{ color: "#D97706" }}>Medium Risk</p>
-                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: "#D97706" }}>
+                      <div className="flex items-start justify-between">
+                        <p className={labelCls}>Medium Risk</p>
+                        <AlertCircle size={18} style={{ color: "#D97706", opacity: 0.5 }} />
+                      </div>
+                      <p className={numberCls} style={{ color: "#D97706" }}>
                         {kpis.med}
                       </p>
-                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
+                      <p className={ctxCls}>
                         {kpis.activeTrainees ? Math.round((kpis.med / kpis.activeTrainees) * 100) : 0}% of active trainees
                       </p>
-                      <ChevronRight size={16} className="absolute bottom-4 right-3" style={{ color: "#D97706" }} />
+                      <ChevronRight size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
                     </button>
 
-                    {/* Card 5: Critical flags */}
+                    {/* Card 5: Critical Flags */}
                     <button
                       onClick={() => setDrillKind("CRITICAL")}
-                      className={`${cardBase} text-left hover:shadow-lg cursor-pointer`}
-                      style={{
-                        background: "linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%)",
-                        borderBottom: "3px solid #DC2626",
-                      }}
+                      className={`${cardBase} ${clickableCls} text-left`}
+                      style={{ borderLeft: "4px solid #DC2626" }}
                     >
-                      <Flag size={20} className="absolute right-4 top-4" style={{ color: "#FCA5A5" }} />
-                      <p className={labelBase} style={{ color: "#DC2626" }}>Critical Flags</p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <p className="text-[40px] font-bold leading-none tabular-nums" style={{ color: "#DC2626" }}>
+                      <div className="flex items-start justify-between">
+                        <p className={labelCls}>Critical Flags</p>
+                        <Flag size={18} style={{ color: "#DC2626", opacity: 0.5 }} />
+                      </div>
+                      <div className="mt-3 flex items-center gap-2">
+                        <p className="text-[36px] font-bold leading-none tabular-nums" style={{ color: "#DC2626" }}>
                           {kpis.critical}
                         </p>
                         {kpis.critical > 0 && (
                           <span
-                            className="pulse-dot inline-block h-2 w-2 rounded-full"
+                            className="pulse-dot inline-block h-1.5 w-1.5 rounded-full"
                             style={{ background: "#DC2626" }}
                           />
                         )}
                       </div>
-                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
-                        require immediate attention
-                      </p>
-                      <ChevronRight size={16} className="absolute bottom-4 right-3" style={{ color: "#DC2626" }} />
+                      <p className={ctxCls}>require immediate attention</p>
+                      <ChevronRight size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
                     </button>
                   </div>
                 );
