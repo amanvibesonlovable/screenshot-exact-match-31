@@ -1049,7 +1049,7 @@ function DashboardInner() {
               </div>
               <p className="text-center text-xs text-muted-foreground">
                 Want to test the trainee flow?{" "}
-                <Link to="/s/demo-token" className="font-bold text-primary hover:underline">Open the Day 15 preview →</Link>
+                <Link to="/demo" className="font-bold text-primary hover:underline">Open the demo previews →</Link>
               </p>
             </div>
           )}
