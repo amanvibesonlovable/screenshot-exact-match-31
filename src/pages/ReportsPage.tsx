@@ -5,11 +5,11 @@ import { useHrAuth } from "@/hr/useHrAuth";
 import { DashboardHeader, DashboardSidebar } from "@/hr/DashboardSidebar";
 import { DIM_LABELS } from "@/hr/DashboardCharts";
 import {
-import { UserMenu } from "@/hr/UserMenu";
   DIM_KEYS, EmpLite, RespLite, STAGES,
   avgRiskScore, completionForEmployees, daysSince, dimAverages,
   isEligibleForStage, latestResponseByEmp, riskLevelFromScore,
 } from "@/hr/aggregations";
+import { UserMenu } from "@/hr/UserMenu";
 
 const cardCls = "rounded-3xl border border-border/60 bg-card/80 p-5 shadow-bubble backdrop-blur";
 const titleCls = "text-sm font-bold uppercase tracking-wide text-muted-foreground";

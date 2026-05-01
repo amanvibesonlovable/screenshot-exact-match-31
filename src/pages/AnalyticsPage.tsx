@@ -12,10 +12,10 @@ import {
 import { DIM_LABELS, RISK_COLORS } from "@/hr/DashboardCharts";
 import { formatTime } from "@/hr/ResponseDetail";
 import {
-import { UserMenu } from "@/hr/UserMenu";
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend,
   Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
+import { UserMenu } from "@/hr/UserMenu";
 
 type Employee = {
   id: string; name: string; employee_code: string;
