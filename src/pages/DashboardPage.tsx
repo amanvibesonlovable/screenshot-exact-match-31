@@ -1048,34 +1048,16 @@ function DashboardInner() {
           {tab === "settings" && (
             <div className="space-y-4">
               <div className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-bubble backdrop-blur">
-                <h2 className="text-lg font-extrabold text-foreground">HR whitelist</h2>
+                <h2 className="text-lg font-extrabold text-foreground">Admin access</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Only emails on this list can sign in to Candor HR.
+                  Admin access is now managed from a dedicated page. Super admins can add, edit, and remove admins there.
                 </p>
-                <div className="mt-4 flex gap-2">
-                  <input
-                    value={newWhitelistEmail}
-                    onChange={(e) => setNewWhitelistEmail(e.target.value)}
-                    placeholder="hr-member@company.com"
-                    className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm"
-                  />
-                  <button onClick={addWhitelist} className="rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-soft">
-                    Add
-                  </button>
-                </div>
-                <ul className="mt-4 space-y-1.5">
-                  {whitelist.map((w) => (
-                    <li key={w.id} className="flex items-center justify-between rounded-xl border border-border/60 bg-background/50 px-3 py-2 text-sm">
-                      <span>{w.email}</span>
-                      <button onClick={() => removeWhitelist(w.id)} className="text-xs text-destructive hover:underline">
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                  {whitelist.length === 0 && (
-                    <li className="text-xs text-muted-foreground">No emails whitelisted yet.</li>
-                  )}
-                </ul>
+                <Link
+                  to="/dashboard/admin-management"
+                  className="mt-4 inline-block rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-soft"
+                >
+                  Open Admin Management →
+                </Link>
               </div>
               <p className="text-center text-xs text-muted-foreground">
                 Want to test the trainee flow?{" "}
