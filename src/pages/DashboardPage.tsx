@@ -153,14 +153,12 @@ function DashboardInner() {
 
   const refresh = async () => {
     setLoading(true);
-    const [{ data: emp }, { data: resp }, { data: wl }] = await Promise.all([
+    const [{ data: emp }, { data: resp }] = await Promise.all([
       supabase.from("employees").select("*").order("created_at", { ascending: false }),
       supabase.from("survey_responses").select("*").order("submitted_at", { ascending: false }),
-      supabase.from("hr_whitelist").select("id, email").order("created_at", { ascending: false }),
     ]);
     setEmployees((emp ?? []) as Employee[]);
     setResponses((resp ?? []) as unknown as SurveyResponse[]);
-    setWhitelist((wl ?? []) as any);
     setLoading(false);
   };
 
