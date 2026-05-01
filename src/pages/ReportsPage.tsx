@@ -5,6 +5,7 @@ import { useHrAuth } from "@/hr/useHrAuth";
 import { DashboardHeader, DashboardSidebar } from "@/hr/DashboardSidebar";
 import { DIM_LABELS } from "@/hr/DashboardCharts";
 import {
+import { UserMenu } from "@/hr/UserMenu";
   DIM_KEYS, EmpLite, RespLite, STAGES,
   avgRiskScore, completionForEmployees, daysSince, dimAverages,
   isEligibleForStage, latestResponseByEmp, riskLevelFromScore,
@@ -82,8 +83,7 @@ function ReportsInner() {
     <main className="min-h-dvh bg-gradient-warm">
       <DashboardHeader rightSlot={
         <>
-          <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
-          <button onClick={() => supabase.auth.signOut()} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary">Sign out</button>
+          <UserMenu />
         </>
       } />
 

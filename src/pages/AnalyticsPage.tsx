@@ -12,6 +12,7 @@ import {
 import { DIM_LABELS, RISK_COLORS } from "@/hr/DashboardCharts";
 import { formatTime } from "@/hr/ResponseDetail";
 import {
+import { UserMenu } from "@/hr/UserMenu";
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend,
   Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
@@ -316,10 +317,7 @@ function AnalyticsInner() {
     <main className="min-h-dvh bg-gradient-warm">
       <DashboardHeader rightSlot={
         <>
-          <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
-          <button onClick={() => supabase.auth.signOut()} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary">
-            Sign out
-          </button>
+          <UserMenu />
         </>
       } />
 
