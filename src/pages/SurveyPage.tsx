@@ -75,7 +75,8 @@ const SurveyPage = () => {
 
       if (cancelled) return;
       if (respErr) {
-        setState({ status: "error", message: respErr.message });
+        console.error("Survey response lookup failed", respErr);
+        setState({ status: "error", message: "Something went wrong. Please try again later." });
         return;
       }
       if (existing) {
