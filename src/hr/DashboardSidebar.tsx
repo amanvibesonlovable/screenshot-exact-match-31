@@ -10,7 +10,7 @@ import {
   MapPin,
   FileText,
 } from "lucide-react";
-import { PulseLogo } from "@/components/PulseLogo";
+import { CandorLogo } from "@/components/CandorLogo";
 
 type Item = {
   label: string;
@@ -66,7 +66,7 @@ export function DashboardSidebar() {
   return (
     <aside
       className="hidden shrink-0 self-start rounded-xl md:block"
-      style={{ width: 220, background: "#1E1B4B" }}
+      style={{ width: 220, background: "#0C4A42" }}
     >
       <nav className="sticky top-6 space-y-1 px-3 py-4">
         {GROUPS.map((g, gi) => (
@@ -89,7 +89,7 @@ export function DashboardSidebar() {
                           ? "font-semibold text-white"
                           : "text-[#E2E8F0] hover:bg-white/10 hover:text-white"
                       }`}
-                      style={active ? { background: "#4F46E5" } : undefined}
+                      style={active ? { background: "#14B8A6" } : undefined}
                     >
                       {item.icon}
                       <span>{item.label}</span>
@@ -114,9 +114,9 @@ export function DashboardHeader({
     <header className="border-b border-border bg-card">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
         <Link to="/dashboard" className="flex items-center gap-2.5">
-          <PulseLogo size={32} />
+          <CandorLogo size={32} />
           <div>
-            <p className="text-base font-semibold tracking-tight text-foreground">Pulse · HR</p>
+            <p className="text-base font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Candor · HR</p>
             <p className="text-[11px] text-muted-foreground">Early warning &amp; training effectiveness</p>
           </div>
         </Link>

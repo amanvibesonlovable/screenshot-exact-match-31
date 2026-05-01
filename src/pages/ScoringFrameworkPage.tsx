@@ -65,7 +65,7 @@ function ScoringInner() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand text-xl font-extrabold text-primary-foreground shadow-soft">✦</div>
             <div>
               <p className="text-lg font-extrabold tracking-tight text-foreground">Scoring Framework</p>
-              <p className="text-xs text-muted-foreground">How Pulse calculates risk for every trainee</p>
+              <p className="text-xs text-muted-foreground">How Candor calculates risk for every trainee</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ Risk Classification:
         </div>
 
         <p className="mt-12 text-center text-[11px] text-muted-foreground">
-          Last updated: {today} · Pulse · HR
+          Last updated: {today} · Candor · HR
         </p>
       </article>
     </main>

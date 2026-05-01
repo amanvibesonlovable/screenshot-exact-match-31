@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable";
 import { useHrAuth } from "@/hr/useHrAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { PulseLogo } from "@/components/PulseLogo";
-import { ArrowLeft } from "lucide-react";
+import { CandorLogo } from "@/components/CandorLogo";
+import { ArrowLeft, Check } from "lucide-react";
 
 type LiveStats = {
   trainees: number;
@@ -72,7 +72,7 @@ export default function AuthPage() {
         style={{
           minHeight: "30vh",
           background:
-            "linear-gradient(180deg, #1E1B4B 0%, #312E81 35%, #4338CA 100%)",
+            "linear-gradient(180deg, #0C4A42 0%, #115E59 50%, #0F766E 100%)",
         }}
       >
         {/* faint dot pattern */}
@@ -86,55 +86,54 @@ export default function AuthPage() {
           }}
         />
 
+        {/* Faint quote watermark */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute select-none font-serif"
+          style={{
+            top: "1rem",
+            left: "-1rem",
+            fontSize: "260px",
+            lineHeight: 1,
+            color: "rgba(255,255,255,0.05)",
+            fontWeight: 700,
+          }}
+        >
+          “
+        </div>
+
         <div className="relative z-10 flex w-full max-w-md flex-col items-center text-center lg:items-start lg:text-left">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
-            <span className="pulse-logo-glow" style={{ display: "inline-flex" }}>
-              <PulseLogo size={36} bg="#FFFFFF" fg="#4F46E5" />
+            <span className="pulse-logo-glow-teal" style={{ display: "inline-flex" }}>
+              <CandorLogo size={36} bg="#FFFFFF" fg="#0F766E" />
             </span>
-            <span className="text-lg font-semibold tracking-tight text-white">Pulse</span>
+            <span className="text-lg font-bold tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
+              Candor
+            </span>
           </div>
 
           {/* Headline */}
           <h1
-            className="mt-6 text-balance text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-[36px]"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.15)" }}
+            className="mt-6 text-balance text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-[32px]"
+            style={{ textShadow: "0 1px 3px rgba(0,0,0,0.15)" }}
           >
-            Hear your trainees before they leave.
+            The truth about your trainees — before it's too late.
           </h1>
 
-          {/* Decorative pulse line */}
-          <svg
-            aria-hidden
-            viewBox="0 0 600 40"
-            className="mt-5 h-5 w-[80%] max-w-sm self-center lg:self-start"
-            preserveAspectRatio="none"
-          >
-            <polyline
-              className="pulse-line-draw"
-              points="0,20 120,20 150,20 165,8 180,32 195,14 210,20 360,20 380,20 395,12 410,28 425,18 440,20 600,20"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeOpacity={0.18}
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-
-          {/* Feature list — hide on mobile to keep header compact */}
-          <ul className="mt-5 hidden space-y-2 text-sm lg:block" style={{ color: "#E0E7FF" }}>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+          {/* Feature list with amber checks */}
+          <ul className="mt-6 hidden space-y-2.5 text-[15px] lg:block" style={{ color: "rgba(255,255,255,0.92)" }}>
+            <li className="flex items-center gap-2.5">
+              <Check size={16} style={{ color: "#F59E0B" }} strokeWidth={3} />
               Confidential check-ins at 6 milestones
             </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+            <li className="flex items-center gap-2.5">
+              <Check size={16} style={{ color: "#F59E0B" }} strokeWidth={3} />
               5 risk dimensions scored automatically
             </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-              Real-time HR dashboard
+            <li className="flex items-center gap-2.5">
+              <Check size={16} style={{ color: "#F59E0B" }} strokeWidth={3} />
+              Real-time HR analytics dashboard
             </li>
           </ul>
 
@@ -142,19 +141,19 @@ export default function AuthPage() {
           {stats && (
             <div
               className="mt-6 hidden w-full max-w-sm rounded-xl border border-white/15 px-5 py-4 lg:block"
-              style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(4px)" }}
+              style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(4px)" }}
             >
               <ul className="space-y-2 text-sm text-white">
                 <li className="flex items-center gap-2">
                   <span className="pulse-dot inline-block h-2 w-2 rounded-full" style={{ background: "#22C55E" }} />
-                  {stats.trainees} active trainees tracked
+                  {stats.trainees} trainees tracked
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="pulse-dot inline-block h-2 w-2 rounded-full" style={{ background: "#F59E0B" }} />
                   {stats.highRisk} high-risk flags caught
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="pulse-dot inline-block h-2 w-2 rounded-full" style={{ background: "#A5B4FC" }} />
+                  <span className="pulse-dot inline-block h-2 w-2 rounded-full" style={{ background: "#CCFBF1" }} />
                   {stats.branches} branches monitored
                 </li>
               </ul>
@@ -237,7 +236,7 @@ export default function AuthPage() {
           <Link
             to="/"
             className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
-            style={{ color: "#4F46E5" }}
+            style={{ color: "#0F766E" }}
           >
             <ArrowLeft size={14} />
             Back to home
