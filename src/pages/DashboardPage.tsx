@@ -992,6 +992,8 @@ function DashboardInner() {
                   </table>
                 </div>
               )}
+                </>
+              )}
             </div>
           )}
 
