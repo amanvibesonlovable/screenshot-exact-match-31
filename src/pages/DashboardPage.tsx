@@ -173,6 +173,13 @@ function DashboardInner() {
     // eslint-disable-next-line
   }, [tab]);
 
+  // Sync URL → tab (so sidebar links that change ?tab= update the active view)
+  useEffect(() => {
+    const urlTab = (params.get("tab") as Tab) || "overview";
+    if (urlTab !== tab) setTab(urlTab);
+    // eslint-disable-next-line
+  }, [params]);
+
   const handleSeed = async () => {
     if (!window.confirm("This will populate the database with 45 demo trainees and ~100 survey responses. Any existing data will be replaced. Continue?")) return;
     setSeeding(true);
