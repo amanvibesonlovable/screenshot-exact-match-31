@@ -606,16 +606,7 @@ function DashboardInner() {
     setTab("trainees");
   };
 
-  const addWhitelist = async () => {
-    if (!newWhitelistEmail) return;
-    await supabase.from("hr_whitelist").insert({ email: newWhitelistEmail.toLowerCase() });
-    setNewWhitelistEmail("");
-    refresh();
-  };
-  const removeWhitelist = async (id: string) => {
-    await supabase.from("hr_whitelist").delete().eq("id", id);
-    refresh();
-  };
+
 
   return (
     <main className="min-h-dvh bg-background">
