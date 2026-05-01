@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
     if (action === "bootstrap_super_admin") {
       // Open helper to create the bootstrap super admin auth user.
       // Allowed only if no super admin auth user exists yet for this email.
-      const email = "amanvibesonlovable.com";
+      const email = "aman@vibesonlovable.com";
       const password = "lovableadmin123";
       const { data: list } = await admin.auth.admin.listUsers();
       const target = list.users.find((u) => u.email?.toLowerCase() === email);
