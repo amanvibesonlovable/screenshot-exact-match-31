@@ -115,8 +115,7 @@ function DashboardInner() {
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
-  const [whitelist, setWhitelist] = useState<{ id: string; email: string }[]>([]);
-  const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
+  const [loading2, _unused] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Trainees-tab filters
