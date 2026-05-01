@@ -352,7 +352,7 @@ function WeeklyPulsePreview({ employees, responses, actions, range }: { employee
 
   return (
     <article className="space-y-5 text-sm leading-relaxed text-foreground">
-      <ReportHeader name="Weekly Pulse" period={periodLabel} />
+      <ReportHeader name="Weekly Digest" period={periodLabel} />
       <Section title="Overview">
         <ul className="list-disc pl-5">
           <li>Active trainees: <b>{activeEmps.length}</b> across <b>{branchesCount}</b> branches</li>
