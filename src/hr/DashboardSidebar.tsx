@@ -9,15 +9,17 @@ import {
   Upload,
   MapPin,
   FileText,
+  Shield,
 } from "lucide-react";
 import { CandorLogo } from "@/components/CandorLogo";
+import { useAdminAuth } from "@/hr/useAdminAuth";
 
 type Item = {
   label: string;
   to: string;
   icon: React.ReactNode;
-  /** match function for active state */
   match: (pathname: string, search: string) => boolean;
+  superOnly?: boolean;
 };
 
 type Group = { label: string; items: Item[] };
@@ -57,49 +59,55 @@ const GROUPS: Group[] = [
     items: [
       { label: "Scoring Framework", to: "/dashboard/scoring", icon: <ListChecks size={15} />, match: has("/dashboard/scoring") },
       { label: "Upload", to: "/dashboard?tab=upload", icon: <Upload size={15} />, match: dashTab("upload") },
+      { label: "Admin Management", to: "/dashboard/admin-management", icon: <Shield size={15} />, match: has("/dashboard/admin-management"), superOnly: true },
     ],
   },
 ];
 
 export function DashboardSidebar() {
   const loc = useLocation();
+  const { isSuperAdmin } = useAdminAuth();
   return (
     <aside
       className="hidden shrink-0 self-start rounded-xl md:block"
       style={{ width: 220, background: "#0C4A42" }}
     >
       <nav className="sticky top-6 space-y-1 px-3 py-4">
-        {GROUPS.map((g, gi) => (
-          <div key={g.label} className={gi > 0 ? "pt-4" : ""}>
-            <p
-              className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.1em]"
-              style={{ color: "#9CA3AF" }}
-            >
-              {g.label}
-            </p>
-            <ul className="space-y-0.5">
-              {g.items.map((item) => {
-                const active = item.match(loc.pathname, loc.search);
-                return (
-                  <li key={item.to}>
-                    <Link
-                      to={item.to}
-                      className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
-                        active
-                          ? "font-semibold text-white"
-                          : "text-[#E2E8F0] hover:bg-white/10 hover:text-white"
-                      }`}
-                      style={active ? { background: "#14B8A6" } : undefined}
-                    >
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+        {GROUPS.map((g, gi) => {
+          const visibleItems = g.items.filter((it) => !it.superOnly || isSuperAdmin);
+          if (visibleItems.length === 0) return null;
+          return (
+            <div key={g.label} className={gi > 0 ? "pt-4" : ""}>
+              <p
+                className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.1em]"
+                style={{ color: "#9CA3AF" }}
+              >
+                {g.label}
+              </p>
+              <ul className="space-y-0.5">
+                {visibleItems.map((item) => {
+                  const active = item.match(loc.pathname, loc.search);
+                  return (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
+                          active
+                            ? "font-semibold text-white"
+                            : "text-[#E2E8F0] hover:bg-white/10 hover:text-white"
+                        }`}
+                        style={active ? { background: "#14B8A6" } : undefined}
+                      >
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
       </nav>
     </aside>
   );
