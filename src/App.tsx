@@ -30,9 +30,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/s/:token" element={<SurveyPage />} />
+          <Route path="/survey/:token" element={<SurveyPage />} />
           <Route path="/demo" element={<DemoPage />} />
-          <Route path="/survey/:slug" element={<DemoSurveyPage />} />
+          <Route path="/demo/:slug" element={<DemoSurveyPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/trainees/:id" element={<TraineeDetailPage />} />
