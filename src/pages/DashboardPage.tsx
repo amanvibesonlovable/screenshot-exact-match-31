@@ -1017,7 +1017,7 @@ function DashboardInner() {
                   <button
                     onClick={() => {
                       const csv = ["Code,Name,Phone,Branch,Link"]
-                        .concat(employees.map((e) => `${e.employee_code},${e.name},${e.phone},${e.branch},${window.location.origin}/s/${e.token}`))
+                        .concat(employees.map((e) => `${e.employee_code},${e.name},${e.phone},${e.branch},${window.location.origin}/survey/${e.token}`))
                         .join("\n");
                       const blob = new Blob([csv], { type: "text/csv" });
                       const url = URL.createObjectURL(blob);
