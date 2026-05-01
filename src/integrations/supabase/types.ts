@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          auth_method: string
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          last_login: string | null
+          name: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auth_method?: string
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          last_login?: string | null
+          name: string
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auth_method?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          last_login?: string | null
+          name?: string
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admins_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           age: number | null
@@ -180,7 +227,9 @@ export type Database = {
     }
     Functions: {
       gen_survey_token: { Args: never; Returns: string }
+      is_active_admin: { Args: never; Returns: boolean }
       is_hr_user: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       employee_status: "training" | "positioned" | "exited"

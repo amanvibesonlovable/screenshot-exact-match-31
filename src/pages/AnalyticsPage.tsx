@@ -15,6 +15,7 @@ import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend,
   Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
+import { UserMenu } from "@/hr/UserMenu";
 
 type Employee = {
   id: string; name: string; employee_code: string;
@@ -316,10 +317,7 @@ function AnalyticsInner() {
     <main className="min-h-dvh bg-gradient-warm">
       <DashboardHeader rightSlot={
         <>
-          <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
-          <button onClick={() => supabase.auth.signOut()} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary">
-            Sign out
-          </button>
+          <UserMenu />
         </>
       } />
 

@@ -25,6 +25,7 @@ import {
 import { RiskDrillSheet, DrillKind, DrillTrainee } from "@/hr/RiskDrillSheet";
 import { OverdueModal, computeOverdueRows } from "@/hr/OverdueModal";
 import { Users, AlertTriangle, AlertCircle, Flag, ChevronRight, CheckCircle2 } from "lucide-react";
+import { UserMenu } from "@/hr/UserMenu";
 
 type Employee = {
   id: string; employee_code: string; name: string; email: string; phone: string;
@@ -630,10 +631,7 @@ function DashboardInner() {
             <button onClick={handleClear} disabled={seeding} className="rounded-md border border-destructive/30 bg-background px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
               Clear data
             </button>
-            <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
-            <button onClick={() => supabase.auth.signOut()} className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary">
-              Sign out
-            </button>
+            <UserMenu />
           </>
         }
       />

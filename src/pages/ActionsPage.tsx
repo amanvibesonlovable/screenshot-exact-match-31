@@ -6,6 +6,7 @@ import { useHrAuth } from "@/hr/useHrAuth";
 import { DashboardHeader, DashboardSidebar } from "@/hr/DashboardSidebar";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { relativeTime } from "@/hr/ResponseDetail";
+import { UserMenu } from "@/hr/UserMenu";
 
 type Employee = {
   id: string;
@@ -228,10 +229,7 @@ function ActionsInner() {
     <main className="min-h-dvh bg-gradient-warm">
       <DashboardHeader rightSlot={
         <>
-          <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
-          <button onClick={() => supabase.auth.signOut()} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary">
-            Sign out
-          </button>
+          <UserMenu />
         </>
       } />
 

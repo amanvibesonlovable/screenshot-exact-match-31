@@ -10,6 +10,7 @@ import {
   avgRiskScore, completionForEmployees, daysSince, dimAverages,
   dimRiskBand, isEligibleForStage, latestResponseByEmp, relTime, riskLevelFromScore,
 } from "@/hr/aggregations";
+import { UserMenu } from "@/hr/UserMenu";
 
 const cardCls = "rounded-3xl border border-border/60 bg-card/80 p-5 shadow-bubble backdrop-blur";
 const titleCls = "text-sm font-bold uppercase tracking-wide text-muted-foreground";
@@ -162,10 +163,7 @@ function BranchesInner() {
     <main className="min-h-dvh bg-gradient-warm">
       <DashboardHeader rightSlot={
         <>
-          <span className="hidden text-xs text-muted-foreground md:inline">{user?.email}</span>
-          <button onClick={() => supabase.auth.signOut()} className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary">
-            Sign out
-          </button>
+          <UserMenu />
         </>
       } />
 
