@@ -660,109 +660,154 @@ function DashboardInner() {
                 branches={Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort()}
               />
 
-              {/* KPI Row — 5 rich cards */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                {/* Card 1: Active trainees */}
-                <div className={kpiCardCls("neutral", false, false)}>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Active trainees</p>
-                  <p className="mt-1 text-3xl font-extrabold tabular-nums text-foreground">{kpis.activeTrainees}</p>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">
-                    across {kpis.branchCount} branch{kpis.branchCount === 1 ? "" : "es"}
-                  </p>
-                  {kpis.branchBreakdown && (
-                    <p className="mt-1 truncate text-[10px] text-muted-foreground" title={kpis.branchBreakdown}>
-                      {kpis.branchBreakdown}
-                    </p>
-                  )}
-                </div>
+              {/* KPI Row — 5 premium cards */}
+              {(() => {
+                const completionColor =
+                  kpis.completionPct >= 80 ? "#16A34A" : kpis.completionPct >= 50 ? "#D97706" : "#DC2626";
+                const cardBase =
+                  "relative flex flex-col rounded-xl p-5 shadow-sm transition";
+                const labelBase = "text-[11px] font-semibold uppercase tracking-[0.05em]";
+                return (
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                    {/* Card 1: Active trainees */}
+                    <div
+                      className={cardBase}
+                      style={{
+                        background: "linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 100%)",
+                        borderBottom: "3px solid #4F46E5",
+                      }}
+                    >
+                      <Users size={20} className="absolute right-4 top-4" style={{ color: "#94A3B8" }} />
+                      <p className={labelBase} style={{ color: "#64748B" }}>Active Trainees</p>
+                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: "#1E293B" }}>
+                        {kpis.activeTrainees}
+                      </p>
+                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
+                        across {kpis.branchCount} branch{kpis.branchCount === 1 ? "" : "es"}
+                      </p>
+                      {kpis.branchBreakdown && (
+                        <p className="mt-1 truncate text-xs" style={{ color: "#94A3B8" }} title={kpis.branchBreakdown}>
+                          {kpis.branchBreakdown}
+                        </p>
+                      )}
+                    </div>
 
-                {/* Card 2: Survey completion */}
-                {(() => {
-                  const tone: KpiTone = kpis.completionPct >= 80 ? "ok" : kpis.completionPct >= 50 ? "warn" : "bad";
-                  const ringColor = kpis.completionPct >= 80 ? "#2D8B4E" : kpis.completionPct >= 50 ? "#D4820C" : "#C23B22";
-                  return (
-                    <div className={kpiCardCls(tone, false, false)}>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Survey completion</p>
-                      <div className="mt-1 flex items-center gap-3">
-                        <p className="text-3xl font-extrabold tabular-nums text-foreground">{kpis.completionPct}%</p>
-                        <Ring pct={kpis.completionPct} color={ringColor} />
+                    {/* Card 2: Survey completion */}
+                    <div
+                      className={cardBase}
+                      style={{
+                        background: "linear-gradient(135deg, #F8FAFC 0%, #F0FDF4 100%)",
+                        borderBottom: `3px solid ${completionColor}`,
+                      }}
+                    >
+                      <div className="absolute right-3 top-3">
+                        <Ring pct={kpis.completionPct} color={completionColor} size={40} />
                       </div>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      <p className={labelBase} style={{ color: "#64748B" }}>Survey Completion</p>
+                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: completionColor }}>
+                        {kpis.completionPct}%
+                      </p>
+                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
                         {kpis.totalCompleted} of {kpis.totalEligible} eligible
                       </p>
                     </div>
-                  );
-                })()}
 
-                {/* Card 3: High risk */}
-                <button
-                  onClick={() => setDrillKind("HIGH")}
-                  className={kpiCardCls(kpis.high > 0 ? "bad" : "ok", true, false)}
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">High risk</p>
-                  {kpis.high > 0 ? (
-                    <>
-                      <p className="mt-1 text-3xl font-extrabold tabular-nums text-destructive">{kpis.high}</p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    {/* Card 3: High risk */}
+                    <button
+                      onClick={() => setDrillKind("HIGH")}
+                      className={`${cardBase} text-left hover:shadow-lg cursor-pointer`}
+                      style={{
+                        background: "linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%)",
+                        borderBottom: "3px solid #DC2626",
+                      }}
+                    >
+                      <AlertTriangle size={20} className="absolute right-4 top-4" style={{ color: "#FCA5A5" }} />
+                      <p className={labelBase} style={{ color: "#DC2626" }}>High Risk</p>
+                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: "#DC2626" }}>
+                        {kpis.high}
+                      </p>
+                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
                         {kpis.activeTrainees ? Math.round((kpis.high / kpis.activeTrainees) * 100) : 0}% of active trainees
                       </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">All clear ✓</p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">No high-risk trainees</p>
-                    </>
-                  )}
-                </button>
+                      <ChevronRight size={16} className="absolute bottom-4 right-3" style={{ color: "#DC2626" }} />
+                    </button>
 
-                {/* Card 4: Medium risk */}
-                <button
-                  onClick={() => setDrillKind("MEDIUM")}
-                  className={kpiCardCls(kpis.med > 0 ? "warn" : "neutral", true, false)}
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Medium risk</p>
-                  <p className="mt-1 text-3xl font-extrabold tabular-nums text-amber-600 dark:text-amber-400">{kpis.med}</p>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">
-                    {kpis.activeTrainees ? Math.round((kpis.med / kpis.activeTrainees) * 100) : 0}% of active trainees
-                  </p>
-                </button>
+                    {/* Card 4: Medium risk */}
+                    <button
+                      onClick={() => setDrillKind("MEDIUM")}
+                      className={`${cardBase} text-left hover:shadow-lg cursor-pointer`}
+                      style={{
+                        background: "linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%)",
+                        borderBottom: "3px solid #D97706",
+                      }}
+                    >
+                      <AlertCircle size={20} className="absolute right-4 top-4" style={{ color: "#FCD34D" }} />
+                      <p className={labelBase} style={{ color: "#D97706" }}>Medium Risk</p>
+                      <p className="mt-2 text-[40px] font-bold leading-none tabular-nums" style={{ color: "#D97706" }}>
+                        {kpis.med}
+                      </p>
+                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
+                        {kpis.activeTrainees ? Math.round((kpis.med / kpis.activeTrainees) * 100) : 0}% of active trainees
+                      </p>
+                      <ChevronRight size={16} className="absolute bottom-4 right-3" style={{ color: "#D97706" }} />
+                    </button>
 
-                {/* Card 5: Critical flags */}
-                <button
-                  onClick={() => setDrillKind("CRITICAL")}
-                  className={kpiCardCls(kpis.critical > 0 ? "bad" : "ok", true, kpis.critical > 0)}
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Critical flags</p>
-                  {kpis.critical > 0 ? (
-                    <>
-                      <p className="mt-1 text-3xl font-extrabold tabular-nums text-destructive">{kpis.critical}</p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">require immediate attention</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">No critical flags 🎉</p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">All clear</p>
-                    </>
-                  )}
-                </button>
-              </div>
+                    {/* Card 5: Critical flags */}
+                    <button
+                      onClick={() => setDrillKind("CRITICAL")}
+                      className={`${cardBase} text-left hover:shadow-lg cursor-pointer`}
+                      style={{
+                        background: "linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%)",
+                        borderBottom: "3px solid #DC2626",
+                      }}
+                    >
+                      <Flag size={20} className="absolute right-4 top-4" style={{ color: "#FCA5A5" }} />
+                      <p className={labelBase} style={{ color: "#DC2626" }}>Critical Flags</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <p className="text-[40px] font-bold leading-none tabular-nums" style={{ color: "#DC2626" }}>
+                          {kpis.critical}
+                        </p>
+                        {kpis.critical > 0 && (
+                          <span
+                            className="pulse-dot inline-block h-2 w-2 rounded-full"
+                            style={{ background: "#DC2626" }}
+                          />
+                        )}
+                      </div>
+                      <p className="mt-2 text-sm" style={{ color: "#64748B" }}>
+                        require immediate attention
+                      </p>
+                      <ChevronRight size={16} className="absolute bottom-4 right-3" style={{ color: "#DC2626" }} />
+                    </button>
+                  </div>
+                );
+              })()}
 
-              {/* Low-risk footnote */}
+              {/* Healthy footnote */}
               {kpis.low > 0 && (
-                <p className="text-[11px] text-muted-foreground">
-                  {kpis.low} trainee{kpis.low === 1 ? "" : "s"} in the healthy range (Low Risk).
+                <p className="flex items-center gap-1.5 text-[13px]" style={{ color: "#16A34A" }}>
+                  <CheckCircle2 size={14} />
+                  {kpis.low} trainee{kpis.low === 1 ? "" : "s"} in the healthy range
                 </p>
               )}
 
+              {/* Overdue banner — opens modal */}
               {pendingOverdue > 0 && (
-                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
-                  ⚠ {pendingOverdue} trainees have overdue check-ins (eligible 5+ days, not completed).{" "}
-                  <button onClick={() => goToTrainees({})} className="font-bold underline">Show them</button>
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+                  <span>
+                    ⚠ <span className="font-semibold">{pendingOverdue} trainees</span> have overdue check-ins (eligible 5+ days, not completed).
+                  </span>
+                  <button
+                    onClick={() => setShowOverdue(true)}
+                    className="rounded-md bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-500/30 dark:text-amber-200"
+                  >
+                    Show them
+                  </button>
                 </div>
               )}
 
               {/* Row: Funnel (60%) + Critical Alerts (40%) */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
                 <div className="lg:col-span-3">
                   <CompletionFunnel rows={funnel} onStageClick={(s) => goToTrainees({ stage: String(s) })} />
                 </div>
@@ -772,26 +817,9 @@ function DashboardInner() {
               </div>
 
               {/* Row: Branch (50%) + Dimension Heatmap (50%) */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <BranchLeaderboard rows={branchData} onBranchClick={(b) => goToTrainees({ branch: b })} />
                 <DimensionHeatmap rows={dimRows} />
-              </div>
-
-              {/* Full-width: Risk trend over time */}
-              <div className="grid grid-cols-1 gap-4">
-                <RiskTrendChart data={trendData} />
-              </div>
-
-              {/* Row: Manager view (60%) + Pulse (40%, hides if empty) */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-                <div className={orgPulse.length > 0 ? "lg:col-span-3" : "lg:col-span-5"}>
-                  <ManagerView rows={managerRows} onManagerClick={(m) => goToTrainees({ manager: m })} />
-                </div>
-                {orgPulse.length > 0 && (
-                  <div className="lg:col-span-2">
-                    <OrgPulseDonut data={orgPulse} />
-                  </div>
-                )}
               </div>
             </div>
           )}
