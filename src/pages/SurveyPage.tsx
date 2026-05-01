@@ -39,18 +39,19 @@ const SurveyPage = () => {
 
     let cancelled = false;
     (async () => {
-      // 1. Look up employee by token
-      const { data: employee, error: empErr } = await supabase
-        .from("employees")
-        .select("id, name, doj")
-        .eq("token", token)
-        .maybeSingle();
+      // 1. Look up employee by token via SECURITY DEFINER RPC (no anon SELECT on employees)
+      const { data: empRows, error: empErr } = await supabase.rpc(
+        "get_employee_by_token" as any,
+        { p_token: token },
+      );
 
       if (cancelled) return;
       if (empErr) {
-        setState({ status: "error", message: empErr.message });
+        console.error("Employee lookup failed", empErr);
+        setState({ status: "error", message: "Something went wrong. Please try again later." });
         return;
       }
+      const employee = Array.isArray(empRows) ? (empRows[0] as EmployeeRow | undefined) : undefined;
       if (!employee) {
         setState({ status: "invalid" });
         return;
@@ -64,20 +65,19 @@ const SurveyPage = () => {
         return;
       }
 
-      // 3. Check if this stage is already submitted
-      const { data: existing, error: respErr } = await supabase
-        .from("survey_responses")
-        .select("id")
-        .eq("employee_id", employee.id)
-        .eq("stage", String(stage) as "15" | "30" | "45" | "60" | "90" | "180")
-        .maybeSingle();
+      // 3. Check if this stage is already submitted via RPC
+      const { data: alreadyDone, error: respErr } = await supabase.rpc(
+        "survey_already_submitted" as any,
+        { p_token: token, p_stage: String(stage) },
+      );
 
       if (cancelled) return;
       if (respErr) {
-        setState({ status: "error", message: respErr.message });
+        console.error("Survey response lookup failed", respErr);
+        setState({ status: "error", message: "Something went wrong. Please try again later." });
         return;
       }
-      if (existing) {
+      if (alreadyDone) {
         setState({ status: "already-done", stage });
         return;
       }
@@ -91,7 +91,7 @@ const SurveyPage = () => {
   }, [token]);
 
   async function handleComplete(
-    employeeId: string,
+    _employeeId: string,
     stage: SurveyStage,
     employeeName: string,
     result: ScoredSurvey & {
@@ -99,23 +99,25 @@ const SurveyPage = () => {
       completion_time_seconds: number;
     },
   ) {
-    const payload = {
-      employee_id: employeeId,
-      stage: String(stage) as "15" | "30" | "45" | "60" | "90" | "180",
-      responses: result.responses as unknown as never,
-      free_text_response: result.free_text_response,
-      scores: result.scores as unknown as never,
-      critical_flags: result.critical_flags as unknown as never,
-      gaming_flag: result.gaming_flag,
-      completion_time_seconds: result.completion_time_seconds,
-      final_score: result.scores.final_score,
-      risk_level: result.scores.risk_level,
-    };
-    const { error } = await supabase.from("survey_responses").insert(payload);
+    if (!token) {
+      setState({ status: "submitted", employeeName, stage });
+      return;
+    }
+    const { error } = await supabase.rpc("submit_survey_response" as any, {
+      p_token: token,
+      p_stage: String(stage),
+      p_responses: result.responses as unknown as never,
+      p_free_text: result.free_text_response,
+      p_scores: result.scores as unknown as never,
+      p_critical_flags: result.critical_flags as unknown as never,
+      p_gaming_flag: result.gaming_flag,
+      p_completion_time_seconds: result.completion_time_seconds,
+      p_final_score: result.scores.final_score,
+      p_risk_level: result.scores.risk_level,
+    });
 
     if (error) {
-      // Show error but keep the friendly closing screen — the chat already
-      // congratulated the user. Console logs the issue for HR debugging.
+      // Friendly closing screen — log details for HR debugging.
       console.error("Failed to save survey response", error);
     }
     setState({ status: "submitted", employeeName, stage });

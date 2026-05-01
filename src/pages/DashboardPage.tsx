@@ -115,8 +115,7 @@ function DashboardInner() {
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
-  const [whitelist, setWhitelist] = useState<{ id: string; email: string }[]>([]);
-  const [newWhitelistEmail, setNewWhitelistEmail] = useState("");
+  const [loading2, _unused] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Trainees-tab filters
@@ -153,14 +152,12 @@ function DashboardInner() {
 
   const refresh = async () => {
     setLoading(true);
-    const [{ data: emp }, { data: resp }, { data: wl }] = await Promise.all([
+    const [{ data: emp }, { data: resp }] = await Promise.all([
       supabase.from("employees").select("*").order("created_at", { ascending: false }),
       supabase.from("survey_responses").select("*").order("submitted_at", { ascending: false }),
-      supabase.from("hr_whitelist").select("id, email").order("created_at", { ascending: false }),
     ]);
     setEmployees((emp ?? []) as Employee[]);
     setResponses((resp ?? []) as unknown as SurveyResponse[]);
-    setWhitelist((wl ?? []) as any);
     setLoading(false);
   };
 
@@ -609,16 +606,7 @@ function DashboardInner() {
     setTab("trainees");
   };
 
-  const addWhitelist = async () => {
-    if (!newWhitelistEmail) return;
-    await supabase.from("hr_whitelist").insert({ email: newWhitelistEmail.toLowerCase() });
-    setNewWhitelistEmail("");
-    refresh();
-  };
-  const removeWhitelist = async (id: string) => {
-    await supabase.from("hr_whitelist").delete().eq("id", id);
-    refresh();
-  };
+
 
   return (
     <main className="min-h-dvh bg-background">
@@ -1048,34 +1036,16 @@ function DashboardInner() {
           {tab === "settings" && (
             <div className="space-y-4">
               <div className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-bubble backdrop-blur">
-                <h2 className="text-lg font-extrabold text-foreground">HR whitelist</h2>
+                <h2 className="text-lg font-extrabold text-foreground">Admin access</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Only emails on this list can sign in to Candor HR.
+                  Admin access is now managed from a dedicated page. Super admins can add, edit, and remove admins there.
                 </p>
-                <div className="mt-4 flex gap-2">
-                  <input
-                    value={newWhitelistEmail}
-                    onChange={(e) => setNewWhitelistEmail(e.target.value)}
-                    placeholder="hr-member@company.com"
-                    className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm"
-                  />
-                  <button onClick={addWhitelist} className="rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-soft">
-                    Add
-                  </button>
-                </div>
-                <ul className="mt-4 space-y-1.5">
-                  {whitelist.map((w) => (
-                    <li key={w.id} className="flex items-center justify-between rounded-xl border border-border/60 bg-background/50 px-3 py-2 text-sm">
-                      <span>{w.email}</span>
-                      <button onClick={() => removeWhitelist(w.id)} className="text-xs text-destructive hover:underline">
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                  {whitelist.length === 0 && (
-                    <li className="text-xs text-muted-foreground">No emails whitelisted yet.</li>
-                  )}
-                </ul>
+                <Link
+                  to="/dashboard/admin-management"
+                  className="mt-4 inline-block rounded-full bg-gradient-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-soft"
+                >
+                  Open Admin Management →
+                </Link>
               </div>
               <p className="text-center text-xs text-muted-foreground">
                 Want to test the trainee flow?{" "}

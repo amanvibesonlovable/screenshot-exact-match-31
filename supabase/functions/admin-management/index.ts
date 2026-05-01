@@ -158,26 +158,8 @@ Deno.serve(async (req) => {
       return json({ success: true });
     }
 
-    if (action === "bootstrap_super_admin") {
-      // Open helper to create the bootstrap super admin auth user.
-      // Allowed only if no super admin auth user exists yet for this email.
-      const email = "aman@vibesonlovable.com";
-      const password = "lovableadmin123";
-      const { data: list } = await admin.auth.admin.listUsers();
-      const target = list.users.find((u) => u.email?.toLowerCase() === email);
-      if (target) {
-        await admin.auth.admin.updateUserById(target.id, { password, email_confirm: true });
-      } else {
-        const { error } = await admin.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-          user_metadata: { name: "Aman (Super Admin)" },
-        });
-        if (error) return json({ error: error.message }, 400);
-      }
-      return json({ success: true });
-    }
+    // bootstrap_super_admin action removed for security: the bootstrap admin
+    // is created via migration seed. Hardcoded credentials must never live in source.
 
     return json({ error: `Unknown action: ${action}` }, 400);
   } catch (e) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import RequireHr from "@/hr/RequireHr";
+import { UserMenu } from "@/hr/UserMenu";
 import { DIM_COLORS, DIM_LABELS, RISK_COLORS } from "@/hr/DashboardCharts";
 
 function TraineeDetailInner() {
