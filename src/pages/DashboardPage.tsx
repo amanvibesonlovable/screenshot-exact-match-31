@@ -651,125 +651,77 @@ function DashboardInner() {
                 branches={Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort()}
               />
 
-              {/* KPI Row — 5 clean, cohesive cards */}
+              {/* KPI Bar — single container, 5 cells */}
               {(() => {
+                const hasResponses = oResponses.length > 0;
                 const completionColor =
                   kpis.completionPct >= 80 ? "#16A34A" : kpis.completionPct >= 50 ? "#D97706" : "#DC2626";
-                const labelCls = "text-[11px] font-semibold uppercase tracking-[0.05em] text-[#6B7280]";
-                const numberCls = "mt-3 text-[36px] font-bold leading-none tabular-nums";
-                const ctxCls = "mt-3 text-sm text-[#6B7280]";
-                const cardBase =
-                  "relative flex flex-col rounded-xl border border-[#E5E7EB] bg-white p-6 shadow-sm transition";
-                const clickableCls = "hover:bg-[#FAFAFA] hover:shadow-md cursor-pointer";
+                const dash = "—";
+                const highPct = kpis.activeTrainees ? Math.round((kpis.high / kpis.activeTrainees) * 100) : 0;
+                const medPct = kpis.activeTrainees ? Math.round((kpis.med / kpis.activeTrainees) * 100) : 0;
 
                 return (
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                    {/* Card 1: Active Trainees */}
-                    <div className={cardBase} style={{ borderLeft: "4px solid #0F766E" }}>
-                      <div className="flex items-start justify-between">
-                        <p className={labelCls}>Active Trainees</p>
-                        <Users size={18} style={{ color: "#0F766E", opacity: 0.5 }} />
-                      </div>
-                      <p className={numberCls} style={{ color: "#111827" }}>
-                        {kpis.activeTrainees}
-                      </p>
-                      <p className={ctxCls}>
-                        across {kpis.branchCount} branch{kpis.branchCount === 1 ? "" : "es"}
-                      </p>
-                      {kpis.branchBreakdown && (
-                        <p className="mt-1 truncate text-xs text-[#9CA3AF]" title={kpis.branchBreakdown}>
-                          {kpis.branchBreakdown}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Card 2: Survey Completion */}
-                    <div className={cardBase} style={{ borderLeft: `4px solid ${completionColor}` }}>
-                      <div className="flex items-start justify-between">
-                        <p className={labelCls}>Survey Completion</p>
-                        <CheckCircle2 size={18} style={{ color: completionColor, opacity: 0.5 }} />
-                      </div>
-                      <p className={numberCls} style={{ color: completionColor }}>
-                        {kpis.completionPct}%
-                      </p>
-                      <p className={ctxCls}>
-                        {kpis.totalCompleted} of {kpis.totalEligible} eligible
-                      </p>
-                    </div>
-
-                    {/* Card 3: High Risk */}
-                    <button
-                      onClick={() => setDrillKind("HIGH")}
-                      className={`${cardBase} ${clickableCls} text-left`}
-                      style={{ borderLeft: "4px solid #DC2626" }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <p className={labelCls}>High Risk</p>
-                        <AlertTriangle size={18} style={{ color: "#DC2626", opacity: 0.5 }} />
-                      </div>
-                      <p className={numberCls} style={{ color: "#DC2626" }}>
-                        {kpis.high}
-                      </p>
-                      <p className={ctxCls}>
-                        {kpis.activeTrainees ? Math.round((kpis.high / kpis.activeTrainees) * 100) : 0}% of active trainees
-                      </p>
-                      <ChevronRight size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
-                    </button>
-
-                    {/* Card 4: Medium Risk */}
-                    <button
-                      onClick={() => setDrillKind("MEDIUM")}
-                      className={`${cardBase} ${clickableCls} text-left`}
-                      style={{ borderLeft: "4px solid #D97706" }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <p className={labelCls}>Medium Risk</p>
-                        <AlertCircle size={18} style={{ color: "#D97706", opacity: 0.5 }} />
-                      </div>
-                      <p className={numberCls} style={{ color: "#D97706" }}>
-                        {kpis.med}
-                      </p>
-                      <p className={ctxCls}>
-                        {kpis.activeTrainees ? Math.round((kpis.med / kpis.activeTrainees) * 100) : 0}% of active trainees
-                      </p>
-                      <ChevronRight size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
-                    </button>
-
-                    {/* Card 5: Critical Flags */}
-                    <button
-                      onClick={() => setDrillKind("CRITICAL")}
-                      className={`${cardBase} ${clickableCls} text-left`}
-                      style={{ borderLeft: "4px solid #DC2626" }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <p className={labelCls}>Critical Flags</p>
-                        <Flag size={18} style={{ color: "#DC2626", opacity: 0.5 }} />
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <p className="text-[36px] font-bold leading-none tabular-nums" style={{ color: "#DC2626" }}>
-                          {kpis.critical}
-                        </p>
-                        {kpis.critical > 0 && (
-                          <span
-                            className="pulse-dot inline-block h-1.5 w-1.5 rounded-full"
-                            style={{ background: "#DC2626" }}
-                          />
-                        )}
-                      </div>
-                      <p className={ctxCls}>require immediate attention</p>
-                      <ChevronRight size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
-                    </button>
-                  </div>
+                  <KPIBar
+                    metrics={[
+                      {
+                        key: "active",
+                        label: "Active Trainees",
+                        value: kpis.activeTrainees,
+                        valueColor: "#0F172A",
+                        context: `across ${kpis.branchCount} branch${kpis.branchCount === 1 ? "" : "es"}`,
+                        subContext: kpis.branchBreakdown || undefined,
+                        flex: 1.3,
+                      },
+                      {
+                        key: "completion",
+                        label: "Completion",
+                        value: hasResponses ? `${kpis.completionPct}%` : dash,
+                        valueColor: hasResponses ? completionColor : "#CBD5E1",
+                        context: hasResponses
+                          ? `${kpis.totalCompleted} of ${kpis.totalEligible} eligible`
+                          : "no surveys yet",
+                      },
+                      {
+                        key: "high",
+                        label: "High Risk",
+                        value: hasResponses ? kpis.high : dash,
+                        valueColor: hasResponses ? "#DC2626" : "#CBD5E1",
+                        context: hasResponses ? `${highPct}% of active trainees` : "awaiting data",
+                        onClick: hasResponses ? () => setDrillKind("HIGH") : undefined,
+                        hoverTint: "#FEF2F2",
+                      },
+                      {
+                        key: "medium",
+                        label: "Medium Risk",
+                        value: hasResponses ? kpis.med : dash,
+                        valueColor: hasResponses ? "#D97706" : "#CBD5E1",
+                        context: hasResponses ? `${medPct}% of active trainees` : "awaiting data",
+                        onClick: hasResponses ? () => setDrillKind("MEDIUM") : undefined,
+                        hoverTint: "#FFFBEB",
+                      },
+                      {
+                        key: "critical",
+                        label: "Critical Flags",
+                        value: hasResponses ? kpis.critical : dash,
+                        valueColor: hasResponses ? "#DC2626" : "#CBD5E1",
+                        context: hasResponses ? "require immediate attention" : "awaiting data",
+                        onClick: hasResponses ? () => setDrillKind("CRITICAL") : undefined,
+                        hoverTint: "#FEF2F2",
+                        pulse: hasResponses && kpis.critical > 0,
+                      },
+                    ]}
+                  />
                 );
               })()}
 
               {/* Healthy footnote */}
               {kpis.low > 0 && (
-                <p className="flex items-center gap-1.5 text-[13px]" style={{ color: "#16A34A" }}>
-                  <CheckCircle2 size={14} />
+                <p className="mt-3 flex items-center gap-1.5 text-[13px]" style={{ color: "#64748B" }}>
+                  <CheckCircle2 size={14} style={{ color: "#16A34A" }} />
                   {kpis.low} trainee{kpis.low === 1 ? "" : "s"} in the healthy range
                 </p>
               )}
+
 
               {/* Overdue banner — opens modal */}
               {pendingOverdue > 0 && (
