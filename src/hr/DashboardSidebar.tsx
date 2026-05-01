@@ -10,7 +10,7 @@ import {
   MapPin,
   FileText,
 } from "lucide-react";
-import { PulseLogo } from "@/components/PulseLogo";
+import { CandorLogo } from "@/components/CandorLogo";
 
 type Item = {
   label: string;
