@@ -48,7 +48,8 @@ const SurveyPage = () => {
 
       if (cancelled) return;
       if (empErr) {
-        setState({ status: "error", message: empErr.message });
+        console.error("Employee lookup failed", empErr);
+        setState({ status: "error", message: "Something went wrong. Please try again later." });
         return;
       }
       if (!employee) {
