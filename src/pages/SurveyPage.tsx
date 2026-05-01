@@ -39,12 +39,11 @@ const SurveyPage = () => {
 
     let cancelled = false;
     (async () => {
-      // 1. Look up employee by token
-      const { data: employee, error: empErr } = await supabase
-        .from("employees")
-        .select("id, name, doj")
-        .eq("token", token)
-        .maybeSingle();
+      // 1. Look up employee by token via SECURITY DEFINER RPC (no anon SELECT on employees)
+      const { data: empRows, error: empErr } = await supabase.rpc(
+        "get_employee_by_token" as any,
+        { p_token: token },
+      );
 
       if (cancelled) return;
       if (empErr) {
@@ -52,6 +51,7 @@ const SurveyPage = () => {
         setState({ status: "error", message: "Something went wrong. Please try again later." });
         return;
       }
+      const employee = Array.isArray(empRows) ? (empRows[0] as EmployeeRow | undefined) : undefined;
       if (!employee) {
         setState({ status: "invalid" });
         return;
@@ -65,13 +65,11 @@ const SurveyPage = () => {
         return;
       }
 
-      // 3. Check if this stage is already submitted
-      const { data: existing, error: respErr } = await supabase
-        .from("survey_responses")
-        .select("id")
-        .eq("employee_id", employee.id)
-        .eq("stage", String(stage) as "15" | "30" | "45" | "60" | "90" | "180")
-        .maybeSingle();
+      // 3. Check if this stage is already submitted via RPC
+      const { data: alreadyDone, error: respErr } = await supabase.rpc(
+        "survey_already_submitted" as any,
+        { p_token: token, p_stage: String(stage) },
+      );
 
       if (cancelled) return;
       if (respErr) {
@@ -79,7 +77,7 @@ const SurveyPage = () => {
         setState({ status: "error", message: "Something went wrong. Please try again later." });
         return;
       }
-      if (existing) {
+      if (alreadyDone) {
         setState({ status: "already-done", stage });
         return;
       }
