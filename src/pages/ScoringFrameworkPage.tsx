@@ -243,6 +243,12 @@ Risk Classification:
           </p>
         </div>
 
+        {/* Section 8: Notification Settings */}
+        <SectionTitle n={8}>Notification Settings</SectionTitle>
+        <div className="print:hidden">
+          <NotificationSettingsCard />
+        </div>
+
         <p className="mt-12 text-center text-[11px] text-muted-foreground">
           Last updated: {today} · Candor · HR
         </p>
