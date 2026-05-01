@@ -4,7 +4,7 @@ import { lovable } from "@/integrations/lovable";
 import { useHrAuth } from "@/hr/useHrAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CandorLogo } from "@/components/CandorLogo";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 
 type LiveStats = {
   trainees: number;
