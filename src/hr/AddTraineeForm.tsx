@@ -20,6 +20,39 @@ const traineeSchema = z.object({
 
 type FormState = z.infer<typeof traineeSchema>;
 
+type TraineeInsertPayload = {
+  employee_code: string;
+  name: string;
+  email: string;
+  phone: string;
+  branch: string;
+  area_manager: string;
+  doj: string;
+  notification_preference: FormState["notification_preference"];
+  age?: number;
+  college?: string;
+};
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function insertTraineeWithRetry(payload: TraineeInsertPayload) {
+  const delays = [0, 900, 1800];
+
+  for (let attempt = 0; attempt < delays.length; attempt += 1) {
+    if (delays[attempt]) await wait(delays[attempt]);
+
+    const { error } = await supabase.from("employees").insert(payload);
+    if (!error || error.code !== "PGRST002") return { error };
+  }
+
+  return {
+    error: {
+      message: "The backend schema is still refreshing. Please wait a few seconds and try again.",
+      code: "PGRST002",
+    },
+  };
+}
+
 const empty: FormState = {
   employee_code: "",
   name: "",
@@ -61,7 +94,7 @@ export function AddTraineeForm({ onAdded }: { onAdded?: () => void }) {
     }
 
     setSubmitting(true);
-    const { error } = await supabase.from("employees").insert({
+    const payload: TraineeInsertPayload = {
       employee_code: parsed.data.employee_code,
       name: parsed.data.name,
       email: parsed.data.email.toLowerCase(),
@@ -72,7 +105,8 @@ export function AddTraineeForm({ onAdded }: { onAdded?: () => void }) {
       notification_preference: parsed.data.notification_preference,
       ...(parsed.data.age ? { age: Number(parsed.data.age) } : {}),
       ...(parsed.data.college ? { college: parsed.data.college } : {}),
-    });
+    };
+    const { error } = await insertTraineeWithRetry(payload);
     setSubmitting(false);
 
     if (error) {
