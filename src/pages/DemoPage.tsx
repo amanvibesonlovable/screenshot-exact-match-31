@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { LogIn, ArrowRight } from "lucide-react";
 import { SURVEYS, type SurveyStage } from "@/survey/survey-config";
+import { CandorLogo } from "@/components/CandorLogo";
 
 const STAGE_META: Record<SurveyStage, { context: string; measures: string; minutes: string }> = {
   15: {
@@ -44,10 +45,10 @@ export default function DemoPage() {
       <nav className="border-b border-border bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              P
-            </div>
-            <span className="text-base font-semibold tracking-tight text-foreground">Pulse</span>
+            <CandorLogo size={32} />
+            <span className="text-lg font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>
+              Candor
+            </span>
           </Link>
           <Link
             to="/auth"
@@ -62,7 +63,7 @@ export default function DemoPage() {
       <section className="mx-auto max-w-5xl px-6 py-10">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Try the check-in experience
+            Try the Candor check-in experience
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground">
             Pick any milestone to see what trainees experience. These are demos — no data is saved.
