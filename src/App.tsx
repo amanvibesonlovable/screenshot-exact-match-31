@@ -16,6 +16,8 @@ import ActionsPage from "./pages/ActionsPage.tsx";
 import BranchesPage from "./pages/BranchesPage.tsx";
 
 import ReportsPage from "./pages/ReportsPage.tsx";
+import DemoPage from "./pages/DemoPage.tsx";
+import DemoSurveyPage from "./pages/DemoSurveyPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/s/:token" element={<SurveyPage />} />
+          <Route path="/demo" element={<DemoPage />} />
+          <Route path="/survey/:slug" element={<DemoSurveyPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/trainees/:id" element={<TraineeDetailPage />} />
