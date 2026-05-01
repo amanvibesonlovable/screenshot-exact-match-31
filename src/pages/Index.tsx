@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { MessageSquare, TrendingUp, ShieldCheck, Upload, MessagesSquare, BarChart3, ArrowRight, LogIn } from "lucide-react";
+import { PulseLogo } from "@/components/PulseLogo";
 
 const Index = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -23,13 +24,12 @@ const Index = () => {
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link to="/" className="flex items-center gap-2.5">
-            <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors ${
-                scrolled ? "bg-primary text-primary-foreground" : "bg-white text-primary"
-              }`}
+            <span
+              className={scrolled ? "pulse-logo-glow-indigo" : "pulse-logo-glow"}
+              style={{ display: "inline-flex" }}
             >
-              P
-            </div>
+              <PulseLogo size={32} bg={scrolled ? "#4F46E5" : "#FFFFFF"} fg={scrolled ? "#FFFFFF" : "#4F46E5"} />
+            </span>
             <span
               className={`text-base font-semibold tracking-tight transition-colors ${
                 scrolled ? "text-foreground" : "text-white"
@@ -72,15 +72,38 @@ const Index = () => {
         />
         <div className="relative mx-auto max-w-3xl px-6 pt-12 pb-12 text-center sm:pt-16 sm:pb-16">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            <span className="pulse-dot inline-block h-2 w-2 rounded-full" style={{ background: "#22C55E" }} />
             Early-warning system for Sales Trainees
           </span>
-          <h1 className="mt-5 text-balance text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+          <h1
+            className="mt-5 text-balance text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
+            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.15)" }}
+          >
             Hear your trainees before they leave.
           </h1>
+
+          {/* Hero EKG line — draws once on load */}
+          <svg
+            aria-hidden
+            viewBox="0 0 600 40"
+            className="mx-auto mt-5 h-6 w-[80%] max-w-md"
+            preserveAspectRatio="none"
+          >
+            <polyline
+              className="pulse-line-draw"
+              points="0,20 120,20 150,20 165,8 180,32 195,14 210,20 360,20 380,20 395,12 410,28 425,18 440,20 600,20"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeOpacity={0.35}
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+
           <p
-            className="mx-auto mt-3 max-w-xl text-pretty text-base leading-relaxed"
-            style={{ color: "rgba(255,255,255,0.85)" }}
+            className="mx-auto mt-3 max-w-xl text-pretty text-lg leading-relaxed"
+            style={{ color: "#E0E7FF", textShadow: "0 1px 2px rgba(0,0,0,0.15)" }}
           >
             Pulse runs friendly, confidential check-ins with every trainee at six milestones — then
             surfaces who's struggling so HR can step in early.
@@ -88,17 +111,17 @@ const Index = () => {
           <div className="mt-6 flex flex-col items-center gap-3">
             <Link
               to="/demo"
-              className="rounded-md bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-md transition-colors hover:bg-[#EEF2FF]"
+              className="rounded-md border border-white bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-md transition-colors hover:bg-[#EEF2FF]"
             >
               Try the trainee experience →
             </Link>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.9)" }}>
               Demo:{" "}
-              <Link to="/demo" className="font-medium text-white underline-offset-2 hover:underline">
+              <Link to="/demo" className="font-medium text-white underline underline-offset-2 hover:opacity-90">
                 Try all 6 check-ins
               </Link>{" "}
               ·{" "}
-              <Link to="/dashboard" className="font-medium text-white underline-offset-2 hover:underline">
+              <Link to="/dashboard" className="font-medium text-white underline underline-offset-2 hover:opacity-90">
                 View HR dashboard
               </Link>
             </p>
