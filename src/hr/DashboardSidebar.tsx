@@ -10,6 +10,7 @@ import {
   MapPin,
   FileText,
 } from "lucide-react";
+import { PulseLogo } from "@/components/PulseLogo";
 
 type Item = {
   label: string;
@@ -107,9 +108,7 @@ export function DashboardHeader({
     <header className="border-b border-border bg-card">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
         <Link to="/dashboard" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-            P
-          </div>
+          <PulseLogo size={32} />
           <div>
             <p className="text-base font-semibold tracking-tight text-foreground">Pulse · HR</p>
             <p className="text-[11px] text-muted-foreground">Early warning &amp; training effectiveness</p>
