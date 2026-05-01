@@ -56,12 +56,7 @@ function TraineeDetailInner() {
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
             ← Back to dashboard
           </Link>
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="rounded-full border border-border bg-background px-4 py-2 text-xs font-bold text-foreground hover:bg-secondary"
-          >
-            Sign out
-          </button>
+          <UserMenu />
         </div>
       </header>
 
