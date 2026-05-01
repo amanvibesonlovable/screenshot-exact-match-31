@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import RequireHr from "@/hr/RequireHr";
 import { DIM_COLORS } from "@/hr/DashboardCharts";
-import { NotificationSettingsCard } from "@/hr/NotificationSettingsCard";
 
 const dimensions: { key: string; label: string; what: string; applies: string }[] = [
   { key: "training_effectiveness", label: "Training Effectiveness", what: "Learning quality, skill gaps, curriculum coverage, dossier adherence", applies: "All surveys" },
@@ -241,12 +240,6 @@ Risk Classification:
           <p className="mt-3 text-xs text-muted-foreground">
             This flag does <strong>not</strong> affect risk scores — it's an indicator for HR to interpret the response with caution.
           </p>
-        </div>
-
-        {/* Section 8: Notification Settings */}
-        <SectionTitle n={8}>Notification Settings</SectionTitle>
-        <div className="print:hidden">
-          <NotificationSettingsCard />
         </div>
 
         <p className="mt-12 text-center text-[11px] text-muted-foreground">

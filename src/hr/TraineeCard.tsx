@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { DIM_COLORS, DIM_LABELS, RISK_COLORS } from "./DashboardCharts";
-import { buildWhatsAppUrl } from "./whatsapp";
-import { MessageCircle } from "lucide-react";
 
 const ACTION_OPTIONS = [
   "Called trainee",
@@ -205,31 +203,6 @@ export function TraineeCard({
           >
             {actionOpen ? "Cancel" : "Mark action"}
           </button>
-          {(() => {
-            const hasPending = Object.values(surveysByStage).some(
-              (s) => s.eligible && !s.completed,
-            );
-            if (!hasPending) return null;
-            const url = buildWhatsAppUrl({
-              name: employee.name,
-              phone: employee.phone,
-              token: employee.token,
-            });
-            if (!url) return null;
-            return (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Send check-in link via WhatsApp"
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-soft transition hover:-translate-y-0.5"
-                style={{ background: "#25D366" }}
-              >
-                <MessageCircle size={12} />
-                WhatsApp
-              </a>
-            );
-          })()}
         </div>
         <code className="truncate rounded bg-secondary px-2 py-1 text-[10px] text-muted-foreground max-w-[160px]">
           /s/{employee.token}

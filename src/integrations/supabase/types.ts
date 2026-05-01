@@ -73,7 +73,6 @@ export type Database = {
           employee_code: string
           id: string
           name: string
-          notification_preference: string
           phone: string
           status: Database["public"]["Enums"]["employee_status"]
           token: string
@@ -90,7 +89,6 @@ export type Database = {
           employee_code: string
           id?: string
           name: string
-          notification_preference?: string
           phone: string
           status?: Database["public"]["Enums"]["employee_status"]
           token?: string
@@ -107,7 +105,6 @@ export type Database = {
           employee_code?: string
           id?: string
           name?: string
-          notification_preference?: string
           phone?: string
           status?: Database["public"]["Enums"]["employee_status"]
           token?: string
@@ -146,71 +143,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "hr_actions_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notification_settings: {
-        Row: {
-          auto_send_email: boolean
-          id: boolean
-          reminder_delay_days: number
-          send_reminders: boolean
-          updated_at: string
-        }
-        Insert: {
-          auto_send_email?: boolean
-          id?: boolean
-          reminder_delay_days?: number
-          send_reminders?: boolean
-          updated_at?: string
-        }
-        Update: {
-          auto_send_email?: boolean
-          id?: boolean
-          reminder_delay_days?: number
-          send_reminders?: boolean
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      notifications: {
-        Row: {
-          channel: string
-          created_at: string
-          employee_id: string
-          error_message: string | null
-          id: string
-          sent_at: string | null
-          stage: number
-          status: string
-        }
-        Insert: {
-          channel: string
-          created_at?: string
-          employee_id: string
-          error_message?: string | null
-          id?: string
-          sent_at?: string | null
-          stage: number
-          status?: string
-        }
-        Update: {
-          channel?: string
-          created_at?: string
-          employee_id?: string
-          error_message?: string | null
-          id?: string
-          sent_at?: string | null
-          stage?: number
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
