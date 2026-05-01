@@ -821,10 +821,34 @@ function DashboardInner() {
 
           {tab === "trainees" && (
             <div className="space-y-4">
-              <div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Trainees</h1>
-                <p className="text-xs text-muted-foreground">{filteredTrainees.length} of {traineeCards.length} trainees</p>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Trainees</h1>
+                  <p className="text-xs text-muted-foreground">
+                    {traineesView === "list"
+                      ? `${filteredTrainees.length} of ${traineeCards.length} trainees`
+                      : "Manually add a single trainee to the roster"}
+                  </p>
+                </div>
+                <div className="flex rounded-md border border-border p-0.5">
+                  {(["list", "add"] as const).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setTraineesView(v)}
+                      className={`rounded px-3 py-1.5 text-xs font-semibold transition ${
+                        traineesView === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {v === "list" ? "List" : "+ Add trainee"}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {traineesView === "add" ? (
+                <AddTraineeForm onAdded={refresh} />
+              ) : (
+                <>
 
               <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
                 <div className="flex rounded-md border border-border p-0.5">
