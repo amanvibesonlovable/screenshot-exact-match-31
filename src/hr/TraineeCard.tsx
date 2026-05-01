@@ -205,7 +205,7 @@ export function TraineeCard({
           </button>
         </div>
         <code className="truncate rounded bg-secondary px-2 py-1 text-[10px] text-muted-foreground max-w-[160px]">
-          /s/{employee.token}
+          /survey/{employee.token}
         </code>
       </div>
 
