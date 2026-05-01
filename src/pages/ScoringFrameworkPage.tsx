@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import RequireHr from "@/hr/RequireHr";
 import { DIM_COLORS } from "@/hr/DashboardCharts";
+import { NotificationSettingsCard } from "@/hr/NotificationSettingsCard";
 
 const dimensions: { key: string; label: string; what: string; applies: string }[] = [
   { key: "training_effectiveness", label: "Training Effectiveness", what: "Learning quality, skill gaps, curriculum coverage, dossier adherence", applies: "All surveys" },

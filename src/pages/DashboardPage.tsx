@@ -26,6 +26,7 @@ import { RiskDrillSheet, DrillKind, DrillTrainee } from "@/hr/RiskDrillSheet";
 import { OverdueModal, computeOverdueRows } from "@/hr/OverdueModal";
 import { Users, AlertTriangle, AlertCircle, Flag, ChevronRight, CheckCircle2 } from "lucide-react";
 import { UserMenu } from "@/hr/UserMenu";
+import { NotificationBanner } from "@/hr/NotificationBanner";
 
 type Employee = {
   id: string; employee_code: string; name: string; email: string; phone: string;
@@ -649,6 +650,8 @@ function DashboardInner() {
                 setFilters={setOverviewFilters}
                 branches={Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort()}
               />
+
+              <NotificationBanner refreshKey={employees.length + responses.length} />
 
               {/* KPI Row — 5 premium cards */}
               {(() => {
