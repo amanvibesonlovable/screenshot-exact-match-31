@@ -131,6 +131,7 @@ function DashboardInner() {
   const [grouping, setGrouping] = useState<"flat" | "branch" | "manager">("flat");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState("Called trainee");
+  const [traineesView, setTraineesView] = useState<"list" | "add">("list");
 
   const [showUpload, setShowUpload] = useState(false);
   const [seeding, setSeeding] = useState(false);
