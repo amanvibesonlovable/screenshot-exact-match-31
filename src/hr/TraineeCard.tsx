@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { DIM_COLORS, DIM_LABELS, RISK_COLORS } from "./DashboardCharts";
+import { buildWhatsAppUrl } from "./whatsapp";
+import { MessageCircle } from "lucide-react";
 
 const ACTION_OPTIONS = [
   "Called trainee",
