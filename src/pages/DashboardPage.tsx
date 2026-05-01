@@ -992,7 +992,7 @@ function DashboardInner() {
                     </thead>
                     <tbody>
                       {employees.map((e) => {
-                        const url = `${window.location.origin}/s/${e.token}`;
+                        const url = `${window.location.origin}/survey/${e.token}`;
                         return (
                           <tr key={e.id} className="border-t border-border/40">
                             <td className="py-1.5 text-xs">{e.employee_code}</td>
