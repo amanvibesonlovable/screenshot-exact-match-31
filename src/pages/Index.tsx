@@ -270,9 +270,7 @@ const Index = () => {
         <div className="mx-auto max-w-6xl px-6 py-10">
           <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-bold text-primary">
-                P
-              </div>
+              <PulseLogo size={36} bg="#FFFFFF" fg="#4F46E5" />
               <div>
                 <div className="text-base font-semibold">Pulse</div>
                 <div className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>
