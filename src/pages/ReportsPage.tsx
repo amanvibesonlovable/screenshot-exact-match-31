@@ -97,9 +97,9 @@ function ReportsInner() {
 
           {/* 2x2 grid of report cards */}
           <section className="no-print grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Weekly Pulse */}
+            {/* Weekly Digest */}
             <div className={cardCls}>
-              <h2 className="text-lg font-extrabold text-foreground">Weekly Pulse</h2>
+              <h2 className="text-lg font-extrabold text-foreground">Weekly Digest</h2>
               <p className="text-xs text-muted-foreground">Auto-generated summary of the past week. Share with leadership.</p>
               <label className="mt-3 block text-xs font-bold text-muted-foreground">Date range</label>
               <select value={weeklyRange} onChange={(e) => setWeeklyRange(e.target.value as DateRange)}
