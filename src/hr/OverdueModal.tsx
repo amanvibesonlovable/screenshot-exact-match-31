@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, Check } from "lucide-react";
+import { Copy, Download, Check, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { buildWhatsAppUrl } from "./whatsapp";
 
 const STAGES = [15, 30, 45, 60, 90, 180] as const;
 
