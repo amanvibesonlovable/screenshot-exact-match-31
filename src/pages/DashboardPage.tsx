@@ -24,8 +24,9 @@ import {
 } from "@/hr/OverviewFilterBar";
 import { RiskDrillSheet, DrillKind, DrillTrainee } from "@/hr/RiskDrillSheet";
 import { OverdueModal, computeOverdueRows } from "@/hr/OverdueModal";
-import { Users, AlertTriangle, AlertCircle, Flag, ChevronRight, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { UserMenu } from "@/hr/UserMenu";
+import { KPIBar } from "@/hr/KPIBar";
 
 type Employee = {
   id: string; employee_code: string; name: string; email: string; phone: string;
