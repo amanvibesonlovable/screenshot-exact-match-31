@@ -150,24 +150,6 @@ export type Database = {
           },
         ]
       }
-      hr_whitelist: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-        }
-        Relationships: []
-      }
       survey_responses: {
         Row: {
           completion_time_seconds: number
@@ -227,9 +209,39 @@ export type Database = {
     }
     Functions: {
       gen_survey_token: { Args: never; Returns: string }
+      get_employee_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          doj: string
+          id: string
+          name: string
+        }[]
+      }
       is_active_admin: { Args: never; Returns: boolean }
       is_hr_user: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      submit_survey_response: {
+        Args: {
+          p_completion_time_seconds: number
+          p_critical_flags: Json
+          p_final_score: number
+          p_free_text: string
+          p_gaming_flag: boolean
+          p_responses: Json
+          p_risk_level: Database["public"]["Enums"]["risk_level"]
+          p_scores: Json
+          p_stage: Database["public"]["Enums"]["survey_stage"]
+          p_token: string
+        }
+        Returns: string
+      }
+      survey_already_submitted: {
+        Args: {
+          p_stage: Database["public"]["Enums"]["survey_stage"]
+          p_token: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       employee_status: "training" | "positioned" | "exited"
