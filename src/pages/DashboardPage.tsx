@@ -671,7 +671,7 @@ function DashboardInner() {
                       className={cardBase}
                       style={{
                         background: "linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 100%)",
-                        borderBottom: "3px solid #4F46E5",
+                        borderBottom: "3px solid #0F766E",
                       }}
                     >
                       <Users size={20} className="absolute right-4 top-4" style={{ color: "#94A3B8" }} />
@@ -1045,7 +1045,7 @@ function DashboardInner() {
               <div className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-bubble backdrop-blur">
                 <h2 className="text-lg font-extrabold text-foreground">HR whitelist</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Only emails on this list can sign in to Pulse HR.
+                  Only emails on this list can sign in to Candor HR.
                 </p>
                 <div className="mt-4 flex gap-2">
                   <input
