@@ -61,7 +61,7 @@ export function AddTraineeForm({ onAdded }: { onAdded?: () => void }) {
     }
 
     setSubmitting(true);
-    const payload: Record<string, unknown> = {
+    const { error } = await supabase.from("employees").insert({
       employee_code: parsed.data.employee_code,
       name: parsed.data.name,
       email: parsed.data.email.toLowerCase(),
@@ -70,11 +70,9 @@ export function AddTraineeForm({ onAdded }: { onAdded?: () => void }) {
       area_manager: parsed.data.area_manager,
       doj: parsed.data.doj,
       notification_preference: parsed.data.notification_preference,
-    };
-    if (parsed.data.age) payload.age = Number(parsed.data.age);
-    if (parsed.data.college) payload.college = parsed.data.college;
-
-    const { error } = await supabase.from("employees").insert(payload);
+      ...(parsed.data.age ? { age: Number(parsed.data.age) } : {}),
+      ...(parsed.data.college ? { college: parsed.data.college } : {}),
+    });
     setSubmitting(false);
 
     if (error) {
