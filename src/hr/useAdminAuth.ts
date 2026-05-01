@@ -36,13 +36,19 @@ export function useAdminAuth(): AdminAuthState {
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
-      setUser(s?.user ?? null);
-      if (!s?.user) {
-        setAdmin(null);
-        setResolved(true);
-      } else {
-        setResolved(false);
-      }
+      setUser((prev) => {
+        const next = s?.user ?? null;
+        // Avoid resetting resolved state when the same user is re-emitted
+        // (e.g. TOKEN_REFRESHED on tab focus).
+        if (prev?.id === next?.id) return prev;
+        if (!next) {
+          setAdmin(null);
+          setResolved(true);
+        } else {
+          setResolved(false);
+        }
+        return next;
+      });
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
