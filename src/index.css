@@ -169,17 +169,19 @@
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55); }
   50%      { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
 }
-@keyframes pulse-glow-indigo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.45); }
-  50%      { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+@keyframes pulse-glow-teal {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.45); }
+  50%      { box-shadow: 0 0 0 10px rgba(20, 184, 166, 0); }
 }
 .pulse-logo-glow {
-  border-radius: 9999px;
+  border-radius: 12px;
   animation: pulse-glow 3s ease-in-out infinite;
 }
-.pulse-logo-glow-indigo {
-  border-radius: 9999px;
-  animation: pulse-glow-indigo 3s ease-in-out infinite;
+/* Teal glow variant — used on light/scrolled backgrounds */
+.pulse-logo-glow-indigo,
+.pulse-logo-glow-teal {
+  border-radius: 12px;
+  animation: pulse-glow-teal 3s ease-in-out infinite;
 }
 
 /* Landing page — pulsating status dot */
