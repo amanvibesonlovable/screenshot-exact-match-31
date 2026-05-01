@@ -651,6 +651,8 @@ function DashboardInner() {
                 branches={Array.from(new Set(employees.map((e) => e.branch).filter(Boolean))).sort()}
               />
 
+              <NotificationBanner refreshKey={employees.length + responses.length} />
+
               {/* KPI Row — 5 premium cards */}
               {(() => {
                 const completionColor =
