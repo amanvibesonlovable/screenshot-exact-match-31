@@ -164,3 +164,41 @@
   100% { transform: scale(1); }
 }
 .check-pop { animation: check-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* Landing page — pulsating glow behind logo */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55); }
+  50%      { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+}
+@keyframes pulse-glow-indigo {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.45); }
+  50%      { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+}
+.pulse-logo-glow {
+  border-radius: 9999px;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+.pulse-logo-glow-indigo {
+  border-radius: 9999px;
+  animation: pulse-glow-indigo 3s ease-in-out infinite;
+}
+
+/* Landing page — pulsating status dot */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.6; transform: scale(1.5); }
+}
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Landing page — hero EKG line draws once on load */
+@keyframes draw-pulse-line {
+  0%   { stroke-dashoffset: 1200; }
+  100% { stroke-dashoffset: 0; }
+}
+.pulse-line-draw {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: draw-pulse-line 2.4s ease-out 0.3s forwards;
+}
