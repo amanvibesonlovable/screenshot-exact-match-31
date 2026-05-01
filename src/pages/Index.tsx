@@ -257,42 +257,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="border-y border-border" style={{ background: "#F8FAFB" }}>
-        <div className="mx-auto max-w-5xl px-6 py-12">
-          <h2 className="text-center text-xs font-bold uppercase tracking-widest" style={{ color: "#64748B" }}>
-            How it works
-          </h2>
-          <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4">
-            {[
-              { icon: Upload, title: "Upload", body: "Upload your trainee roster as a CSV. Links auto-generate for each trainee." },
-              { icon: MessagesSquare, title: "Check-in", body: "Trainees get a friendly chat survey at Day 15, 30, 45, 60, 90, and 180. No login needed." },
-              { icon: BarChart3, title: "Act", body: "HR sees risk scores, flags, and trends on a live dashboard. Intervene early." },
-            ].map((s, i) => (
-              <div key={s.title} className="relative flex flex-col items-center text-center">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white shadow-md"
-                  style={{ background: "#0F766E" }}
-                >
-                  {i + 1}
-                </div>
-                <div
-                  className="mt-4 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm"
-                  style={{ color: "#0F766E" }}
-                >
-                  <s.icon size={22} />
-                </div>
-                <h3 className="mt-3 text-sm font-semibold" style={{ color: "#0F172A" }}>{s.title}</h3>
-                <p className="mt-1 max-w-[220px] text-xs leading-relaxed" style={{ color: "#475569" }}>{s.body}</p>
-                {i < 2 && (
-                  <ArrowRight className="absolute right-[-12px] top-5 hidden h-5 w-5 sm:block" style={{ color: "#CBD5E1" }} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Footer — deep teal */}
       <footer style={{ background: "#0C4A42" }} className="text-white">
         <div className="mx-auto max-w-6xl px-6 py-10">
