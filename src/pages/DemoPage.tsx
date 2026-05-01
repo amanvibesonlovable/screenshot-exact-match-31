@@ -78,7 +78,7 @@ export default function DemoPage() {
             return (
               <Link
                 key={stage}
-                to={`/survey/demo-day${stage}`}
+                to={`/demo/demo-day${stage}`}
                 className="group flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-l-4 hover:border-l-primary hover:shadow-md"
               >
                 <span className="inline-flex w-fit items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
