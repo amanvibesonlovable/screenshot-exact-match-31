@@ -1,87 +1,131 @@
 import { Link } from "react-router-dom";
-import { MessageSquare, TrendingUp, ShieldCheck, Upload, MessagesSquare, BarChart3, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MessageSquare, TrendingUp, ShieldCheck, Upload, MessagesSquare, BarChart3, ArrowRight, LogIn } from "lucide-react";
 
 const Index = () => {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 480);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <main className="min-h-dvh bg-background">
-      {/* Top nav */}
-      <nav className="border-b border-border bg-card">
+      {/* Sticky Nav — transparent on hero, solid after scroll */}
+      <nav
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "border-b border-border bg-white/95 backdrop-blur"
+            : "border-b border-transparent bg-transparent"
+        }`}
+      >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                scrolled ? "bg-primary text-primary-foreground" : "bg-white text-primary"
+              }`}
+            >
               P
             </div>
-            <span className="text-base font-semibold tracking-tight text-foreground">Pulse</span>
+            <span
+              className={`text-base font-semibold tracking-tight transition-colors ${
+                scrolled ? "text-foreground" : "text-white"
+              }`}
+            >
+              Pulse
+            </span>
           </Link>
           <Link
             to="/auth"
-            className="rounded-md border border-border bg-card px-4 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            className={`inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium transition-colors ${
+              scrolled
+                ? "border border-primary text-primary hover:bg-primary/5"
+                : "border border-white/80 bg-transparent text-white hover:bg-white/15"
+            }`}
           >
+            <LogIn size={16} />
             HR Sign In
           </Link>
         </div>
       </nav>
 
-      {/* Hero with subtle radial gradient bg */}
+      {/* Hero — deep indigo gradient → white */}
       <section
-        className="relative overflow-hidden"
+        className="relative overflow-hidden pt-20"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 0%, #EDEDFF 0%, #F5F5FF 35%, hsl(var(--background)) 75%)",
+            "linear-gradient(180deg, #1E1B4B 0%, #312E81 30%, #4F46E5 55%, #A5B4FC 75%, #FFFFFF 100%)",
         }}
       >
         {/* faint dot pattern */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          className="pointer-events-none absolute inset-0 opacity-[0.08]"
           style={{
             backgroundImage:
-              "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+              "radial-gradient(circle, #FFFFFF 1px, transparent 1px)",
             backgroundSize: "22px 22px",
           }}
         />
-        <div className="relative mx-auto max-w-3xl px-6 pt-12 pb-8 text-center sm:pt-14 sm:pb-10">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+        <div className="relative mx-auto max-w-3xl px-6 pt-12 pb-12 text-center sm:pt-16 sm:pb-16">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
             Early-warning system for Sales Trainees
           </span>
-          <h1 className="mt-5 text-balance text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mt-5 text-balance text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
             Hear your trainees before they leave.
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground">
+          <p
+            className="mx-auto mt-3 max-w-xl text-pretty text-base leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.85)" }}
+          >
             Pulse runs friendly, confidential check-ins with every trainee at six milestones — then
             surfaces who's struggling so HR can step in early.
           </p>
-          <div className="mt-5 flex flex-col items-center gap-2.5">
+          <div className="mt-6 flex flex-col items-center gap-3">
             <Link
-              to="/s/demo-token"
-              className="rounded-md bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-[hsl(244_75%_52%)]"
+              to="/demo"
+              className="rounded-md bg-white px-6 py-2.5 text-sm font-semibold text-primary shadow-md transition-colors hover:bg-[#EEF2FF]"
             >
               Try the trainee experience →
             </Link>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.85)" }}>
               Demo:{" "}
-              <Link to="/s/demo-token" className="font-medium text-primary underline-offset-2 hover:underline">
-                Day 15 check-in
+              <Link to="/demo" className="font-medium text-white underline-offset-2 hover:underline">
+                Try all 6 check-ins
               </Link>{" "}
               ·{" "}
-              <Link to="/auth" className="font-medium text-primary underline-offset-2 hover:underline">
-                HR dashboard
+              <Link to="/dashboard" className="font-medium text-white underline-offset-2 hover:underline">
+                View HR dashboard
               </Link>
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Stats row */}
-          <div className="mt-8 grid grid-cols-2 gap-6 border-y border-border/60 py-5 sm:grid-cols-4">
+      {/* Stats row — bridge between dark hero and white content */}
+      <section className="border-t border-border/60" style={{ background: "#F8FAFC" }}>
+        <div className="mx-auto max-w-5xl px-6 py-6">
+          <div className="grid grid-cols-2 gap-px sm:grid-cols-4">
             {[
-              { n: "6", l: "Check-in milestones" },
-              { n: "5", l: "Risk dimensions" },
-              { n: "<2 min", l: "Per check-in" },
+              { n: "6", l: "Check-in Milestones" },
+              { n: "5", l: "Risk Dimensions" },
+              { n: "<2 min", l: "Per Check-in" },
               { n: "100%", l: "Confidential" },
-            ].map((s) => (
-              <div key={s.l} className="text-center">
-                <div className="text-2xl font-bold text-foreground sm:text-3xl">{s.n}</div>
-                <div className="mt-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">{s.l}</div>
+            ].map((s, i) => (
+              <div
+                key={s.l}
+                className={`text-center ${i > 0 ? "sm:border-l sm:border-border/60" : ""}`}
+              >
+                <div className="text-2xl font-bold sm:text-3xl" style={{ color: "#4F46E5" }}>
+                  {s.n}
+                </div>
+                <div className="mt-1 text-[11px] font-medium uppercase tracking-wide" style={{ color: "#6B7280" }}>
+                  {s.l}
+                </div>
               </div>
             ))}
           </div>
@@ -89,101 +133,108 @@ const Index = () => {
       </section>
 
       {/* Feature cards */}
-      <section className="mx-auto max-w-5xl px-6 py-10">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {/* Card 1 */}
-          <div className="flex flex-col rounded-lg border border-border bg-card p-5 shadow-sm">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary-soft text-primary">
-              <MessageSquare size={18} />
-            </div>
-            <h3 className="mt-3 text-sm font-semibold text-foreground">Conversational</h3>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              Feels like chatting with a friend, not filling a form. Trainees respond with taps — no typing needed.
-            </p>
-            <div className="mt-4 space-y-1.5">
-              <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-secondary px-2.5 py-1 text-[11px] text-foreground">
-                How's training going?
+      <section className="bg-background">
+        <div className="mx-auto max-w-5xl px-6 py-12">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            {/* Card 1 - Conversational */}
+            <div
+              className="flex flex-col rounded-xl border border-border p-6 shadow-sm"
+              style={{ background: "#F5F3FF" }}
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-primary shadow-sm">
+                <MessageSquare size={22} />
               </div>
-              <div className="ml-auto max-w-[70%] rounded-2xl rounded-br-sm bg-primary px-2.5 py-1 text-[11px] text-primary-foreground">
-                Pretty good 👍
-              </div>
-              <div className="max-w-[75%] rounded-2xl rounded-bl-sm bg-secondary px-2.5 py-1 text-[11px] text-foreground">
-                What's the hardest part?
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="flex flex-col rounded-lg border border-border bg-card p-5 shadow-sm">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary-soft text-primary">
-              <TrendingUp size={18} />
-            </div>
-            <h3 className="mt-3 text-sm font-semibold text-foreground">Smart Scoring</h3>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              Every response is scored across 5 risk dimensions with dynamic follow-ups that dig deeper when it matters.
-            </p>
-            <div className="mt-4 space-y-1.5">
-              {[
-                { l: "Training", w: "75%", c: "bg-primary" },
-                { l: "Attrition", w: "40%", c: "bg-[#F59E0B]" },
-                { l: "Support", w: "60%", c: "bg-primary" },
-                { l: "Wellbeing", w: "85%", c: "bg-success" },
-                { l: "Readiness", w: "55%", c: "bg-primary" },
-              ].map((b) => (
-                <div key={b.l} className="flex items-center gap-2">
-                  <span className="w-14 text-[10px] uppercase text-muted-foreground">{b.l}</span>
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
-                    <div className={`h-full ${b.c}`} style={{ width: b.w }} />
-                  </div>
+              <h3 className="mt-4 text-base font-semibold text-foreground">Conversational</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                Feels like chatting with a friend, not filling a form. Trainees respond with taps — no typing needed.
+              </p>
+              <div className="mt-5 space-y-2 rounded-lg bg-white p-3 shadow-inner">
+                <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-secondary px-3 py-1.5 text-[12px] text-foreground">
+                  How's training going?
                 </div>
-              ))}
+                <div className="ml-auto max-w-[70%] rounded-2xl rounded-br-sm bg-primary px-3 py-1.5 text-[12px] text-primary-foreground">
+                  Pretty good 👍
+                </div>
+                <div className="max-w-[75%] rounded-2xl rounded-bl-sm bg-secondary px-3 py-1.5 text-[12px] text-foreground">
+                  What's the hardest part?
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Card 3 */}
-          <div className="flex flex-col rounded-lg border border-border bg-card p-5 shadow-sm">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary-soft text-primary">
-              <ShieldCheck size={18} />
+            {/* Card 2 - Smart Scoring */}
+            <div
+              className="flex flex-col rounded-xl border border-border p-6 shadow-sm"
+              style={{ background: "#EFF6FF" }}
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-primary shadow-sm">
+                <TrendingUp size={22} />
+              </div>
+              <h3 className="mt-4 text-base font-semibold text-foreground">Smart Scoring</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                Every response is scored across 5 risk dimensions with dynamic follow-ups that dig deeper when it matters.
+              </p>
+              <div className="mt-5 space-y-2 rounded-lg bg-white p-3 shadow-inner">
+                {[
+                  { l: "Training", w: "75%", c: "#3B82F6" },
+                  { l: "Attrition", w: "40%", c: "#EF4444" },
+                  { l: "Support", w: "60%", c: "#8B5CF6" },
+                  { l: "Wellbeing", w: "85%", c: "#14B8A6" },
+                  { l: "Readiness", w: "55%", c: "#4F46E5" },
+                ].map((b) => (
+                  <div key={b.l} className="flex items-center gap-2">
+                    <span className="w-16 text-[10px] font-medium uppercase text-muted-foreground">{b.l}</span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+                      <div className="h-full" style={{ width: b.w, backgroundColor: b.c }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-foreground">Confidential</h3>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              No login required. Managers never see individual answers. Trainees know their honesty is protected.
-            </p>
-            <div className="mt-4 flex items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-2">
-              <ShieldCheck size={14} className="text-success" />
-              <span className="text-[11px] font-medium text-foreground">Encrypted · Anonymous to managers</span>
+
+            {/* Card 3 - Confidential */}
+            <div
+              className="flex flex-col rounded-xl border border-border p-6 shadow-sm"
+              style={{ background: "#F0FDF4" }}
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-primary shadow-sm">
+                <ShieldCheck size={22} />
+              </div>
+              <h3 className="mt-4 text-base font-semibold text-foreground">Confidential</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                No login required. Managers never see individual answers. Trainees know their honesty is protected.
+              </p>
+              <div className="mt-5 flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2.5 shadow-inner">
+                <ShieldCheck size={16} className="text-success" />
+                <span className="text-[12px] font-medium text-foreground">Encrypted · Anonymous</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* How it works */}
-      <section className="border-y border-border bg-secondary/40">
-        <div className="mx-auto max-w-5xl px-6 py-10">
-          <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <section className="border-y border-border" style={{ background: "#F9FAFB" }}>
+        <div className="mx-auto max-w-5xl px-6 py-12">
+          <h2 className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
             How it works
           </h2>
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-2">
+          <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4">
             {[
               { icon: Upload, title: "Upload", body: "Upload your trainee roster as CSV." },
-              { icon: MessagesSquare, title: "Trainees", body: "Get a friendly chat check-in at each milestone." },
+              { icon: MessagesSquare, title: "Trainees Check-in", body: "Friendly chat at every milestone." },
               { icon: BarChart3, title: "HR Acts", body: "On risk-scored insights from the dashboard." },
             ].map((s, i) => (
-              <div key={s.title} className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left">
-                <div className="flex flex-col items-center sm:items-start">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-primary">
-                    <s.icon size={18} />
-                  </div>
-                  <div className="mt-3">
-                    <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                      Step {i + 1}
-                    </div>
-                    <h3 className="text-sm font-semibold text-foreground">{s.title}</h3>
-                    <p className="mt-1 max-w-[200px] text-xs leading-relaxed text-muted-foreground">{s.body}</p>
-                  </div>
+              <div key={s.title} className="relative flex flex-col items-center text-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-md">
+                  {i + 1}
                 </div>
+                <div className="mt-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+                  <s.icon size={22} />
+                </div>
+                <h3 className="mt-3 text-sm font-semibold text-foreground">{s.title}</h3>
+                <p className="mt-1 max-w-[200px] text-xs leading-relaxed text-muted-foreground">{s.body}</p>
                 {i < 2 && (
-                  <ArrowRight className="mx-auto mt-3 hidden h-4 w-4 shrink-0 text-muted-foreground sm:mt-4 sm:block" />
+                  <ArrowRight className="absolute right-[-12px] top-5 hidden h-5 w-5 text-muted-foreground/60 sm:block" />
                 )}
               </div>
             ))}
@@ -191,11 +242,31 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-4 text-xs text-muted-foreground sm:flex-row">
-          <span>Pulse — Built for HR teams that care about trainee success</span>
-          <span>Confidential & Secure</span>
+      {/* Footer — deep indigo */}
+      <footer style={{ background: "#1E1B4B" }} className="text-white">
+        <div className="mx-auto max-w-6xl px-6 py-10">
+          <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-bold text-primary">
+                P
+              </div>
+              <div>
+                <div className="text-base font-semibold">Pulse</div>
+                <div className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  Hear your trainees before they leave.
+                </div>
+              </div>
+            </div>
+            <div className="text-sm" style={{ color: "rgba(255,255,255,0.85)" }}>
+              Built for HR teams that care about trainee success
+            </div>
+          </div>
+          <div
+            className="mt-8 border-t pt-4 text-xs"
+            style={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)" }}
+          >
+            © {new Date().getFullYear()} Pulse · Confidential & Secure
+          </div>
         </div>
       </footer>
     </main>
