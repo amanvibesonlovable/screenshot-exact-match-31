@@ -18,6 +18,7 @@ import BranchesPage from "./pages/BranchesPage.tsx";
 import ReportsPage from "./pages/ReportsPage.tsx";
 import DemoPage from "./pages/DemoPage.tsx";
 import DemoSurveyPage from "./pages/DemoSurveyPage.tsx";
+import AdminManagementPage from "./pages/AdminManagementPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/dashboard/branches" element={<BranchesPage />} />
           
           <Route path="/dashboard/reports" element={<ReportsPage />} />
+          <Route path="/dashboard/admin-management" element={<AdminManagementPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
