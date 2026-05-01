@@ -28,7 +28,7 @@ export default function AuthPage() {
     let cancelled = false;
     (async () => {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from("trainees")
           .select("id, branch, latest_risk")
           .limit(1000);
