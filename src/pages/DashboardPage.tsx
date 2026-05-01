@@ -150,6 +150,8 @@ function DashboardInner() {
 
   // Drill-down sheet
   const [drillKind, setDrillKind] = useState<DrillKind | null>(null);
+  // Overdue check-ins modal
+  const [showOverdue, setShowOverdue] = useState(false);
 
   const refresh = async () => {
     setLoading(true);
