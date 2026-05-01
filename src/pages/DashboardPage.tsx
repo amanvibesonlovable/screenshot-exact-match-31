@@ -308,6 +308,11 @@ function DashboardInner() {
     return n;
   }, [oEmployees, oResponses]);
 
+  const overdueRows = useMemo(
+    () => computeOverdueRows(oEmployees as any, oResponses as any),
+    [oEmployees, oResponses],
+  );
+
   const donutData = useMemo(() => {
     const c = { LOW: 0, MEDIUM: 0, HIGH: 0 };
     for (const r of oLatest.values()) c[r.risk_level]++;
