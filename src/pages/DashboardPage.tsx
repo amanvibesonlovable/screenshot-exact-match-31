@@ -26,6 +26,8 @@ import {
   filtersToParams,
 } from "@/hr/OverviewFilterBar";
 import { RiskDrillSheet, DrillKind, DrillTrainee } from "@/hr/RiskDrillSheet";
+import { OverdueModal, computeOverdueRows } from "@/hr/OverdueModal";
+import { Users, AlertTriangle, AlertCircle, Flag, ChevronRight, CheckCircle2 } from "lucide-react";
 
 type Employee = {
   id: string; employee_code: string; name: string; email: string; phone: string;
