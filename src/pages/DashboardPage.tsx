@@ -9,9 +9,6 @@ import {
   CriticalAlertsFeed,
   DimensionHeatmap,
   DIM_LABELS,
-  ManagerView,
-  OrgPulseDonut,
-  RiskTrendChart,
 } from "@/hr/DashboardCharts";
 import { TraineeCard, TraineeCardData } from "@/hr/TraineeCard";
 import CsvUploadModal from "@/hr/CsvUploadModal";
