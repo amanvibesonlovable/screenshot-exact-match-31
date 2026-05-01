@@ -80,7 +80,7 @@ function TraineeDetailInner() {
             </div>
             <div className="rounded-2xl border border-dashed border-border bg-background/50 p-3 text-xs text-muted-foreground">
               Survey link:{" "}
-              <code className="rounded bg-secondary px-1.5 py-0.5 text-foreground">/s/{employee.token}</code>
+              <code className="rounded bg-secondary px-1.5 py-0.5 text-foreground">/survey/{employee.token}</code>
             </div>
           </div>
         </div>
