@@ -115,16 +115,6 @@ const Index = () => {
             >
               Try the trainee experience →
             </Link>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.9)" }}>
-              Demo:{" "}
-              <Link to="/demo" className="font-medium text-white underline underline-offset-2 hover:opacity-90">
-                Try all 6 check-ins
-              </Link>{" "}
-              ·{" "}
-              <Link to="/dashboard" className="font-medium text-white underline underline-offset-2 hover:opacity-90">
-                View HR dashboard
-              </Link>
-            </p>
           </div>
         </div>
       </section>
