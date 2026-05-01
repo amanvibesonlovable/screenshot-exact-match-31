@@ -160,50 +160,66 @@ export function OverdueModal({
                 <th className="px-3 py-2.5">Overdue Survey</th>
                 <th className="px-3 py-2.5 text-right">Days Overdue</th>
                 <th className="px-3 py-2.5">Survey Link</th>
+                <th className="px-3 py-2.5">WhatsApp</th>
               </tr>
             </thead>
             <tbody>
               {sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">
                     No overdue check-ins. 🎉
                   </td>
                 </tr>
               ) : (
-                sorted.map((r) => (
-                  <tr key={r.employeeId} className="border-t border-border hover:bg-secondary/40">
-                    <td className="px-3 py-2.5 font-medium text-foreground">{r.name}</td>
-                    <td className="px-3 py-2.5 text-muted-foreground">{r.branch}</td>
-                    <td className="px-3 py-2.5 text-muted-foreground">{r.manager}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums">{r.daysSinceJoining}</td>
-                    <td className="px-3 py-2.5">Day {r.overdueStage}</td>
-                    <td className="px-3 py-2.5 text-right">
-                      <Badge
-                        variant="outline"
-                        className="border-destructive/30 bg-destructive/10 text-destructive tabular-nums"
-                      >
-                        {r.daysOverdue}d
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <button
-                        onClick={() => copyLink(r)}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground hover:bg-secondary"
-                        title={r.surveyUrl}
-                      >
-                        {copiedId === r.employeeId ? (
-                          <>
-                            <Check size={12} /> Copied
-                          </>
+                sorted.map((r) => {
+                  const waUrl = buildWhatsAppUrl({ name: r.name, phone: r.phone, token: r.surveyUrl.split("/s/")[1] ?? "" });
+                  return (
+                    <tr key={r.employeeId} className="border-t border-border hover:bg-secondary/40">
+                      <td className="px-3 py-2.5 font-medium text-foreground">{r.name}</td>
+                      <td className="px-3 py-2.5 text-muted-foreground">{r.branch}</td>
+                      <td className="px-3 py-2.5 text-muted-foreground">{r.manager}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums">{r.daysSinceJoining}</td>
+                      <td className="px-3 py-2.5">Day {r.overdueStage}</td>
+                      <td className="px-3 py-2.5 text-right">
+                        <Badge
+                          variant="outline"
+                          className="border-destructive/30 bg-destructive/10 text-destructive tabular-nums"
+                        >
+                          {r.daysOverdue}d
+                        </Badge>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <button
+                          onClick={() => copyLink(r)}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground hover:bg-secondary"
+                          title={r.surveyUrl}
+                        >
+                          {copiedId === r.employeeId ? (
+                            <><Check size={12} /> Copied</>
+                          ) : (
+                            <><Copy size={12} /> Copy</>
+                          )}
+                        </button>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        {waUrl ? (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Send check-in link via WhatsApp"
+                            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold text-white"
+                            style={{ background: "#25D366" }}
+                          >
+                            <MessageCircle size={12} /> WhatsApp
+                          </a>
                         ) : (
-                          <>
-                            <Copy size={12} /> Copy
-                          </>
+                          <span className="text-xs text-muted-foreground">No phone</span>
                         )}
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
