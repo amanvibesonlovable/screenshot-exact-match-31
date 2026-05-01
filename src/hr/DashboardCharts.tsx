@@ -41,9 +41,9 @@ export const DIM_LABELS: Record<string, string> = {
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
 
 const cardCls =
-  "rounded-3xl border border-border/60 bg-card/80 p-5 shadow-bubble backdrop-blur";
+  "rounded-xl border border-border bg-card p-6 shadow-sm";
 const titleCls =
-  "text-sm font-bold uppercase tracking-wide text-muted-foreground";
+  "text-base font-semibold tracking-tight text-foreground";
 
 export function RiskDonut({
   data,
