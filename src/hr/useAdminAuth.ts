@@ -77,12 +77,9 @@ export function useAdminAuth(): AdminAuthState {
         setAdmin(null);
       } else {
         setAdmin(data as unknown as AdminRecord);
-        // Best-effort last_login update
-        supabase
-          .from("admins" as any)
-          .update({ last_login: new Date().toISOString() })
-          .eq("email", email)
-          .then(() => {});
+        // Best-effort last_login update via SECURITY DEFINER RPC
+        // (direct UPDATE is no longer permitted by RLS to prevent self-escalation)
+        supabase.rpc("update_own_last_login" as any).then(() => {});
       }
       setResolved(true);
     })();
