@@ -310,6 +310,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_own_last_login: { Args: never; Returns: undefined }
     }
     Enums: {
       employee_status: "training" | "positioned" | "exited"
