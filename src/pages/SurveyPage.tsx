@@ -130,6 +130,7 @@ const SurveyPage = () => {
     result: ScoredSurvey & {
       free_text_response: string | null;
       completion_time_seconds: number;
+      rawAnswers: { question_id: string; selected: number[] }[];
     },
   ) {
     const pending: PendingSubmission = { stage, employeeName, result };
