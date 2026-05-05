@@ -218,6 +218,24 @@ export type Database = {
           },
         ]
       }
+      survey_definitions: {
+        Row: {
+          definition: Json
+          stage: Database["public"]["Enums"]["survey_stage"]
+          updated_at: string
+        }
+        Insert: {
+          definition: Json
+          stage: Database["public"]["Enums"]["survey_stage"]
+          updated_at?: string
+        }
+        Update: {
+          definition?: Json
+          stage?: Database["public"]["Enums"]["survey_stage"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       survey_responses: {
         Row: {
           completion_time_seconds: number
@@ -290,14 +308,9 @@ export type Database = {
       is_super_admin: { Args: never; Returns: boolean }
       submit_survey_response: {
         Args: {
+          p_answers: Json
           p_completion_time_seconds: number
-          p_critical_flags: Json
-          p_final_score: number
           p_free_text: string
-          p_gaming_flag: boolean
-          p_responses: Json
-          p_risk_level: Database["public"]["Enums"]["risk_level"]
-          p_scores: Json
           p_stage: Database["public"]["Enums"]["survey_stage"]
           p_token: string
         }

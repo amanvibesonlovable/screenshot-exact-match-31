@@ -12,6 +12,16 @@ interface EmployeeRow {
   doj: string;
 }
 
+type PendingSubmission = {
+  stage: SurveyStage;
+  employeeName: string;
+  result: ScoredSurvey & {
+    free_text_response: string | null;
+    completion_time_seconds: number;
+    rawAnswers: { question_id: string; selected: number[] }[];
+  };
+};
+
 type LoadState =
   | { status: "loading" }
   | { status: "invalid" }
@@ -19,6 +29,7 @@ type LoadState =
   | { status: "already-done"; stage: SurveyStage }
   | { status: "ready"; employee: EmployeeRow; stage: SurveyStage }
   | { status: "submitted"; employeeName: string; stage: SurveyStage }
+  | { status: "submit-error"; pending: PendingSubmission; submitting: boolean; message: string }
   | { status: "error"; message: string };
 
 function daysBetween(fromIsoDate: string, to: Date) {
@@ -90,6 +101,22 @@ const SurveyPage = () => {
     };
   }, [token]);
 
+  async function submitToServer(pending: PendingSubmission): Promise<{ ok: boolean; message?: string }> {
+    if (!token) return { ok: true };
+    const { error } = await supabase.rpc("submit_survey_response" as any, {
+      p_token: token,
+      p_stage: String(pending.stage),
+      p_answers: pending.result.rawAnswers as unknown as never,
+      p_free_text: pending.result.free_text_response,
+      p_completion_time_seconds: pending.result.completion_time_seconds,
+    });
+    if (error) {
+      console.error("Failed to save survey response", error);
+      return { ok: false, message: error.message };
+    }
+    return { ok: true };
+  }
+
   async function handleComplete(
     _employeeId: string,
     stage: SurveyStage,
@@ -97,30 +124,27 @@ const SurveyPage = () => {
     result: ScoredSurvey & {
       free_text_response: string | null;
       completion_time_seconds: number;
+      rawAnswers: { question_id: string; selected: number[] }[];
     },
   ) {
-    if (!token) {
+    const pending: PendingSubmission = { stage, employeeName, result };
+    const res = await submitToServer(pending);
+    if (res.ok) {
       setState({ status: "submitted", employeeName, stage });
-      return;
+    } else {
+      setState({ status: "submit-error", pending, submitting: false, message: res.message ?? "" });
     }
-    const { error } = await supabase.rpc("submit_survey_response" as any, {
-      p_token: token,
-      p_stage: String(stage),
-      p_responses: result.responses as unknown as never,
-      p_free_text: result.free_text_response,
-      p_scores: result.scores as unknown as never,
-      p_critical_flags: result.critical_flags as unknown as never,
-      p_gaming_flag: result.gaming_flag,
-      p_completion_time_seconds: result.completion_time_seconds,
-      p_final_score: result.scores.final_score,
-      p_risk_level: result.scores.risk_level,
-    });
+  }
 
-    if (error) {
-      // Friendly closing screen — log details for HR debugging.
-      console.error("Failed to save survey response", error);
+  async function handleRetry() {
+    if (state.status !== "submit-error") return;
+    setState({ ...state, submitting: true });
+    const res = await submitToServer(state.pending);
+    if (res.ok) {
+      setState({ status: "submitted", employeeName: state.pending.employeeName, stage: state.pending.stage });
+    } else {
+      setState({ status: "submit-error", pending: state.pending, submitting: false, message: res.message ?? "" });
     }
-    setState({ status: "submitted", employeeName, stage });
   }
 
   switch (state.status) {
@@ -170,6 +194,30 @@ const SurveyPage = () => {
           title={`All done, ${state.employeeName}!`}
           message="Your inputs help HR support you better. You can close this window now."
         />
+      );
+
+    case "submit-error":
+      return (
+        <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-warm px-6 py-12 text-center">
+          <div className="flex max-w-sm flex-col items-center gap-5">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-brand text-4xl shadow-soft">💾</div>
+            <h1 className="text-2xl font-extrabold text-foreground">We couldn't save your check-in yet</h1>
+            <p className="text-[15px] leading-relaxed text-muted-foreground">
+              Your answers are safe on this screen. Tap retry — it usually works on the second try.
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={state.submitting}
+              className="mt-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-opacity disabled:opacity-60"
+            >
+              {state.submitting ? "Retrying…" : "Retry saving"}
+            </button>
+            {state.message && (
+              <p className="text-xs text-muted-foreground/60">Tech detail: {state.message}</p>
+            )}
+          </div>
+        </div>
       );
 
     case "error":
