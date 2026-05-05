@@ -196,6 +196,30 @@ const SurveyPage = () => {
         />
       );
 
+    case "submit-error":
+      return (
+        <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-warm px-6 py-12 text-center">
+          <div className="flex max-w-sm flex-col items-center gap-5">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-brand text-4xl shadow-soft">💾</div>
+            <h1 className="text-2xl font-extrabold text-foreground">We couldn't save your check-in yet</h1>
+            <p className="text-[15px] leading-relaxed text-muted-foreground">
+              Your answers are safe on this screen. Tap retry — it usually works on the second try.
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={state.submitting}
+              className="mt-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-opacity disabled:opacity-60"
+            >
+              {state.submitting ? "Retrying…" : "Retry saving"}
+            </button>
+            {state.message && (
+              <p className="text-xs text-muted-foreground/60">Tech detail: {state.message}</p>
+            )}
+          </div>
+        </div>
+      );
+
     case "error":
       return (
         <StatusScreen
