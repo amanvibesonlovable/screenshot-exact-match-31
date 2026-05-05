@@ -214,10 +214,7 @@ export function DashboardHeader({
         </Link>
         <div className="flex items-center gap-2">
           <MobileSectionNav />
-          <div className="hidden items-center gap-2 md:flex">{rightSlot}</div>
-          <div className="md:hidden">{/* compact: only user/menu on mobile */}
-            {rightSlot}
-          </div>
+          <div className="flex items-center gap-2">{rightSlot}</div>
         </div>
       </div>
     </header>
