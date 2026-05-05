@@ -97,6 +97,28 @@ const SurveyPage = () => {
     };
   }, [token]);
 
+  async function submitToServer(pending: PendingSubmission): Promise<{ ok: boolean; message?: string }> {
+    if (!token) return { ok: true };
+    // Send only RAW answers — server recomputes everything from canonical definition
+    const rawAnswers = pending.result.responses.map((r) => {
+      // Map back from labels to selected indexes by looking up in scored result is non-trivial,
+      // so the chat layer now passes selected indexes directly via rawAnswers field.
+      return r;
+    });
+    const { error } = await supabase.rpc("submit_survey_response" as any, {
+      p_token: token,
+      p_stage: String(pending.stage),
+      p_answers: (pending.result as any).rawAnswers ?? rawAnswers,
+      p_free_text: pending.result.free_text_response,
+      p_completion_time_seconds: pending.result.completion_time_seconds,
+    });
+    if (error) {
+      console.error("Failed to save survey response", error);
+      return { ok: false, message: error.message };
+    }
+    return { ok: true };
+  }
+
   async function handleComplete(
     _employeeId: string,
     stage: SurveyStage,
@@ -106,28 +128,24 @@ const SurveyPage = () => {
       completion_time_seconds: number;
     },
   ) {
-    if (!token) {
+    const pending: PendingSubmission = { stage, employeeName, result };
+    const res = await submitToServer(pending);
+    if (res.ok) {
       setState({ status: "submitted", employeeName, stage });
-      return;
+    } else {
+      setState({ status: "submit-error", pending, submitting: false, message: res.message ?? "" });
     }
-    const { error } = await supabase.rpc("submit_survey_response" as any, {
-      p_token: token,
-      p_stage: String(stage),
-      p_responses: result.responses as unknown as never,
-      p_free_text: result.free_text_response,
-      p_scores: result.scores as unknown as never,
-      p_critical_flags: result.critical_flags as unknown as never,
-      p_gaming_flag: result.gaming_flag,
-      p_completion_time_seconds: result.completion_time_seconds,
-      p_final_score: result.scores.final_score,
-      p_risk_level: result.scores.risk_level,
-    });
+  }
 
-    if (error) {
-      // Friendly closing screen — log details for HR debugging.
-      console.error("Failed to save survey response", error);
+  async function handleRetry() {
+    if (state.status !== "submit-error") return;
+    setState({ ...state, submitting: true });
+    const res = await submitToServer(state.pending);
+    if (res.ok) {
+      setState({ status: "submitted", employeeName: state.pending.employeeName, stage: state.pending.stage });
+    } else {
+      setState({ status: "submit-error", pending: state.pending, submitting: false, message: res.message ?? "" });
     }
-    setState({ status: "submitted", employeeName, stage });
   }
 
   switch (state.status) {
