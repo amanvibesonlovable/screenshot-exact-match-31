@@ -103,16 +103,10 @@ const SurveyPage = () => {
 
   async function submitToServer(pending: PendingSubmission): Promise<{ ok: boolean; message?: string }> {
     if (!token) return { ok: true };
-    // Send only RAW answers — server recomputes everything from canonical definition
-    const rawAnswers = pending.result.responses.map((r) => {
-      // Map back from labels to selected indexes by looking up in scored result is non-trivial,
-      // so the chat layer now passes selected indexes directly via rawAnswers field.
-      return r;
-    });
     const { error } = await supabase.rpc("submit_survey_response" as any, {
       p_token: token,
       p_stage: String(pending.stage),
-      p_answers: (pending.result as any).rawAnswers ?? rawAnswers,
+      p_answers: pending.result.rawAnswers as unknown as never,
       p_free_text: pending.result.free_text_response,
       p_completion_time_seconds: pending.result.completion_time_seconds,
     });
