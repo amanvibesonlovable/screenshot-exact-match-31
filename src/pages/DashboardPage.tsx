@@ -614,10 +614,10 @@ function DashboardInner() {
       <DashboardHeader
         rightSlot={
           <>
-            <button onClick={handleSeed} disabled={seeding} className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary disabled:opacity-50">
+            <button onClick={handleSeed} disabled={seeding} className="hidden md:inline-flex rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary disabled:opacity-50">
               {seeding ? "Seeding…" : "Seed demo"}
             </button>
-            <button onClick={handleClear} disabled={seeding} className="rounded-md border border-destructive/30 bg-background px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
+            <button onClick={handleClear} disabled={seeding} className="hidden md:inline-flex rounded-md border border-destructive/30 bg-background px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
               Clear data
             </button>
             <UserMenu />
@@ -629,14 +629,6 @@ function DashboardInner() {
         <DashboardSidebar />
 
         <div className="flex-1 min-w-0">
-          {/* Mobile tab switch */}
-          <div className="md:hidden mb-4 flex gap-1 rounded-full border border-border bg-card p-1">
-            {(["overview", "trainees", "upload", "settings"] as Tab[]).map((t) => (
-              <button key={t} onClick={() => setTab(t)} className={`flex-1 rounded-full px-2 py-1.5 text-[11px] font-bold ${tab === t ? "bg-gradient-brand text-primary-foreground" : "text-muted-foreground"}`}>
-                {t}
-              </button>
-            ))}
-          </div>
 
 
           {tab === "overview" && (

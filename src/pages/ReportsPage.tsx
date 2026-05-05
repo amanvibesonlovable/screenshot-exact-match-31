@@ -11,8 +11,45 @@ import {
 } from "@/hr/aggregations";
 import { UserMenu } from "@/hr/UserMenu";
 
-const cardCls = "rounded-3xl border border-border/60 bg-card/80 p-5 shadow-bubble backdrop-blur";
+import { CalendarClock, Building2, GraduationCap, Database, Download, FileDown, Eye, Printer, Sparkles } from "lucide-react";
+
+const cardCls = "group relative flex flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md hover:-translate-y-0.5";
 const titleCls = "text-sm font-bold uppercase tracking-wide text-muted-foreground";
+
+const REPORT_META = {
+  weekly: {
+    icon: CalendarClock,
+    bestFor: "Leadership summary",
+    cadence: "Every Monday",
+    includes: "Risk movement, new critical flags, overdue check-ins, and branch highlights for the past week.",
+  },
+  branch: {
+    icon: Building2,
+    bestFor: "Branch / area manager review",
+    cadence: "Before branch reviews",
+    includes: "One branch's trainee risk, completion, comments, and recommended actions.",
+  },
+  training: {
+    icon: GraduationCap,
+    bestFor: "L&D / program review",
+    cadence: "Monthly",
+    includes: "Training quality signals, dimension trends, and systemic gaps across cohorts.",
+  },
+  export: {
+    icon: Database,
+    bestFor: "Excel / Sheets analysis",
+    cadence: "As needed",
+    includes: "Raw employee, response, score, or action records based on your filters.",
+  },
+} as const;
+
+function ReportBadge({ children, tone = "default" }: { children: React.ReactNode; tone?: "default" | "muted" }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+      tone === "muted" ? "bg-secondary text-muted-foreground" : "bg-primary/10 text-primary"
+    }`}>{children}</span>
+  );
+}
 
 type ReportKey = "weekly" | "branch" | "training" | "export";
 type DateRange = "7" | "14" | "30" | "all" | "custom";
@@ -89,92 +126,165 @@ function ReportsInner() {
 
       <div className="mx-auto flex max-w-7xl gap-6 px-6 py-6">
         <DashboardSidebar />
-        <div className="min-w-0 flex-1 space-y-4">
+        <div className="min-w-0 flex-1 space-y-6">
           <div className="no-print">
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports</h1>
-            <p className="text-xs text-muted-foreground">Generate downloadable summary reports for leadership and reviews.</p>
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} className="text-primary" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">Reporting hub</span>
+            </div>
+            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">Reports</h1>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Generate polished reports for leadership reviews, branch meetings, and L&amp;D, or export raw data
+              for deeper analysis. Each report respects your current data filters.
+            </p>
           </div>
 
-          {/* 2x2 grid of report cards */}
+          {/* Report cards */}
           <section className="no-print grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Weekly Digest */}
+            {(() => { const M = REPORT_META.weekly; const Icon = M.icon; return (
             <div className={cardCls}>
-              <h2 className="text-lg font-extrabold text-foreground">Weekly Digest</h2>
-              <p className="text-xs text-muted-foreground">Auto-generated summary of the past week. Share with leadership.</p>
-              <label className="mt-3 block text-xs font-bold text-muted-foreground">Date range</label>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-foreground">Weekly Digest</h2>
+                    <p className="text-[11px] text-muted-foreground">Best for: <span className="font-medium text-foreground/80">{M.bestFor}</span></p>
+                  </div>
+                </div>
+                <ReportBadge>{M.cadence}</ReportBadge>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{M.includes}</p>
+              <label className="mt-4 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Date range</label>
               <select value={weeklyRange} onChange={(e) => setWeeklyRange(e.target.value as DateRange)}
-                className="mt-1 w-full rounded-full border border-border bg-background px-3 py-1.5 text-xs">
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs">
                 <option value="7">Last 7 days</option>
                 <option value="14">Last 14 days</option>
                 <option value="30">Last 30 days</option>
               </select>
-              <div className="mt-3 flex gap-2">
-                <button onClick={() => setOpen("weekly")} className="rounded-full bg-gradient-brand px-4 py-1.5 text-xs font-bold text-primary-foreground">Preview</button>
-                <button onClick={() => window.print()} className="rounded-full border border-border bg-background px-4 py-1.5 text-xs font-bold">Print / PDF</button>
+              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                <button onClick={() => setOpen("weekly")} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"><Eye size={13} /> Preview</button>
+                <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-semibold hover:bg-secondary"><Printer size={13} /> Print / PDF</button>
               </div>
             </div>
+            ); })()}
 
             {/* Branch Review */}
+            {(() => { const M = REPORT_META.branch; const Icon = M.icon; return (
             <div className={cardCls}>
-              <h2 className="text-lg font-extrabold text-foreground">Branch Review</h2>
-              <p className="text-xs text-muted-foreground">Detailed report for a specific branch. Ideal for branch review meetings.</p>
-              <label className="mt-3 block text-xs font-bold text-muted-foreground">Branch</label>
-              <select value={branchSelected} onChange={(e) => setBranchSelected(e.target.value)}
-                className="mt-1 w-full rounded-full border border-border bg-background px-3 py-1.5 text-xs">
-                {branches.map((b) => <option key={b} value={b}>{b}</option>)}
-              </select>
-              <label className="mt-2 block text-xs font-bold text-muted-foreground">Date range</label>
-              <select value={branchRange} onChange={(e) => setBranchRange(e.target.value as DateRange)}
-                className="mt-1 w-full rounded-full border border-border bg-background px-3 py-1.5 text-xs">
-                <option value="all">All time</option>
-                <option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option>
-              </select>
-              <div className="mt-3 flex gap-2">
-                <button onClick={() => setOpen("branch")} className="rounded-full bg-gradient-brand px-4 py-1.5 text-xs font-bold text-primary-foreground">Preview</button>
-                <button onClick={() => window.print()} className="rounded-full border border-border bg-background px-4 py-1.5 text-xs font-bold">Print / PDF</button>
-                <button onClick={() => exportBranchCsv(branchSelected, employees, responses)} className="rounded-full border border-border bg-background px-4 py-1.5 text-xs font-bold">CSV</button>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-foreground">Branch Review</h2>
+                    <p className="text-[11px] text-muted-foreground">Best for: <span className="font-medium text-foreground/80">{M.bestFor}</span></p>
+                  </div>
+                </div>
+                <ReportBadge>{M.cadence}</ReportBadge>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{M.includes}</p>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Branch</label>
+                  <select value={branchSelected} onChange={(e) => setBranchSelected(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs">
+                    {branches.map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Date range</label>
+                  <select value={branchRange} onChange={(e) => setBranchRange(e.target.value as DateRange)}
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs">
+                    <option value="all">All time</option>
+                    <option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                <button onClick={() => setOpen("branch")} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"><Eye size={13} /> Preview</button>
+                <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-semibold hover:bg-secondary"><Printer size={13} /> Print / PDF</button>
+                <button onClick={() => exportBranchCsv(branchSelected, employees, responses)} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-semibold hover:bg-secondary"><FileDown size={13} /> CSV</button>
               </div>
             </div>
+            ); })()}
 
             {/* Training Effectiveness */}
+            {(() => { const M = REPORT_META.training; const Icon = M.icon; return (
             <div className={cardCls}>
-              <h2 className="text-lg font-extrabold text-foreground">Training Effectiveness</h2>
-              <p className="text-xs text-muted-foreground">Aggregated training quality insights. Share with L&amp;D.</p>
-              <label className="mt-3 block text-xs font-bold text-muted-foreground">Date range</label>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-foreground">Training Effectiveness</h2>
+                    <p className="text-[11px] text-muted-foreground">Best for: <span className="font-medium text-foreground/80">{M.bestFor}</span></p>
+                  </div>
+                </div>
+                <ReportBadge>{M.cadence}</ReportBadge>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{M.includes}</p>
+              <label className="mt-4 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Date range</label>
               <select value={trainingRange} onChange={(e) => setTrainingRange(e.target.value as DateRange)}
-                className="mt-1 w-full rounded-full border border-border bg-background px-3 py-1.5 text-xs">
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs">
                 <option value="all">All time</option>
                 <option value="30">Last 30 days</option><option value="90">Last 90 days</option>
               </select>
-              <div className="mt-3 flex gap-2">
-                <button onClick={() => setOpen("training")} className="rounded-full bg-gradient-brand px-4 py-1.5 text-xs font-bold text-primary-foreground">Preview</button>
-                <button onClick={() => window.print()} className="rounded-full border border-border bg-background px-4 py-1.5 text-xs font-bold">Print / PDF</button>
-                <button onClick={() => exportTrainingCsv(employees, responses)} className="rounded-full border border-border bg-background px-4 py-1.5 text-xs font-bold">CSV</button>
+              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                <button onClick={() => setOpen("training")} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"><Eye size={13} /> Preview</button>
+                <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-semibold hover:bg-secondary"><Printer size={13} /> Print / PDF</button>
+                <button onClick={() => exportTrainingCsv(employees, responses)} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs font-semibold hover:bg-secondary"><FileDown size={13} /> CSV</button>
               </div>
             </div>
+            ); })()}
 
             {/* Data Export */}
+            {(() => { const M = REPORT_META.export; const Icon = M.icon; return (
             <div className={cardCls}>
-              <h2 className="text-lg font-extrabold text-foreground">Data Export</h2>
-              <p className="text-xs text-muted-foreground">Download raw data as CSV for analysis in Excel or Sheets.</p>
-              <label className="mt-3 block text-xs font-bold text-muted-foreground">Dataset</label>
-              <select value={exportDataset} onChange={(e) => setExportDataset(e.target.value as any)}
-                className="mt-1 w-full rounded-full border border-border bg-background px-3 py-1.5 text-xs">
-                <option value="employees">All Employees</option>
-                <option value="responses">All Survey Responses</option>
-                <option value="responses_full">Responses with Full Scores</option>
-                <option value="actions">Actions Log</option>
-              </select>
-              <label className="mt-2 block text-xs font-bold text-muted-foreground">Branch filter</label>
-              <select value={exportBranch} onChange={(e) => setExportBranch(e.target.value)}
-                className="mt-1 w-full rounded-full border border-border bg-background px-3 py-1.5 text-xs">
-                <option value="all">All branches</option>
-                {branches.map((b) => <option key={b} value={b}>{b}</option>)}
-              </select>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-foreground">Data Export</h2>
+                    <p className="text-[11px] text-muted-foreground">Best for: <span className="font-medium text-foreground/80">{M.bestFor}</span></p>
+                  </div>
+                </div>
+                <ReportBadge tone="muted">{M.cadence}</ReportBadge>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{M.includes}</p>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Dataset</label>
+                  <select value={exportDataset} onChange={(e) => setExportDataset(e.target.value as any)}
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs">
+                    <option value="employees">All Employees</option>
+                    <option value="responses">All Survey Responses</option>
+                    <option value="responses_full">Responses with Full Scores</option>
+                    <option value="actions">Actions Log</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Branch filter</label>
+                  <select value={exportBranch} onChange={(e) => setExportBranch(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-xs">
+                    <option value="all">All branches</option>
+                    {branches.map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+              </div>
               <p className="mt-2 text-[11px] text-muted-foreground">{recordCount(exportDataset, exportBranch, employees, responses, actions)} records will export.</p>
-              <button onClick={() => doExport(exportDataset, exportBranch, employees, responses, actions, empById)}
-                className="mt-3 rounded-full bg-gradient-brand px-4 py-1.5 text-xs font-bold text-primary-foreground">Download CSV</button>
+              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                <button onClick={() => doExport(exportDataset, exportBranch, employees, responses, actions, empById)}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"><Download size={13} /> Download CSV</button>
+              </div>
             </div>
+            ); })()}
           </section>
 
           {loading && <p className="p-4 text-center text-xs text-muted-foreground">Loading data…</p>}
