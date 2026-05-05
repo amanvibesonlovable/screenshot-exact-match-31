@@ -15,7 +15,11 @@ interface EmployeeRow {
 type PendingSubmission = {
   stage: SurveyStage;
   employeeName: string;
-  result: ScoredSurvey & { free_text_response: string | null; completion_time_seconds: number };
+  result: ScoredSurvey & {
+    free_text_response: string | null;
+    completion_time_seconds: number;
+    rawAnswers: { question_id: string; selected: number[] }[];
+  };
 };
 
 type LoadState =
