@@ -629,14 +629,6 @@ function DashboardInner() {
         <DashboardSidebar />
 
         <div className="flex-1 min-w-0">
-          {/* Mobile tab switch */}
-          <div className="md:hidden mb-4 flex gap-1 rounded-full border border-border bg-card p-1">
-            {(["overview", "trainees", "upload", "settings"] as Tab[]).map((t) => (
-              <button key={t} onClick={() => setTab(t)} className={`flex-1 rounded-full px-2 py-1.5 text-[11px] font-bold ${tab === t ? "bg-gradient-brand text-primary-foreground" : "text-muted-foreground"}`}>
-                {t}
-              </button>
-            ))}
-          </div>
 
 
           {tab === "overview" && (
