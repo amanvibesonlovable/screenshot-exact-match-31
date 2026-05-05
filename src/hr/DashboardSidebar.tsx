@@ -116,6 +116,87 @@ export function DashboardSidebar() {
   );
 }
 
+export function MobileSectionNav() {
+  const loc = useLocation();
+  const navigate = useNavigate();
+  const { isSuperAdmin } = useAdminAuth();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  const flat: Item[] = GROUPS.flatMap((g) => g.items).filter(
+    (it) => !it.superOnly || isSuperAdmin,
+  );
+  const current = flat.find((it) => it.match(loc.pathname, loc.search)) ?? flat[0];
+
+  return (
+    <div ref={ref} className="relative md:hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground"
+        aria-label="Dashboard section"
+      >
+        <Menu size={14} />
+        <span className="max-w-[140px] truncate">{current?.label ?? "Section"}</span>
+        <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-border bg-card shadow-lg"
+          role="menu"
+        >
+          <p className="px-3 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Dashboard section
+          </p>
+          <ul className="max-h-[70vh] overflow-y-auto p-1">
+            {GROUPS.map((g) => {
+              const items = g.items.filter((it) => !it.superOnly || isSuperAdmin);
+              if (!items.length) return null;
+              return (
+                <li key={g.label} className="py-1">
+                  <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                    {g.label}
+                  </p>
+                  <ul>
+                    {items.map((it) => {
+                      const active = it.match(loc.pathname, loc.search);
+                      return (
+                        <li key={it.to}>
+                          <button
+                            onClick={() => {
+                              setOpen(false);
+                              navigate(it.to);
+                            }}
+                            className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
+                              active
+                                ? "bg-primary/10 font-semibold text-primary"
+                                : "text-foreground hover:bg-secondary"
+                            }`}
+                          >
+                            {it.icon}
+                            <span>{it.label}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DashboardHeader({
   rightSlot,
 }: {
@@ -123,15 +204,21 @@ export function DashboardHeader({
 }) {
   return (
     <header className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
-        <Link to="/dashboard" className="flex items-center gap-2.5">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-6">
+        <Link to="/dashboard" className="flex min-w-0 items-center gap-2.5">
           <CandorLogo size={32} />
-          <div>
-            <p className="text-base font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Candor · HR</p>
-            <p className="text-[11px] text-muted-foreground">Early warning &amp; training effectiveness</p>
+          <div className="min-w-0">
+            <p className="truncate text-base font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Candor · HR</p>
+            <p className="hidden text-[11px] text-muted-foreground sm:block">Early warning &amp; training effectiveness</p>
           </div>
         </Link>
-        <div className="flex items-center gap-2">{rightSlot}</div>
+        <div className="flex items-center gap-2">
+          <MobileSectionNav />
+          <div className="hidden items-center gap-2 md:flex">{rightSlot}</div>
+          <div className="md:hidden">{/* compact: only user/menu on mobile */}
+            {rightSlot}
+          </div>
+        </div>
       </div>
     </header>
   );
