@@ -12,6 +12,12 @@ interface EmployeeRow {
   doj: string;
 }
 
+type PendingSubmission = {
+  stage: SurveyStage;
+  employeeName: string;
+  result: ScoredSurvey & { free_text_response: string | null; completion_time_seconds: number };
+};
+
 type LoadState =
   | { status: "loading" }
   | { status: "invalid" }
@@ -19,6 +25,7 @@ type LoadState =
   | { status: "already-done"; stage: SurveyStage }
   | { status: "ready"; employee: EmployeeRow; stage: SurveyStage }
   | { status: "submitted"; employeeName: string; stage: SurveyStage }
+  | { status: "submit-error"; pending: PendingSubmission; submitting: boolean; message: string }
   | { status: "error"; message: string };
 
 function daysBetween(fromIsoDate: string, to: Date) {
