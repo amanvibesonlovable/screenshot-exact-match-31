@@ -163,7 +163,7 @@ export function SurveyChat({ config, traineeName, onComplete }: Props) {
     const result = scoreSurvey(config, answers, completionTimeSeconds);
     await wait(900);
     setDone(result);
-    onComplete?.({ ...result, free_text_response: text, completion_time_seconds: completionTimeSeconds });
+    onComplete?.({ ...result, free_text_response: text, completion_time_seconds: completionTimeSeconds, rawAnswers: answers });
   }
 
   // Progress: each completed static q + free-text contributes
