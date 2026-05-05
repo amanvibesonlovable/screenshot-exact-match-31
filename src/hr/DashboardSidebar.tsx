@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -10,7 +10,10 @@ import {
   MapPin,
   FileText,
   Shield,
+  Menu,
+  ChevronDown,
 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { CandorLogo } from "@/components/CandorLogo";
 import { useAdminAuth } from "@/hr/useAdminAuth";
 
