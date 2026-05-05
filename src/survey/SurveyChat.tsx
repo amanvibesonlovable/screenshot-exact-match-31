@@ -18,7 +18,7 @@ type ChatItem =
 interface Props {
   config: SurveyConfig;
   traineeName: string;
-  onComplete?: (result: ScoredSurvey & { free_text_response: string | null; completion_time_seconds: number }) => void;
+  onComplete?: (result: ScoredSurvey & { free_text_response: string | null; completion_time_seconds: number; rawAnswers: RawAnswer[] }) => void;
 }
 
 const TYPING_MS = 1100;
