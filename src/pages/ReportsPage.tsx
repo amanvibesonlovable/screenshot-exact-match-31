@@ -11,8 +11,45 @@ import {
 } from "@/hr/aggregations";
 import { UserMenu } from "@/hr/UserMenu";
 
-const cardCls = "rounded-3xl border border-border/60 bg-card/80 p-5 shadow-bubble backdrop-blur";
+import { CalendarClock, Building2, GraduationCap, Database, Download, FileDown, Eye, Printer, Sparkles } from "lucide-react";
+
+const cardCls = "group relative flex flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md hover:-translate-y-0.5";
 const titleCls = "text-sm font-bold uppercase tracking-wide text-muted-foreground";
+
+const REPORT_META = {
+  weekly: {
+    icon: CalendarClock,
+    bestFor: "Leadership summary",
+    cadence: "Every Monday",
+    includes: "Risk movement, new critical flags, overdue check-ins, and branch highlights for the past week.",
+  },
+  branch: {
+    icon: Building2,
+    bestFor: "Branch / area manager review",
+    cadence: "Before branch reviews",
+    includes: "One branch's trainee risk, completion, comments, and recommended actions.",
+  },
+  training: {
+    icon: GraduationCap,
+    bestFor: "L&D / program review",
+    cadence: "Monthly",
+    includes: "Training quality signals, dimension trends, and systemic gaps across cohorts.",
+  },
+  export: {
+    icon: Database,
+    bestFor: "Excel / Sheets analysis",
+    cadence: "As needed",
+    includes: "Raw employee, response, score, or action records based on your filters.",
+  },
+} as const;
+
+function ReportBadge({ children, tone = "default" }: { children: React.ReactNode; tone?: "default" | "muted" }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+      tone === "muted" ? "bg-secondary text-muted-foreground" : "bg-primary/10 text-primary"
+    }`}>{children}</span>
+  );
+}
 
 type ReportKey = "weekly" | "branch" | "training" | "export";
 type DateRange = "7" | "14" | "30" | "all" | "custom";
