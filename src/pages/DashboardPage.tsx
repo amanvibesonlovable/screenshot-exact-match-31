@@ -614,10 +614,10 @@ function DashboardInner() {
       <DashboardHeader
         rightSlot={
           <>
-            <button onClick={handleSeed} disabled={seeding} className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary disabled:opacity-50">
+            <button onClick={handleSeed} disabled={seeding} className="hidden md:inline-flex rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary disabled:opacity-50">
               {seeding ? "Seeding…" : "Seed demo"}
             </button>
-            <button onClick={handleClear} disabled={seeding} className="rounded-md border border-destructive/30 bg-background px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
+            <button onClick={handleClear} disabled={seeding} className="hidden md:inline-flex rounded-md border border-destructive/30 bg-background px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
               Clear data
             </button>
             <UserMenu />
