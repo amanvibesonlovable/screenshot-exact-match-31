@@ -62,7 +62,6 @@ const SurveyPage = () => {
 
     let cancelled = false;
     (async () => {
-      // 1. Look up employee by token via SECURITY DEFINER RPC (no anon SELECT on employees)
       const { data: empRows, error: empErr } = await supabase.rpc(
         "get_employee_by_token" as any,
         { p_token: token },
@@ -80,20 +79,50 @@ const SurveyPage = () => {
         return;
       }
 
-      // 2. Compute eligible stage
+      const program: "str" | "ascent" = employee.program === "ascent" ? "ascent" : "str";
       const days = daysBetween(employee.doj, new Date());
-      const stage = getEligibleStage(days);
-      if (!stage) {
-        setState({ status: "too-early" });
+      const firstName = employee.name.split(" ")[0];
+
+      // ----- ASCENT (interns) -----
+      if (program === "ascent") {
+        const week = getEligibleInternWeek(days);
+        if (!week) {
+          setState({ status: "too-early", program, name: firstName });
+          return;
+        }
+        const { data: alreadyDone, error: respErr } = await supabase.rpc(
+          "survey_already_submitted" as any,
+          { p_token: token, p_stage: String(week) },
+        );
+        if (cancelled) return;
+        if (respErr) {
+          console.error("Survey response lookup failed", respErr);
+          setState({ status: "error", message: "Something went wrong. Please try again later." });
+          return;
+        }
+        if (alreadyDone) {
+          // If past week 7 boundary and all 7 done, show "all-done"
+          if (days >= 56 && week === 7) {
+            setState({ status: "all-done", name: firstName });
+            return;
+          }
+          setState({ status: "already-done", program, stage: week, name: firstName });
+          return;
+        }
+        setState({ status: "ready", program, employee, stage: week });
         return;
       }
 
-      // 3. Check if this stage is already submitted via RPC
+      // ----- STR (existing flow) -----
+      const stage = getEligibleStage(days);
+      if (!stage) {
+        setState({ status: "too-early", program, name: firstName });
+        return;
+      }
       const { data: alreadyDone, error: respErr } = await supabase.rpc(
         "survey_already_submitted" as any,
         { p_token: token, p_stage: String(stage) },
       );
-
       if (cancelled) return;
       if (respErr) {
         console.error("Survey response lookup failed", respErr);
@@ -101,11 +130,10 @@ const SurveyPage = () => {
         return;
       }
       if (alreadyDone) {
-        setState({ status: "already-done", stage });
+        setState({ status: "already-done", program, stage, name: firstName });
         return;
       }
-
-      setState({ status: "ready", employee, stage });
+      setState({ status: "ready", program, employee, stage });
     })();
 
     return () => {
@@ -115,7 +143,9 @@ const SurveyPage = () => {
 
   async function submitToServer(pending: PendingSubmission): Promise<{ ok: boolean; message?: string }> {
     if (!token) return { ok: true };
-    const { error } = await supabase.rpc("submit_survey_response" as any, {
+    const rpcName =
+      pending.program === "ascent" ? "submit_intern_survey_response" : "submit_survey_response";
+    const { error } = await supabase.rpc(rpcName as any, {
       p_token: token,
       p_stage: String(pending.stage),
       p_answers: pending.result.rawAnswers as unknown as never,
@@ -130,8 +160,8 @@ const SurveyPage = () => {
   }
 
   async function handleComplete(
-    _employeeId: string,
-    stage: SurveyStage,
+    program: "str" | "ascent",
+    stage: StageKey,
     employeeName: string,
     result: ScoredSurvey & {
       free_text_response: string | null;
@@ -139,10 +169,10 @@ const SurveyPage = () => {
       rawAnswers: { question_id: string; selected: number[] }[];
     },
   ) {
-    const pending: PendingSubmission = { stage, employeeName, result };
+    const pending: PendingSubmission = { program, stage, employeeName, result };
     const res = await submitToServer(pending);
     if (res.ok) {
-      setState({ status: "submitted", employeeName, stage });
+      setState({ status: "submitted", program, employeeName, stage });
     } else {
       setState({ status: "submit-error", pending, submitting: false, message: res.message ?? "" });
     }
@@ -153,7 +183,12 @@ const SurveyPage = () => {
     setState({ ...state, submitting: true });
     const res = await submitToServer(state.pending);
     if (res.ok) {
-      setState({ status: "submitted", employeeName: state.pending.employeeName, stage: state.pending.stage });
+      setState({
+        status: "submitted",
+        program: state.pending.program,
+        employeeName: state.pending.employeeName,
+        stage: state.pending.stage,
+      });
     } else {
       setState({ status: "submit-error", pending: state.pending, submitting: false, message: res.message ?? "" });
     }
@@ -184,20 +219,42 @@ const SurveyPage = () => {
     case "too-early":
       return (
         <StatusScreen
-          emoji="⏳"
-          title="Your first check-in isn't ready yet"
-          message="See you soon! We'll reach out when it's time for your first check-in."
+          emoji="👋"
+          title={`Hey ${state.name}!`}
+          message={
+            state.program === "ascent"
+              ? "Your first check-in will be ready next Monday. See you then!"
+              : "Your first check-in isn't ready yet. We'll reach out when it's time."
+          }
         />
       );
 
-    case "already-done":
+    case "all-done":
+      return (
+        <StatusScreen
+          emoji="🎉"
+          title={`Hey ${state.name}!`}
+          message="You've completed all your check-ins. Thank you for your candor throughout the internship!"
+        />
+      );
+
+    case "already-done": {
+      const label =
+        state.program === "ascent"
+          ? INTERN_WEEK_LABELS[state.stage as InternWeek]
+          : STAGE_LABELS[state.stage as SurveyStage];
+      const nextLine =
+        state.program === "ascent"
+          ? "See you next week. 🙌"
+          : "The next one will arrive at the right time.";
       return (
         <StatusScreen
           emoji="🙏"
           title="You've already completed this check-in"
-          message={`Thanks for sharing your ${STAGE_LABELS[state.stage]} thoughts with us. The next one will arrive at the right time.`}
+          message={`Thanks ${state.name} for sharing your ${label} thoughts with us. ${nextLine}`}
         />
       );
+    }
 
     case "submitted":
       return (
@@ -243,14 +300,16 @@ const SurveyPage = () => {
       );
 
     case "ready": {
-      const config = SURVEYS[state.stage];
+      const firstName = state.employee.name.split(" ")[0];
+      const config =
+        state.program === "ascent"
+          ? (internConfigForChat(state.stage as InternWeek) as any)
+          : SURVEYS[state.stage as SurveyStage];
       return (
         <SurveyChat
           config={config}
-          traineeName={state.employee.name.split(" ")[0]}
-          onComplete={(result) =>
-            handleComplete(state.employee.id, state.stage, state.employee.name.split(" ")[0], result)
-          }
+          traineeName={firstName}
+          onComplete={(result) => handleComplete(state.program, state.stage, firstName, result)}
         />
       );
     }
