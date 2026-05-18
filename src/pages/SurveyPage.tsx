@@ -4,16 +4,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { SurveyChat } from "@/survey/SurveyChat";
 import { StatusScreen } from "@/survey/components/StatusScreen";
 import { SURVEYS, getEligibleStage, STAGE_LABELS, type SurveyStage } from "@/survey/survey-config";
+import {
+  INTERN_SURVEYS,
+  INTERN_WEEK_LABELS,
+  getEligibleInternWeek,
+  internConfigForChat,
+  type InternWeek,
+} from "@/survey/intern-survey-config";
 import type { ScoredSurvey } from "@/survey/scoring";
 
 interface EmployeeRow {
   id: string;
   name: string;
   doj: string;
+  program?: string | null;
 }
 
+type StageKey = SurveyStage | InternWeek;
+
 type PendingSubmission = {
-  stage: SurveyStage;
+  program: "str" | "ascent";
+  stage: StageKey;
   employeeName: string;
   result: ScoredSurvey & {
     free_text_response: string | null;
@@ -25,10 +36,11 @@ type PendingSubmission = {
 type LoadState =
   | { status: "loading" }
   | { status: "invalid" }
-  | { status: "too-early" }
-  | { status: "already-done"; stage: SurveyStage }
-  | { status: "ready"; employee: EmployeeRow; stage: SurveyStage }
-  | { status: "submitted"; employeeName: string; stage: SurveyStage }
+  | { status: "too-early"; program: "str" | "ascent"; name: string }
+  | { status: "all-done"; name: string }
+  | { status: "already-done"; program: "str" | "ascent"; stage: StageKey; name: string }
+  | { status: "ready"; program: "str" | "ascent"; employee: EmployeeRow; stage: StageKey }
+  | { status: "submitted"; program: "str" | "ascent"; employeeName: string; stage: StageKey }
   | { status: "submit-error"; pending: PendingSubmission; submitting: boolean; message: string }
   | { status: "error"; message: string };
 
