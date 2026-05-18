@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminAuth } from "@/hr/useAdminAuth";
@@ -8,6 +8,7 @@ import { ArrowLeft, Check, Eye, EyeOff, Loader2, AlertCircle } from "lucide-reac
 
 export default function AuthPage() {
   const nav = useNavigate();
+  const [search] = useSearchParams();
   const { user, admin, resolved } = useAdminAuth();
 
   const [mode, setMode] = useState<"signin" | "forgot">("signin");
@@ -20,11 +21,13 @@ export default function AuthPage() {
   const [resetSent, setResetSent] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // After signing in, route based on admins-table check
+  // After signing in, route to ?redirect= target if provided, else landing page chooser
   useEffect(() => {
     if (!user || !resolved) return;
     if (admin && admin.status === "active") {
-      nav("/dashboard", { replace: true });
+      const redirect = search.get("redirect");
+      const safe = redirect && redirect.startsWith("/") ? redirect : "/";
+      nav(safe, { replace: true });
     } else if (user) {
       // Signed-in user is not in admins or inactive — sign out + show error.
       const reason = admin?.status === "inactive"
@@ -34,7 +37,7 @@ export default function AuthPage() {
         setErr(reason);
       });
     }
-  }, [user, admin, resolved, nav]);
+  }, [user, admin, resolved, nav, search]);
 
   const onGoogle = async () => {
     setErr(null);
