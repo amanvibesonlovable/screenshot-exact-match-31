@@ -291,7 +291,7 @@ export default function AscentUploadPage() {
                                 </span>
                               </span>
                             ) : (
-                              <span className="text-destructive">{r.errors.join("; ")}</span>
+                              <span className="text-destructive">{(r as Extract<ParsedRow, { ok: false }>).errors.join("; ")}</span>
                             )}
                           </td>
                         </tr>
