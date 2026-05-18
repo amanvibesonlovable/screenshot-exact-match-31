@@ -21,6 +21,11 @@ import DemoSurveyPage from "./pages/DemoSurveyPage.tsx";
 import AdminManagementPage from "./pages/AdminManagementPage.tsx";
 import AscentPlaceholder from "./pages/ascent/AscentPlaceholder.tsx";
 import AscentUploadPage from "./pages/ascent/AscentUploadPage.tsx";
+import AscentOverviewPage from "./pages/ascent/AscentOverviewPage.tsx";
+import AscentInternsPage from "./pages/ascent/AscentInternsPage.tsx";
+import AscentInternDetailPage from "./pages/ascent/AscentInternDetailPage.tsx";
+import AscentAnalyticsPage from "./pages/ascent/AscentAnalyticsPage.tsx";
+import AscentBranchesPage from "./pages/ascent/AscentBranchesPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -48,11 +53,11 @@ const App = () => (
           <Route path="/dashboard/admin-management" element={<AdminManagementPage />} />
 
           {/* Ascent 2026 — intern program */}
-          <Route path="/ascent" element={<AscentPlaceholder title="Ascent Overview" />} />
-          <Route path="/ascent/interns" element={<AscentPlaceholder title="Interns" />} />
-          <Route path="/ascent/interns/:id" element={<AscentPlaceholder title="Intern Detail" />} />
-          <Route path="/ascent/analytics" element={<AscentPlaceholder title="Analytics" />} />
-          <Route path="/ascent/branches" element={<AscentPlaceholder title="Branches" />} />
+          <Route path="/ascent" element={<AscentOverviewPage />} />
+          <Route path="/ascent/interns" element={<AscentInternsPage />} />
+          <Route path="/ascent/interns/:id" element={<AscentInternDetailPage />} />
+          <Route path="/ascent/analytics" element={<AscentAnalyticsPage />} />
+          <Route path="/ascent/branches" element={<AscentBranchesPage />} />
           <Route path="/ascent/ppo-tracker" element={<AscentPlaceholder title="PPO Tracker" />} />
           <Route path="/ascent/responses" element={<AscentPlaceholder title="Responses" />} />
           <Route path="/ascent/actions" element={<AscentPlaceholder title="Actions" />} />
