@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { MessageSquare, TrendingUp, ShieldCheck, Upload, MessagesSquare, BarChart3, ArrowRight, LogIn } from "lucide-react";
+import { MessageSquare, TrendingUp, ShieldCheck, Upload, MessagesSquare, BarChart3, ArrowRight, LogIn, Target, Rocket } from "lucide-react";
 import { CandorLogo } from "@/components/CandorLogo";
 
 const Index = () => {
