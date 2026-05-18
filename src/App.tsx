@@ -19,6 +19,8 @@ import ReportsPage from "./pages/ReportsPage.tsx";
 import DemoPage from "./pages/DemoPage.tsx";
 import DemoSurveyPage from "./pages/DemoSurveyPage.tsx";
 import AdminManagementPage from "./pages/AdminManagementPage.tsx";
+import AscentPlaceholder from "./pages/ascent/AscentPlaceholder.tsx";
+import AscentUploadPage from "./pages/ascent/AscentUploadPage.tsx";
 
 const queryClient = new QueryClient();
 
