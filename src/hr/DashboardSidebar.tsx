@@ -72,10 +72,10 @@ export function DashboardSidebar() {
   const { isSuperAdmin } = useAdminAuth();
   return (
     <aside
-      className="hidden shrink-0 self-start rounded-xl md:block"
-      style={{ width: 220, background: "#0C4A42" }}
+      className="hidden shrink-0 self-start rounded-xl md:flex md:flex-col"
+      style={{ width: 220, background: "#0C4A42", minHeight: "calc(100vh - 3rem)" }}
     >
-      <nav className="sticky top-6 space-y-1 px-3 py-4">
+      <nav className="sticky top-6 flex-1 space-y-1 px-3 py-4">
         {GROUPS.map((g, gi) => {
           const visibleItems = g.items.filter((it) => !it.superOnly || isSuperAdmin);
           if (visibleItems.length === 0) return null;
@@ -112,6 +112,14 @@ export function DashboardSidebar() {
           );
         })}
       </nav>
+      <div className="border-t px-4 py-3" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <Link
+          to="/ascent"
+          className="flex items-center gap-2 text-[12px] text-[#94A3B8] transition-colors hover:text-white"
+        >
+          <span>Switch to Ascent 2026 →</span>
+        </Link>
+      </div>
     </aside>
   );
 }
