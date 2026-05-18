@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { MessageSquare, TrendingUp, ShieldCheck, Upload, MessagesSquare, BarChart3, ArrowRight, LogIn } from "lucide-react";
+import { MessageSquare, TrendingUp, ShieldCheck, Upload, MessagesSquare, BarChart3, ArrowRight, LogIn, Target, Rocket } from "lucide-react";
 import { CandorLogo } from "@/components/CandorLogo";
 
 const Index = () => {
@@ -253,6 +253,94 @@ const Index = () => {
                 <span className="text-[12px] font-medium text-foreground">Encrypted · Anonymous to managers</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Choose Your Program */}
+      <section className="border-t border-border/60 bg-background" id="programs">
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Choose Your Program
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Select the program you want to manage
+            </p>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* STR Program card */}
+            <Link
+              to="/dashboard"
+              className="program-card group relative flex flex-col rounded-2xl border bg-white p-8 transition-all hover:shadow-lg"
+              style={{ borderColor: "#E5E7EB" }}
+            >
+              <span
+                aria-hidden
+                className="absolute inset-y-0 left-0 w-0 rounded-l-2xl transition-all group-hover:w-1"
+                style={{ background: "#0F766E" }}
+              />
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-full"
+                style={{ background: "#F0FDFA", color: "#0F766E" }}
+              >
+                <Target size={22} />
+              </div>
+              <h3 className="mt-5 text-xl font-bold" style={{ color: "#0F172A" }}>
+                STR Program
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: "#64748B" }}>
+                Early warning &amp; training effectiveness for Sales Trainees.
+              </p>
+              <ul className="mt-4 space-y-1 text-[13px]" style={{ color: "#64748B" }}>
+                <li>70–80 trainees / year</li>
+                <li>6 milestone surveys</li>
+                <li>5 risk dimensions</li>
+              </ul>
+              <span
+                className="mt-6 inline-flex items-center gap-1.5 self-start rounded-md border px-4 py-2 text-sm font-semibold transition-colors group-hover:bg-[#0F766E] group-hover:text-white"
+                style={{ borderColor: "#0F766E", color: "#0F766E" }}
+              >
+                Open Dashboard <ArrowRight size={15} />
+              </span>
+            </Link>
+
+            {/* Ascent Program card */}
+            <Link
+              to="/ascent"
+              className="program-card group relative flex flex-col rounded-2xl border bg-white p-8 transition-all hover:shadow-lg"
+              style={{ borderColor: "#E5E7EB" }}
+            >
+              <span
+                aria-hidden
+                className="absolute inset-y-0 left-0 w-0 rounded-l-2xl transition-all group-hover:w-1"
+                style={{ background: "#0F766E" }}
+              />
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-full"
+                style={{ background: "#F0FDFA", color: "#0F766E" }}
+              >
+                <Rocket size={22} />
+              </div>
+              <h3 className="mt-5 text-xl font-bold" style={{ color: "#0F172A" }}>
+                Ascent 2026
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: "#64748B" }}>
+                Intern experience tracking &amp; PPO readiness for 200+ Ascent Interns.
+              </p>
+              <ul className="mt-4 space-y-1 text-[13px]" style={{ color: "#64748B" }}>
+                <li>200+ interns / year</li>
+                <li>7 weekly check-ins</li>
+                <li>4 risk dimensions</li>
+              </ul>
+              <span
+                className="mt-6 inline-flex items-center gap-1.5 self-start rounded-md border px-4 py-2 text-sm font-semibold transition-colors group-hover:bg-[#0F766E] group-hover:text-white"
+                style={{ borderColor: "#0F766E", color: "#0F766E" }}
+              >
+                Open Dashboard <ArrowRight size={15} />
+              </span>
+            </Link>
           </div>
         </div>
       </section>

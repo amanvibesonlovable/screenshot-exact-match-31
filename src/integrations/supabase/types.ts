@@ -72,9 +72,12 @@ export type Database = {
           email: string
           employee_code: string
           id: string
+          intern_batch: string | null
           name: string
           notification_preference: string
           phone: string
+          program: string
+          project_type: string | null
           status: Database["public"]["Enums"]["employee_status"]
           token: string
           updated_at: string
@@ -89,9 +92,12 @@ export type Database = {
           email: string
           employee_code: string
           id?: string
+          intern_batch?: string | null
           name: string
           notification_preference?: string
           phone: string
+          program?: string
+          project_type?: string | null
           status?: Database["public"]["Enums"]["employee_status"]
           token?: string
           updated_at?: string
@@ -106,9 +112,12 @@ export type Database = {
           email?: string
           employee_code?: string
           id?: string
+          intern_batch?: string | null
           name?: string
           notification_preference?: string
           phone?: string
+          program?: string
+          project_type?: string | null
           status?: Database["public"]["Enums"]["employee_status"]
           token?: string
           updated_at?: string
@@ -301,11 +310,22 @@ export type Database = {
           doj: string
           id: string
           name: string
+          program: string
         }[]
       }
       is_active_admin: { Args: never; Returns: boolean }
       is_hr_user: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      submit_intern_survey_response: {
+        Args: {
+          p_answers: Json
+          p_completion_time_seconds: number
+          p_free_text: string
+          p_stage: Database["public"]["Enums"]["survey_stage"]
+          p_token: string
+        }
+        Returns: string
+      }
       submit_survey_response: {
         Args: {
           p_answers: Json
@@ -328,7 +348,20 @@ export type Database = {
     Enums: {
       employee_status: "training" | "positioned" | "exited"
       risk_level: "LOW" | "MEDIUM" | "HIGH"
-      survey_stage: "15" | "30" | "45" | "60" | "90" | "180"
+      survey_stage:
+        | "15"
+        | "30"
+        | "45"
+        | "60"
+        | "90"
+        | "180"
+        | "1"
+        | "2"
+        | "3"
+        | "4"
+        | "5"
+        | "6"
+        | "7"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -458,7 +491,21 @@ export const Constants = {
     Enums: {
       employee_status: ["training", "positioned", "exited"],
       risk_level: ["LOW", "MEDIUM", "HIGH"],
-      survey_stage: ["15", "30", "45", "60", "90", "180"],
+      survey_stage: [
+        "15",
+        "30",
+        "45",
+        "60",
+        "90",
+        "180",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+      ],
     },
   },
 } as const
