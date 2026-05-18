@@ -28,7 +28,8 @@ export default function RequireAdmin({
     );
   }
   if (!user || !isAuthorized) {
-    return <Navigate to="/auth" replace state={{ from: loc.pathname }} />;
+    const redirect = encodeURIComponent(loc.pathname + loc.search);
+    return <Navigate to={`/auth?redirect=${redirect}`} replace state={{ from: loc.pathname }} />;
   }
   if (requireSuperAdmin && !isSuperAdmin) {
     return (
