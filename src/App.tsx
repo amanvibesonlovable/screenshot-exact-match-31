@@ -46,6 +46,20 @@ const App = () => (
           
           <Route path="/dashboard/reports" element={<ReportsPage />} />
           <Route path="/dashboard/admin-management" element={<AdminManagementPage />} />
+
+          {/* Ascent 2026 — intern program */}
+          <Route path="/ascent" element={<AscentPlaceholder title="Ascent Overview" />} />
+          <Route path="/ascent/interns" element={<AscentPlaceholder title="Interns" />} />
+          <Route path="/ascent/interns/:id" element={<AscentPlaceholder title="Intern Detail" />} />
+          <Route path="/ascent/analytics" element={<AscentPlaceholder title="Analytics" />} />
+          <Route path="/ascent/branches" element={<AscentPlaceholder title="Branches" />} />
+          <Route path="/ascent/ppo-tracker" element={<AscentPlaceholder title="PPO Tracker" />} />
+          <Route path="/ascent/responses" element={<AscentPlaceholder title="Responses" />} />
+          <Route path="/ascent/actions" element={<AscentPlaceholder title="Actions" />} />
+          <Route path="/ascent/reports" element={<AscentPlaceholder title="Reports" />} />
+          <Route path="/ascent/scoring" element={<AscentPlaceholder title="Scoring Framework" />} />
+          <Route path="/ascent/upload" element={<AscentUploadPage />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
