@@ -26,6 +26,11 @@ import AscentInternsPage from "./pages/ascent/AscentInternsPage.tsx";
 import AscentInternDetailPage from "./pages/ascent/AscentInternDetailPage.tsx";
 import AscentAnalyticsPage from "./pages/ascent/AscentAnalyticsPage.tsx";
 import AscentBranchesPage from "./pages/ascent/AscentBranchesPage.tsx";
+import AscentPpoTrackerPage from "./pages/ascent/AscentPpoTrackerPage.tsx";
+import AscentResponsesPage from "./pages/ascent/AscentResponsesPage.tsx";
+import AscentActionsPage from "./pages/ascent/AscentActionsPage.tsx";
+import AscentReportsPage from "./pages/ascent/AscentReportsPage.tsx";
+import AscentScoringPage from "./pages/ascent/AscentScoringPage.tsx";
 
 const queryClient = new QueryClient();
 
