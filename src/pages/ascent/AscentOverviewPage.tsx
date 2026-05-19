@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, Copy } from "lucide-react";
+import { AlertTriangle, Copy, Sprout, Trash2, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { seedAscentData, clearAscentData } from "@/ascent/seed";
 import { AscentLayout } from "@/ascent/AscentLayout";
 import { AscentFilterBar } from "@/ascent/AscentFilterBar";
 import { KPIBar } from "@/hr/KPIBar";
