@@ -50,6 +50,30 @@ export default function AscentOverviewPage() {
   const { data: responses = [] } = useAscentResponses(internIds);
   const [filters, setFilters] = useState<AscentFilters>(DEFAULT_FILTERS);
   const [overdueOpen, setOverdueOpen] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const qc = useQueryClient();
+
+  async function handleSeed() {
+    if (seeding) return;
+    setSeeding(true);
+    const res = await seedAscentData();
+    setSeeding(false);
+    if (res.error) toast.error(`Seed failed: ${res.error}`);
+    else toast.success(`Seeded ${res.internsInserted ?? 0} interns, ${res.responsesInserted ?? 0} responses`);
+    qc.invalidateQueries({ queryKey: ["ascent"] });
+  }
+
+  async function handleClear() {
+    if (clearing) return;
+    if (!confirm("Clear ALL Ascent interns and responses? This cannot be undone.")) return;
+    setClearing(true);
+    const res = await clearAscentData();
+    setClearing(false);
+    if (res.error) toast.error(`Clear failed: ${res.error}`);
+    else toast.success("Ascent data cleared");
+    qc.invalidateQueries({ queryKey: ["ascent"] });
+  }
 
   const branches = uniqueBranches(interns);
   const batches = uniqueBatches(interns);
