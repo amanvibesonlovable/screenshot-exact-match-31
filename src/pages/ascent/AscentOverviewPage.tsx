@@ -54,7 +54,7 @@ export default function AscentOverviewPage() {
 
   const activeInterns = f.interns.filter((i) => i.status === "training");
   const byEmp = responsesByIntern(f.responses);
-  const dropouts = f.interns.filter((i) => i.status === "dropped_out").length;
+  const dropouts = f.interns.filter((i) => i.status === "exited").length;
 
   // KPI calcs
   const completion = completionStats(activeInterns, f.responses);
