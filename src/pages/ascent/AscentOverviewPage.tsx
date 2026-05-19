@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, Copy } from "lucide-react";
+import { AlertTriangle, Copy, Sprout, Trash2, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { seedAscentData, clearAscentData } from "@/ascent/seed";
 import { AscentLayout } from "@/ascent/AscentLayout";
 import { AscentFilterBar } from "@/ascent/AscentFilterBar";
 import { KPIBar } from "@/hr/KPIBar";
@@ -47,6 +50,30 @@ export default function AscentOverviewPage() {
   const { data: responses = [] } = useAscentResponses(internIds);
   const [filters, setFilters] = useState<AscentFilters>(DEFAULT_FILTERS);
   const [overdueOpen, setOverdueOpen] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const qc = useQueryClient();
+
+  async function handleSeed() {
+    if (seeding) return;
+    setSeeding(true);
+    const res = await seedAscentData();
+    setSeeding(false);
+    if (res.error) toast.error(`Seed failed: ${res.error}`);
+    else toast.success(`Seeded ${res.insertedEmployees} interns, ${res.insertedResponses} responses`);
+    qc.invalidateQueries({ queryKey: ["ascent"] });
+  }
+
+  async function handleClear() {
+    if (clearing) return;
+    if (!confirm("Clear ALL Ascent interns and responses? This cannot be undone.")) return;
+    setClearing(true);
+    const res = await clearAscentData();
+    setClearing(false);
+    if (res.error) toast.error(`Clear failed: ${res.error}`);
+    else toast.success("Ascent data cleared");
+    qc.invalidateQueries({ queryKey: ["ascent"] });
+  }
 
   const branches = uniqueBranches(interns);
   const batches = uniqueBatches(interns);
@@ -238,7 +265,29 @@ export default function AscentOverviewPage() {
   return (
     <AscentLayout title="Ascent Overview">
       <div className="space-y-5">
-        <AscentFilterBar filters={filters} onChange={setFilters} branches={branches} batches={batches} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <AscentFilterBar filters={filters} onChange={setFilters} branches={branches} batches={batches} />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSeed}
+              disabled={seeding || clearing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+            >
+              {seeding ? <Loader2 size={14} className="animate-spin" /> : <Sprout size={14} />}
+              Seed test data
+            </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={seeding || clearing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
+            >
+              {clearing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+              Clear data
+            </button>
+          </div>
+        </div>
 
         <div>
           <KPIBar metrics={kpis} />
