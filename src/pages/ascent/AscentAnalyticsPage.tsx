@@ -99,8 +99,8 @@ export default function AscentAnalyticsPage() {
   const avgTime = times.length ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0;
   const median = times.length ? times.sort((a, b) => a - b)[Math.floor(times.length / 2)] : 0;
 
-  // Dropouts by week — approximate as 0 unless intern marked dropped_out. No timeline data; show empty.
-  const dropouts = f.interns.filter((i) => i.status === "dropped_out").length;
+  // Dropouts by week — approximate as 0 unless intern marked exited. No timeline data; show empty.
+  const dropouts = f.interns.filter((i) => i.status === "exited").length;
 
   return (
     <AscentLayout title="Analytics">
