@@ -265,7 +265,29 @@ export default function AscentOverviewPage() {
   return (
     <AscentLayout title="Ascent Overview">
       <div className="space-y-5">
-        <AscentFilterBar filters={filters} onChange={setFilters} branches={branches} batches={batches} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <AscentFilterBar filters={filters} onChange={setFilters} branches={branches} batches={batches} />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSeed}
+              disabled={seeding || clearing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+            >
+              {seeding ? <Loader2 size={14} className="animate-spin" /> : <Sprout size={14} />}
+              Seed test data
+            </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={seeding || clearing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
+            >
+              {clearing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+              Clear data
+            </button>
+          </div>
+        </div>
 
         <div>
           <KPIBar metrics={kpis} />
