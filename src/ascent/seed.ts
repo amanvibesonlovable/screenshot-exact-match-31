@@ -378,7 +378,7 @@ export async function seedAscentData(): Promise<{
     area_manager: s.area_manager,
     doj: s.doj,
     token: urlSafeToken(),
-    status: DROPOUT_CODES.has(s.employee_code) ? ("dropped_out" as const) : ("training" as const),
+    status: DROPOUT_CODES.has(s.employee_code) ? ("exited" as const) : ("training" as const),
     program: "ascent" as const,
     project_type: s.project,
     intern_batch: s.batch,
