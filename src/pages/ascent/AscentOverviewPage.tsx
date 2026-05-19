@@ -60,7 +60,7 @@ export default function AscentOverviewPage() {
     const res = await seedAscentData();
     setSeeding(false);
     if (res.error) toast.error(`Seed failed: ${res.error}`);
-    else toast.success(`Seeded ${res.internsInserted ?? 0} interns, ${res.responsesInserted ?? 0} responses`);
+    else toast.success(`Seeded ${res.insertedEmployees} interns, ${res.insertedResponses} responses`);
     qc.invalidateQueries({ queryKey: ["ascent"] });
   }
 
